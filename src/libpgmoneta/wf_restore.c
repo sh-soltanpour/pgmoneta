@@ -813,6 +813,8 @@ restore_excluded_files_execute(int server, char* identifier, struct node* i_node
    int number_of_backups = 0;
    struct backup** backups = NULL;
    char* d = NULL;
+   struct workers* workers = NULL;
+   int number_of_workers = 0;
    struct configuration* config = (struct configuration*)shmem;
 
    if (!strcmp(identifier, "oldest"))
@@ -890,7 +892,14 @@ restore_excluded_files_execute(int server, char* identifier, struct node* i_node
       to_file = strcpy(to_file, to);
       to_file = strcat(to_file, excluded_files_names[i]);
 
-      if (pgmoneta_copy_file(from_file, to_file))
+
+      number_of_workers = pgmoneta_get_number_of_workers(server);
+      if (number_of_workers > 0)
+      {
+         pgmoneta_workers_initialize(number_of_workers, &workers);
+      }
+
+      if (pgmoneta_copy_file(from_file, to_file, workers))
       {
          pgmoneta_log_error("Restore: Could not copy file %s to %s", from_file, to_file);
          free(from_file);
