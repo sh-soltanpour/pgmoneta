@@ -79,6 +79,8 @@ static int get_permissions(char* from, int* permissions);
 
 static void copy_file(void* arg);
 
+char* excluded_files_names[] = {"/global/pg_control"};
+int excluded_files_names_length = sizeof(excluded_files_names) / sizeof(excluded_files_names[0]);
 
 int32_t
 pgmoneta_get_request(struct message* msg)
@@ -1489,6 +1491,31 @@ pgmoneta_delete_file(char* file)
 }
 
 int
+get_excluded_files_paths(char*** excluded_files_paths, char* prefix)
+{
+   *excluded_files_paths = malloc(excluded_files_names_length * sizeof(char*));
+
+   if (*excluded_files_paths == NULL)
+   {
+      return 1;
+   }
+
+   for (int i = 0; i < excluded_files_names_length; i++)
+   {
+      int new_size = strlen(excluded_files_names[i]) + strlen(prefix) + 1;
+
+      (*excluded_files_paths)[i] = (char*)malloc(new_size);
+      if ((*excluded_files_paths)[i] == NULL)
+      {
+         return 1;
+      }
+      strcpy((*excluded_files_paths)[i], prefix);
+      strcat((*excluded_files_paths)[i], excluded_files_names[i]);
+   }
+   return 0;
+}
+
+int
 pgmoneta_copy_postgresql(char* from, char* to, char* base, char* server, char* id, struct backup* backup, struct workers* workers)
 {
    DIR* d = opendir(from);
@@ -1496,6 +1523,13 @@ pgmoneta_copy_postgresql(char* from, char* to, char* base, char* server, char* i
    char* to_buffer = NULL;
    struct dirent* entry;
    struct stat statbuf;
+
+   char** excluded_files_paths = NULL;
+
+   if (get_excluded_files_paths(&excluded_files_paths, from))
+   {
+      goto error;
+   }
 
    pgmoneta_mkdir(to);
 
@@ -1526,12 +1560,20 @@ pgmoneta_copy_postgresql(char* from, char* to, char* base, char* server, char* i
                }
                else
                {
-                  pgmoneta_copy_directory(from_buffer, to_buffer, workers);
+                  pgmoneta_copy_directory(from_buffer, to_buffer, excluded_files_paths, workers);
                }
             }
             else
             {
-               pgmoneta_copy_file(from_buffer, to_buffer, workers);
+               bool file_is_excluded = false;
+               for (int i = 0; i < excluded_files_names_length; i++)
+               {
+                  file_is_excluded = !strcmp(from_buffer, excluded_files_paths[i]);
+               }
+               if (!file_is_excluded)
+               {
+                  pgmoneta_copy_file(from_buffer, to_buffer, workers);
+               }
             }
          }
 
@@ -1547,10 +1589,20 @@ pgmoneta_copy_postgresql(char* from, char* to, char* base, char* server, char* i
    {
       goto error;
    }
+   for (int i = 0; i < excluded_files_names_length; i++)
+   {
+      free(excluded_files_paths[i]);
+   }
+   free(excluded_files_paths);
 
    return 0;
 
 error:
+   for (int i = 0; i < excluded_files_names_length; i++)
+   {
+      free(excluded_files_paths[i]);
+   }
+   free(excluded_files_paths);
 
    return 1;
 }
@@ -1665,7 +1717,7 @@ copy_tablespaces(char* from, char* to, char* base, char* server, char* id, struc
             pgmoneta_mkdir(to_directory);
             pgmoneta_symlink_at_file(to_oid, relative_directory);
 
-            pgmoneta_copy_directory(&path[0], to_directory, workers);
+            pgmoneta_copy_directory(&path[0], to_directory, NULL, workers);
 
             free(to_oid);
             free(to_directory);
@@ -1700,7 +1752,7 @@ error:
 }
 
 int
-pgmoneta_copy_directory(char* from, char* to, struct workers* workers)
+pgmoneta_copy_directory(char* from, char* to, char** excluded_files_paths, struct workers* workers)
 {
    DIR* d = opendir(from);
    char* from_buffer = NULL;
@@ -1731,11 +1783,19 @@ pgmoneta_copy_directory(char* from, char* to, struct workers* workers)
          {
             if (S_ISDIR(statbuf.st_mode))
             {
-               pgmoneta_copy_directory(from_buffer, to_buffer, workers);
+               pgmoneta_copy_directory(from_buffer, to_buffer, excluded_files_paths, workers);
             }
             else
             {
-               pgmoneta_copy_file(from_buffer, to_buffer, workers);
+               bool file_is_excluded = false;
+               for (int i = 0; i < excluded_files_names_length; i++)
+               {
+                  file_is_excluded = !strcmp(from_buffer, excluded_files_paths[i]);
+               }
+               if (!file_is_excluded)
+               {
+                  pgmoneta_copy_file(from_buffer, to_buffer, workers);
+               }
             }
          }
 

@@ -44,6 +44,9 @@ extern "C" {
 #define LONG_TIME_LENGHT  16 + 1
 #define UTC_TIME_LENGTH   29 + 1
 
+extern char* excluded_files_names[];
+extern int excluded_files_names_length;
+
 /** @struct
  * Defines the signal structure
  */
@@ -444,7 +447,7 @@ pgmoneta_copy_postgresql(char* from, char* to, char* base, char* server, char* i
  * @return The result
  */
 int
-pgmoneta_copy_directory(char* from, char* to, struct workers* workers);
+pgmoneta_copy_directory(char* from, char* to, char** excluded_files_paths, struct workers* workers);
 
 /**
  * Copy a file
