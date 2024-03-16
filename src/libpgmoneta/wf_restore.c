@@ -892,7 +892,6 @@ restore_excluded_files_execute(int server, char* identifier, struct node* i_node
       to_file = strcpy(to_file, to);
       to_file = strcat(to_file, excluded_files_names[i]);
 
-
       number_of_workers = pgmoneta_get_number_of_workers(server);
       if (number_of_workers > 0)
       {
