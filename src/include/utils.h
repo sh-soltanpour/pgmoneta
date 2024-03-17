@@ -447,7 +447,7 @@ pgmoneta_copy_postgresql(char* from, char* to, char* base, char* server, char* i
  * @return The result
  */
 int
-pgmoneta_copy_directory(char* from, char* to, char** excluded_files_paths, struct workers* workers);
+pgmoneta_copy_directory(char* from, char* to, char** restore_last_paths, struct workers* workers);
 
 /**
  * Copy a file
