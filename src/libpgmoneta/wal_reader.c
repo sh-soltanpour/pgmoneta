@@ -28,65 +28,106 @@
 
 #include "logging.h"
 #include "wal_reader.h"
+#include "rmgr.h"
 
 void
-log_short_page_header(XLogPageHeaderData* header)
-{
-   pgmoneta_log_debug("Page Header:\n");
-   pgmoneta_log_debug("  xlp_magic: %u\n", header->xlp_magic);
-   pgmoneta_log_debug("  xlp_info: %u\n", header->xlp_info);
-   pgmoneta_log_debug("  xlp_tli: %u\n", header->xlp_tli);
-   pgmoneta_log_debug("  xlp_pageaddr: %llu\n", (unsigned long long) header->xlp_pageaddr);
-   pgmoneta_log_debug("  xlp_rem_len: %u\n", header->xlp_rem_len);
+log_short_page_header(XLogPageHeaderData *header) {
+    printf("Page Header:\n");
+    printf("  xlp_magic: %u\n", header->xlp_magic);
+    printf("  xlp_info: %u\n", header->xlp_info);
+    printf("  xlp_tli: %u\n", header->xlp_tli);
+    printf("  xlp_pageaddr: %llu\n", (unsigned long long) header->xlp_pageaddr);
+    printf("  xlp_rem_len: %u\n", header->xlp_rem_len);
+    printf("-----------------\n");
 }
 
 void
-log_long_page_header(XLogLongPageHeaderData* header)
-{
-   pgmoneta_log_debug("Long Page Header:\n");
-   log_short_page_header(&header->std);
-   pgmoneta_log_debug("  xlp_sysid: %llu\n", (unsigned long long) header->xlp_sysid);
-   pgmoneta_log_debug("  xlp_seg_size: %u\n", header->xlp_seg_size);
-   pgmoneta_log_debug("  xlp_xlog_blcksz: %u\n", header->xlp_xlog_blcksz);
+log_long_page_header(XLogLongPageHeaderData *header) {
+    printf("Long Page Header:\n");
+    log_short_page_header(&header->std);
+    printf("  xlp_sysid: %llu\n", (unsigned long long) header->xlp_sysid);
+    printf("  xlp_seg_size: %u\n", header->xlp_seg_size);
+    printf("  xlp_xlog_blcksz: %u\n", header->xlp_xlog_blcksz);
+    printf("-----------------\n");
+}
+
+void print_record(XLogRecord *record) {
+    printf("xl_tot_len: %u\n", record->xl_tot_len);
+    printf("xl_xid: %u\n", record->xl_xid);
+    printf("xl_info: %u\n", record->xl_info);
+    printf("xl_prev: %llu\n", (unsigned long long) record->xl_prev);
+    printf("xl_rmid: %u\n", record->xl_rmid);
+    printf("rmgrname: %s\n", RmgrTable[record->xl_rmid].name);
+    printf("-----------------\n");
 }
 
 void
-parse_wal_segment_headers(char* path)
-{
-   FILE* file = fopen(path, "rb");
-   if (file == NULL)
-   {
-      pgmoneta_log_fatal("Error: Could not open file %s\n", path);
-   }
-   char long_header_buffer[SizeOfXLogLongPHD];
-   uint32_t page_size;
-   char* page = NULL;
+parse_wal_segment_headers(char *path) {
+    XLogRecord *record = NULL;
+    XLogLongPageHeaderData *long_header = NULL;
 
-   fread(long_header_buffer, 1, SizeOfXLogLongPHD, file);
-   XLogLongPageHeaderData* long_header = (XLogLongPageHeaderData*) long_header_buffer;
-   log_long_page_header(long_header);
+    FILE *file = fopen(path, "rb");
+    if (file == NULL) {
+        pgmoneta_log_fatal("Error: Could not open file %s\n", path);
+    }
 
-   page_size = long_header->xlp_xlog_blcksz;
-   page = (char*) malloc(page_size);
 
-   fseek(file, page_size, SEEK_SET);
+    long_header = malloc(SizeOfXLogLongPHD);
+    printf("size of long header: %lu\n", SizeOfXLogLongPHD);
 
-   while ((fread(page, 1, page_size, file)) == page_size)
-   {
-      parse_page(page);
 
-   }
-   fclose(file);
-}
+    fread(long_header, SizeOfXLogLongPHD, 1, file);
+    log_long_page_header(long_header);
 
-void
-parse_page(char* page)
-{
-   XLogPageHeaderData* header = (XLogPageHeaderData*) page;
-   if (header->xlp_magic != XLOG_PAGE_MAGIC)
-   {
-      pgmoneta_log_fatal("Error: Invalid magic number, expected %x, actual %x\n", XLOG_PAGE_MAGIC,
-                         header->xlp_magic);
-   }
-   log_short_page_header(header);
+    if (long_header->std.xlp_info & XLP_FIRST_IS_CONTRECORD) {
+        printf("IS CONT RECORD");
+    }
+
+    record = malloc(SizeOfXLogRecord);
+    if (record == NULL) {
+        pgmoneta_log_fatal("Error: Could not allocate memory for record\n");
+        free(long_header);
+        fclose(file);
+        exit(EXIT_FAILURE);
+    }
+
+    XLogPageHeaderData *page_header = NULL;
+    page_header = malloc(SizeOfXLogShortPHD);
+    if (page_header == NULL) {
+        pgmoneta_log_fatal("Error: Could not allocate memory for page header\n");
+        free(record);
+        free(long_header);
+        fclose(file);
+        exit(EXIT_FAILURE);
+    };
+
+
+    int next_record = ftell(file);
+    int count = 0;
+    int page_number = 0;
+    while (count++ < 500) {
+        printf("next_record: %d\n", next_record);
+        if (next_record > (long_header->xlp_xlog_blcksz * (page_number + 1))) {
+            page_number++;
+            printf("Next page\n");
+            fseek(file, page_number * long_header->xlp_xlog_blcksz, SEEK_SET);
+            fread(page_header, SizeOfXLogShortPHD, 1, file);
+            log_short_page_header(page_header);
+            next_record = MAXALIGN(ftell(file) + page_header->xlp_rem_len);
+            continue;
+        }
+        fseek(file, next_record, SEEK_SET);
+        if (fread(record, SizeOfXLogRecord, 1, file) != 1) {
+            pgmoneta_log_fatal("Error: Could not read second record\n");
+            free(record);
+            free(long_header);
+            fclose(file);
+            exit(EXIT_FAILURE);
+        }
+        if (record->xl_tot_len == 0) {
+            break;
+        }
+        print_record(record);
+        next_record = ftell(file) + MAXALIGN(record->xl_tot_len - SizeOfXLogRecord);
+    }
 }
