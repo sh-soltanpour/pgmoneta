@@ -39,17 +39,23 @@ extern "C" {
 #include <stddef.h>
 
 
+#define MAXIMUM_ALIGNOF 8 // TODO: double check this value
 #define MAXALIGN(x) (((x) + (sizeof(void*) - 1)) & ~(sizeof(void*) - 1))
+
+#define TYPEALIGN(ALIGNVAL, LEN)  \
+     (((uintptr_t) (LEN) + ((ALIGNVAL) - 1)) & ~((uintptr_t) ((ALIGNVAL) - 1)))
+#define MAXALIGNTYPE(LEN) TYPEALIGN(MAXIMUM_ALIGNOF, (LEN))
+
+
 #define XLOG_PAGE_MAGIC 0xD10D  // WAL version indicator
 
 #define InvalidXLogRecPtr   0
+#define InvalidTransactionId        ((TransactionId) 0)
+#define InvalidBuffer   0
 
 
 #define XLP_FIRST_IS_CONTRECORD   0x0001
 #define XLP_LONG_HEADER   0x0002
-
-
-#define XLOG_BLCKSZ 8192
 
 
 typedef uint32_t TimeLineID;
@@ -58,6 +64,32 @@ typedef uint32_t pg_crc32c;
 typedef uint32_t TransactionId;
 typedef uint8_t RmgrId;
 typedef uint64_t XLogSegNo;
+typedef uint16_t RepOriginId;
+
+typedef int Buffer;
+typedef uint32_t BlockNumber;
+typedef unsigned int Oid;
+typedef Oid RelFileNumber;
+
+#define FLEXIBLE_ARRAY_MEMBER   /* empty */
+
+
+typedef enum ForkNumber {
+    InvalidForkNumber = -1,
+    MAIN_FORKNUM = 0,
+    FSM_FORKNUM,
+    VISIBILITYMAP_FORKNUM,
+    INIT_FORKNUM,
+
+    /*
+     * NOTE: if you add a new fork, change MAX_FORKNUM and possibly
+     * FORKNAMECHARS below, and update the forkNames array in
+     * src/common/relpath.c
+     */
+} ForkNumber;
+
+
+#define InvalidRepOriginId   0
 
 
 typedef struct XLogPageHeaderData {
@@ -91,8 +123,148 @@ typedef struct XLogRecord {
 } XLogRecord;
 
 
+typedef struct XLogRecordBlockHeader {
+    uint8_t id;             /* block reference ID */
+    uint8_t fork_flags;     /* fork within the relation, and flags */
+    uint16_t data_length;    /* number of payload bytes (not including page
+                                  * image) */
+
+    /* If BKPBLOCK_HAS_IMAGE, an XLogRecordBlockImageHeader struct follows */
+    /* If BKPBLOCK_SAME_REL is not set, a RelFileLocator follows */
+    /* BlockNumber follows */
+} XLogRecordBlockHeader;
+
+#define SizeOfXLogRecordBlockHeader (offsetof(XLogRecordBlockHeader, data_length) + sizeof(uint16_t))
+
+
+typedef struct XLogRecordDataHeaderShort {
+    uint8_t id;             /* XLR_BLOCK_ID_DATA_SHORT */
+    uint8_t data_length;    /* number of payload bytes */
+} XLogRecordDataHeaderShort;
+
+#define SizeOfXLogRecordDataHeaderShort (sizeof(uint8_t) * 2)
+
+typedef struct XLogRecordDataHeaderLong {
+    uint8_t id;             /* XLR_BLOCK_ID_DATA_LONG */
+    /* followed by uint32 data_length, unaligned */
+} XLogRecordDataHeaderLong;
+
+#define SizeOfXLogRecordDataHeaderLong (sizeof(uint8_t) + sizeof(uint32))
+
+
+typedef struct RelFileLocator {
+    Oid spcOid;         /* tablespace */
+    Oid dbOid;          /* database */
+    RelFileNumber relNumber;    /* relation */
+} RelFileLocator;
+
+typedef struct {
+    /* Is this block ref in use? */
+    bool in_use;
+
+    /* Identify the block this refers to */
+    RelFileLocator rlocator;
+    ForkNumber forknum;
+    BlockNumber blkno;
+
+    /* Prefetching workspace. */
+    Buffer prefetch_buffer;
+
+    /* copy of the fork_flags field from the XLogRecordBlockHeader */
+    uint8_t flags;
+
+    /* Information on full-page image, if any */
+    bool has_image;      /* has image, even for consistency checking */
+    bool apply_image;    /* has image that should be restored */
+    char *bkp_image;
+    uint16_t hole_offset;
+    uint16_t hole_length;
+    uint16_t bimg_len;
+    uint8_t bimg_info;
+
+    /* Buffer holding the rmgr-specific data associated with this block */
+    bool has_data;
+    char *data;
+    uint16_t data_len;
+    uint16_t data_bufsz;
+} DecodedBkpBlock;
+
+
+typedef struct DecodedXLogRecord {
+    /* Private member used for resource management. */
+    size_t size;           /* total size of decoded record */
+    bool oversized;      /* outside the regular decode buffer? */
+    struct DecodedXLogRecord *next; /* decoded record queue link */
+
+    /* Public members. */
+    XLogRecPtr lsn;            /* location */
+    XLogRecPtr next_lsn;       /* location of next record */
+    XLogRecord header;         /* header */
+    RepOriginId record_origin;
+    TransactionId toplevel_xid; /* XID of top-level transaction */
+    char *main_data;      /* record's main data portion */
+    uint32_t main_data_len;  /* main data portion's length */
+    int max_block_id;   /* highest block_id in use (-1 if none) */
+    DecodedBkpBlock blocks[FLEXIBLE_ARRAY_MEMBER];
+} DecodedXLogRecord;
+
+
+#define XLogRecHasBlockRef(record, block_id)           \
+     ((record->max_block_id >= (block_id)) && \
+      (record->blocks[block_id].in_use))
+
+
+#define XLogRecHasBlockImage(record, block_id)     \
+     (record->blocks[block_id].has_image)
+
+#define XLR_MAX_BLOCK_ID            32
+
+#define XLR_BLOCK_ID_DATA_SHORT     255
+#define XLR_BLOCK_ID_DATA_LONG      254
+#define XLR_BLOCK_ID_ORIGIN         253
+#define XLR_BLOCK_ID_TOPLEVEL_XID   252
+
+
+#define BKPBLOCK_FORK_MASK  0x0F
+#define BKPBLOCK_FLAG_MASK  0xF0
+#define BKPBLOCK_HAS_IMAGE  0x10    /* block data is an XLogRecordBlockImage */
+#define BKPBLOCK_HAS_DATA   0x20
+#define BKPBLOCK_WILL_INIT  0x40    /* redo will re-init the page */
+#define BKPBLOCK_SAME_REL   0x80    /* RelFileLocator omitted, same as
+                                      * previous */
+
+
+
+
+
+/* Information stored in bimg_info */
+#define BKPIMAGE_HAS_HOLE       0x01    /* page image has "hole" */
+#define BKPIMAGE_APPLY          0x02    /* page image should be restored
+                                          * during replay */
+/* compression methods supported */
+#define BKPIMAGE_COMPRESS_PGLZ  0x04
+#define BKPIMAGE_COMPRESS_LZ4   0x08
+#define BKPIMAGE_COMPRESS_ZSTD  0x10
+
+#define BKPIMAGE_COMPRESSED(info) \
+     ((info & (BKPIMAGE_COMPRESS_PGLZ | BKPIMAGE_COMPRESS_LZ4 | \
+               BKPIMAGE_COMPRESS_ZSTD)) != 0)
+
+#define BKPIMAGE_COMPRESSED(info) \
+     ((info & (BKPIMAGE_COMPRESS_PGLZ | BKPIMAGE_COMPRESS_LZ4 | \
+               BKPIMAGE_COMPRESS_ZSTD)) != 0)
+
+
 void parse_wal_segment_headers(char *path);
+
+void decode_xlog_record(char *buffer, DecodedXLogRecord *decoded, XLogRecord *record, uint32_t block_size);
+
+void get_record_length(DecodedXLogRecord *record, uint32_t *rec_len, uint32_t *fpi_len);
+
+void display_decoded_record(DecodedXLogRecord *record);
+
 void find_next_record(FILE *file, XLogRecord *record, XLogRecPtr RecPtr, XLogLongPageHeaderData *pData);
+
 void parse_page(char *page);
 
 #define SizeOfXLogLongPHD   MAXALIGN(sizeof(XLogLongPageHeaderData))
@@ -108,7 +280,7 @@ void parse_page(char *page);
 #define XLByteToPrevSeg(xlrp, logSegNo, wal_segsz_bytes) \
      logSegNo = ((xlrp) - 1) / (wal_segsz_bytes)
 
-#define MAX(a,b) \
+#define MAX(a, b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
      _a > _b ? _a : _b; })

@@ -29,6 +29,9 @@
 #include "logging.h"
 #include "wal_reader.h"
 #include "rmgr.h"
+#include "string.h"
+#include "assert.h"
+#include "rm_standby.h"
 
 void
 log_short_page_header(XLogPageHeaderData *header) {
@@ -52,19 +55,22 @@ log_long_page_header(XLogLongPageHeaderData *header) {
 }
 
 void print_record(XLogRecord *record) {
-    printf("xl_tot_len: %u\n", record->xl_tot_len);
-    printf("xl_xid: %u\n", record->xl_xid);
-    printf("xl_info: %u\n", record->xl_info);
-    printf("xl_prev: %llu\n", (unsigned long long) record->xl_prev);
-    printf("xl_rmid: %u\n", record->xl_rmid);
-    printf("rmgrname: %s\n", RmgrTable[record->xl_rmid].name);
-    printf("-----------------\n");
+    printf("%s\t", RmgrTable[record->xl_rmid].name);
+    printf("%u\t", record->xl_tot_len);
+//    printf("xl_xid: %u\n", record->xl_xid);
+//    printf("xl_info: %u\n", record->xl_info);
+//    printf("xl_prev: %llu\n", (unsigned long long) record->xl_prev);
+//    printf("xl_rmid: %u\n", record->xl_rmid);
+//    printf("-----------------\n");
 }
 
 void
 parse_wal_segment_headers(char *path) {
     XLogRecord *record = NULL;
     XLogLongPageHeaderData *long_header = NULL;
+    char *buffer = NULL;
+
+    buffer = malloc(16000);
 
     FILE *file = fopen(path, "rb");
     if (file == NULL) {
@@ -73,11 +79,11 @@ parse_wal_segment_headers(char *path) {
 
 
     long_header = malloc(SizeOfXLogLongPHD);
-    printf("size of long header: %lu\n", SizeOfXLogLongPHD);
+//    printf("size of long header: %lu\n", SizeOfXLogLongPHD);
 
 
     fread(long_header, SizeOfXLogLongPHD, 1, file);
-    log_long_page_header(long_header);
+//    log_long_page_header(long_header);
 
     if (long_header->std.xlp_info & XLP_FIRST_IS_CONTRECORD) {
         printf("IS CONT RECORD");
@@ -105,17 +111,21 @@ parse_wal_segment_headers(char *path) {
     int next_record = ftell(file);
     int count = 0;
     int page_number = 0;
-    while (count++ < 500) {
-        printf("next_record: %d\n", next_record);
-        if (next_record > (long_header->xlp_xlog_blcksz * (page_number + 1))) {
+
+    while (true) {
+
+//        printf("next_record: %d\n", next_record);
+        if (next_record >= (long_header->xlp_xlog_blcksz * (page_number + 1))) {
             page_number++;
-            printf("Next page\n");
+//            printf("Next page\n");
             fseek(file, page_number * long_header->xlp_xlog_blcksz, SEEK_SET);
             fread(page_header, SizeOfXLogShortPHD, 1, file);
-            log_short_page_header(page_header);
+//            log_short_page_header(page_header);
             next_record = MAXALIGN(ftell(file) + page_header->xlp_rem_len);
             continue;
         }
+        count++;
+//        printf("count: %d\n", count);
         fseek(file, next_record, SEEK_SET);
         if (fread(record, SizeOfXLogRecord, 1, file) != 1) {
             pgmoneta_log_fatal("Error: Could not read second record\n");
@@ -124,10 +134,273 @@ parse_wal_segment_headers(char *path) {
             fclose(file);
             exit(EXIT_FAILURE);
         }
+
         if (record->xl_tot_len == 0) {
-            break;
+            return;
         }
-        print_record(record);
+        uint32_t data_length = record->xl_tot_len - SizeOfXLogRecord;
         next_record = ftell(file) + MAXALIGN(record->xl_tot_len - SizeOfXLogRecord);
+        fread(buffer, data_length, 1, file);
+
+        DecodedXLogRecord *decoded = malloc(sizeof(DecodedXLogRecord));
+        decode_xlog_record(buffer, decoded, record, long_header->xlp_xlog_blcksz);
+        display_decoded_record(decoded);
+
     }
+    printf("count: %d\n", count);
+}
+
+
+void display_decoded_record(DecodedXLogRecord *record) {
+    uint32_t      rec_len;
+    uint32_t      fpi_len;
+
+    print_record(&record->header);
+    get_record_length(record, &rec_len, &fpi_len);
+    printf("rec/tot_len: %u/%u\t", rec_len, record->header.xl_tot_len);
+    //if record is rmgr is standby
+    if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Standby")) {
+        standby_desc(record);
+    }
+    printf("\n");
+}
+
+void decode_xlog_record(char *buffer, DecodedXLogRecord *decoded, XLogRecord *record, uint32_t block_size) {
+#define COPY_HEADER_FIELD(_dst, _size)          \
+     do {                                        \
+         if (remaining < _size)                  \
+             goto shortdata_err;                 \
+         memcpy(_dst, ptr, _size);               \
+         ptr += _size;                           \
+         remaining -= _size;                     \
+     } while(0)
+
+    decoded->header = *record;
+//    decoded->lsn = lsn; TODO: uncomment
+    decoded->next = NULL;
+    decoded->record_origin = InvalidRepOriginId;
+    decoded->toplevel_xid = InvalidTransactionId;
+    decoded->main_data = NULL;
+    decoded->main_data_len = 0;
+    decoded->max_block_id = -1;
+
+    //read id
+    int remaining = 0;
+    uint32_t datatotal = 0;
+    char *ptr = NULL;
+    char *out = NULL;
+    RelFileLocator *rlocator = NULL;
+    uint8_t block_id;
+
+    remaining = record->xl_tot_len - SizeOfXLogRecord;
+    ptr = (char *) buffer;
+
+    COPY_HEADER_FIELD(&block_id, sizeof(uint8_t));
+
+    if (block_id == XLR_BLOCK_ID_DATA_SHORT) {
+        /* XLogRecordDataHeaderShort */
+        uint8_t main_data_len;
+        COPY_HEADER_FIELD(&main_data_len, sizeof(uint8_t));
+        decoded->main_data_len = main_data_len;
+        datatotal += main_data_len;
+    } else if (block_id == XLR_BLOCK_ID_DATA_LONG) {
+        /* XLogRecordDataHeaderLong */
+        uint32_t main_data_len;
+        COPY_HEADER_FIELD(&main_data_len, sizeof(uint32_t));
+        decoded->main_data_len = main_data_len;
+        datatotal += main_data_len;
+    } else if (block_id == XLR_BLOCK_ID_ORIGIN) {
+        COPY_HEADER_FIELD(&decoded->record_origin, sizeof(RepOriginId));
+    } else if (block_id == XLR_BLOCK_ID_TOPLEVEL_XID) {
+        COPY_HEADER_FIELD(&decoded->toplevel_xid, sizeof(TransactionId));
+    } else if (block_id <= XLR_MAX_BLOCK_ID) {
+        /* XLogRecordBlockHeader */
+        DecodedBkpBlock *blk;
+        uint8_t fork_flags;
+
+        /* mark any intervening block IDs as not in use */
+        for (int i = decoded->max_block_id + 1; i < block_id; ++i)
+            decoded->blocks[i].in_use = false;
+
+        if (block_id <= decoded->max_block_id) {
+            goto err;
+        }
+        decoded->max_block_id = block_id;
+
+        blk = &decoded->blocks[block_id];
+        blk->in_use = true;
+        blk->apply_image = false;
+
+        COPY_HEADER_FIELD(&fork_flags, sizeof(uint8_t));
+        blk->forknum = fork_flags & BKPBLOCK_FORK_MASK;
+        blk->flags = fork_flags;
+        blk->has_image = ((fork_flags & BKPBLOCK_HAS_IMAGE) != 0);
+        blk->has_data = ((fork_flags & BKPBLOCK_HAS_DATA) != 0);
+
+
+        blk->prefetch_buffer = InvalidBuffer;
+        COPY_HEADER_FIELD(&blk->data_len, sizeof(uint16_t));
+        /* cross-check that the HAS_DATA flag is set iff data_length > 0 */
+        if (blk->has_data && blk->data_len == 0) {
+            pgmoneta_log_fatal("BKPBLOCK_HAS_DATA set, but no data included");
+            goto err;
+        }
+        if (!blk->has_data && blk->data_len != 0) {
+            pgmoneta_log_fatal("BKPBLOCK_HAS_DATA not set, but data length is not zero");
+            goto err;
+        }
+        datatotal += blk->data_len;
+
+        if (blk->has_image) {
+            COPY_HEADER_FIELD(&blk->bimg_len, sizeof(uint16_t));
+            COPY_HEADER_FIELD(&blk->hole_offset, sizeof(uint16_t));
+            COPY_HEADER_FIELD(&blk->bimg_info, sizeof(uint8_t));
+
+            blk->apply_image = ((blk->bimg_info & BKPIMAGE_APPLY) != 0);
+
+            if (BKPIMAGE_COMPRESSED(blk->bimg_info)) {
+                if (blk->bimg_info & BKPIMAGE_HAS_HOLE)
+                    COPY_HEADER_FIELD(&blk->hole_length, sizeof(uint16_t));
+                else
+                    blk->hole_length = 0;
+            } else
+                blk->hole_length = block_size - blk->bimg_len;
+            datatotal += blk->bimg_len;
+
+            /*
+             * cross-check that hole_offset > 0, hole_length > 0 and
+             * bimg_len < BLCKSZ if the HAS_HOLE flag is set.
+             */
+            if ((blk->bimg_info & BKPIMAGE_HAS_HOLE) &&
+                (blk->hole_offset == 0 ||
+                 blk->hole_length == 0 ||
+                 blk->bimg_len == block_size)) {
+                pgmoneta_log_fatal(
+                        "BKPIMAGE_HAS_HOLE set, but hole offset %u length %u block image length %u at %X/%X");
+                goto err;
+            }
+
+            /*
+             * cross-check that hole_offset == 0 and hole_length == 0 if
+             * the HAS_HOLE flag is not set.
+             */
+            if (!(blk->bimg_info & BKPIMAGE_HAS_HOLE) &&
+                (blk->hole_offset != 0 || blk->hole_length != 0)) {
+                pgmoneta_log_fatal("BKPIMAGE_HAS_HOLE not set, but hole offset %u length %u at %X/%X");
+                goto err;
+            }
+
+            /*
+             * Cross-check that bimg_len < BLCKSZ if it is compressed.
+             */
+            if (BKPIMAGE_COMPRESSED(blk->bimg_info) &&
+                blk->bimg_len == block_size) {
+                pgmoneta_log_fatal("BKPIMAGE_COMPRESSED set, but block image length %u at %X/%X");
+                goto err;
+            }
+
+            /*
+             * cross-check that bimg_len = BLCKSZ if neither HAS_HOLE is
+             * set nor COMPRESSED().
+             */
+            if (!(blk->bimg_info & BKPIMAGE_HAS_HOLE) &&
+                !BKPIMAGE_COMPRESSED(blk->bimg_info) &&
+                blk->bimg_len != block_size) {
+                pgmoneta_log_fatal(
+                        "neither BKPIMAGE_HAS_HOLE nor BKPIMAGE_COMPRESSED set, but block image length is %u at %X/%X");
+                goto err;
+            }
+        }
+        if (!(fork_flags & BKPBLOCK_SAME_REL)) {
+            COPY_HEADER_FIELD(&blk->rlocator, sizeof(RelFileLocator));
+            rlocator = &blk->rlocator;
+        } else {
+            if (rlocator == NULL) {
+                pgmoneta_log_fatal("BKPBLOCK_SAME_REL set but no previous rel at %X/%X");
+                goto err;
+            }
+
+            blk->rlocator = *rlocator;
+        }
+        COPY_HEADER_FIELD(&blk->blkno, sizeof(BlockNumber));
+    } else {
+        pgmoneta_log_fatal("invalid block_id %u at %X/%X");
+        goto err;
+    }
+
+
+    if (remaining != datatotal) {
+        printf("");
+    }
+    out = ((char *) decoded) +
+          offsetof(DecodedXLogRecord, blocks) +
+          sizeof(decoded->blocks[0]) * (decoded->max_block_id + 1);
+    /* block data first */
+    for (block_id = 0; block_id <= decoded->max_block_id; block_id++) {
+        DecodedBkpBlock *blk = &decoded->blocks[block_id];
+
+        if (!blk->in_use)
+            continue;
+
+        assert(blk->has_image || !blk->apply_image);
+
+        if (blk->has_image) {
+            /* no need to align image */
+            blk->bkp_image = out;
+            memcpy(out, ptr, blk->bimg_len);
+            ptr += blk->bimg_len;
+            out += blk->bimg_len;
+        }
+        if (blk->has_data) {
+            out = (char *) MAXALIGNTYPE(out);
+            blk->data = out;
+            memcpy(blk->data, ptr, blk->data_len);
+            ptr += blk->data_len;
+            out += blk->data_len;
+        }
+    }
+
+
+
+//copy the main data
+    if (decoded->main_data_len > 0) {
+        decoded->
+                main_data = malloc(decoded->main_data_len);
+        if (decoded->main_data == NULL) {
+            printf("Could not allocate memory for main data\n");
+            goto
+                    shortdata_err;
+        }
+        memcpy(decoded->main_data, ptr, decoded->main_data_len);
+    }
+
+
+    return;
+
+    shortdata_err:
+    printf("shortdata_err\n");
+
+    err:
+    printf("err\n");
+}
+
+
+void get_record_length(DecodedXLogRecord *record, uint32_t *rec_len, uint32_t *fpi_len) {
+    int block_id;
+
+
+    *fpi_len = 0;
+    for (block_id = 0; block_id <= record->max_block_id; block_id++) {
+        if (!XLogRecHasBlockRef(record, block_id))
+            continue;
+
+        if (XLogRecHasBlockImage(record, block_id))
+            *fpi_len += record->blocks[block_id].bimg_len;
+    }
+
+/*
+ * Calculate the length of the record as the total length - the length of
+ * all the block images.
+ */
+    *rec_len = record->header.xl_tot_len - *fpi_len;
 }
