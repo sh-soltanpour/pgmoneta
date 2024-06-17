@@ -120,25 +120,19 @@ parse_wal_segment_headers(char* path)
    ;
 
    int next_record = ftell(file);
-   int count = 0;
    int page_number = 0;
 
    while (true)
    {
 
-//        printf("next_record: %d\n", next_record);
       if (next_record >= (long_header->xlp_xlog_blcksz * (page_number + 1)))
       {
          page_number++;
-//            printf("Next page\n");
          fseek(file, page_number * long_header->xlp_xlog_blcksz, SEEK_SET);
          fread(page_header, SizeOfXLogShortPHD, 1, file);
-//            log_short_page_header(page_header);
          next_record = MAXALIGN(ftell(file) + page_header->xlp_rem_len);
          continue;
       }
-      count++;
-//        printf("count: %d\n", count);
       fseek(file, next_record, SEEK_SET);
       if (fread(record, SizeOfXLogRecord, 1, file) != 1)
       {
