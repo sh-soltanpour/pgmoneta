@@ -38,6 +38,8 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 #include "stdbool.h"
+#include "transaction.h"
+
 
 #define MAXIMUM_ALIGNOF 8 // TODO: double check this value
 #define MAXALIGN(x) (((x) + (sizeof(void*) - 1)) & ~(sizeof(void*) - 1))
@@ -58,7 +60,6 @@ extern "C" {
 typedef uint32_t TimeLineID;
 typedef uint64_t XLogRecPtr;
 typedef uint32_t pg_crc32c;
-typedef uint32_t TransactionId;
 typedef uint8_t RmgrId;
 typedef uint64_t XLogSegNo;
 typedef uint16_t RepOriginId;
@@ -83,6 +84,15 @@ typedef enum ForkNumber {
     * src/common/relpath.c
     */
 } ForkNumber;
+
+
+typedef enum WalLevel
+{
+    WAL_LEVEL_MINIMAL = 0,
+    WAL_LEVEL_REPLICA,
+    WAL_LEVEL_LOGICAL
+} WalLevel;
+
 
 #define InvalidRepOriginId   0
 
@@ -287,6 +297,8 @@ void parse_page(char* page);
 
 #define XLogSegmentOffset(xlogptr, wal_segsz_bytes) \
         ((xlogptr) & ((wal_segsz_bytes) - 1))
+
+#define LSN_FORMAT_ARGS(lsn) ((uint32_t) ((lsn) >> 32)), ((uint32_t) (lsn))
 
 #define XLogRecGetBlock(record, i) (&record->blocks[(i)])
 #define XLogRecBlockImageApply(record, block_id) (record->blocks[block_id].apply_image)
