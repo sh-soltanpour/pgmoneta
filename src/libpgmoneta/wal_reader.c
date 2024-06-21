@@ -33,6 +33,7 @@
 #include "assert.h"
 #include "rm_standby.h"
 #include "rm_btree.h"
+#include "rm_heap.h"
 
 bool XLogRecGetBlockTagExtended(DecodedXLogRecord* pRecord, int id, RelFileLocator* pLocator, ForkNumber* pNumber,
                                 BlockNumber* pInt, Buffer* pVoid);
@@ -204,6 +205,18 @@ display_decoded_record(DecodedXLogRecord* record)
       printf("%s\t", btree_identify(record->header.xl_info));
       btree_desc(record);
       printf("\n");
+   }
+   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Heap"))
+   {
+      char* buf = NULL;
+      buf = heap_desc(buf, record);
+      printf("%s\n", buf);
+   }
+   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Heap2"))
+   {
+      char* buf = NULL;
+      buf = heap2_desc(buf, record);
+      printf("%s\n", buf);
    }
    else
    {

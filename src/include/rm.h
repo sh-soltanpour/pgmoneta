@@ -32,4 +32,9 @@
 #define XLR_INFO_MASK           0x0F
 #define XLR_RMGR_INFO_MASK      0xF0
 
+typedef uint32_t BlockNumber;
+
+// offset
+typedef uint16_t OffsetNumber;
+
 #endif //PGMONETA_RM_H

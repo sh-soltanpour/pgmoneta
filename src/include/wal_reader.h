@@ -37,6 +37,7 @@ extern "C" {
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
+#include "stdbool.h"
 
 #define MAXIMUM_ALIGNOF 8 // TODO: double check this value
 #define MAXALIGN(x) (((x) + (sizeof(void*) - 1)) & ~(sizeof(void*) - 1))
