@@ -26,8 +26,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PGMONETA_RM_XLOG_H
-#define PGMONETA_RM_XLOG_H
+#ifndef PGMONETA_RM_STANDBY_H
+#define PGMONETA_RM_STANDBY_H
 
 #include "stdbool.h"
 #include "wal_reader.h"
@@ -79,4 +79,4 @@ typedef struct xl_invalidations
 
 void standby_desc(DecodedXLogRecord* record);
 
-#endif //PGMONETA_RM_XLOG_H
+#endif //PGMONETA_RM_STANDBY_H

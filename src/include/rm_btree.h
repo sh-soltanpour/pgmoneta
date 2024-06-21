@@ -31,6 +31,7 @@
 #include "stdint.h"
 #include "wal_reader.h"
 #include "rm.h"
+#include "transaction.h"
 
 void btree_desc(DecodedXLogRecord* record);
 const char* btree_identify (uint8_t info);
@@ -78,13 +79,6 @@ typedef struct ItemIdData
 #define XLOG_BTREE_META_CLEANUP 0xE0    /* update cleanup-related data in the
                                          * metapage */
 
-typedef struct FullTransactionId
-{
-   uint64_t value;
-} FullTransactionId;
-
-#define EpochFromFullTransactionId(x)   ((uint32_t) ((x).value >> 32))
-#define XidFromFullTransactionId(x)     ((uint32_t) (x).value)
 
 /*
  * All that we need to regenerate the meta-data page
