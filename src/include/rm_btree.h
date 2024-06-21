@@ -35,11 +35,6 @@
 void btree_desc(DecodedXLogRecord* record);
 const char* btree_identify (uint8_t info);
 
-typedef uint32_t BlockNumber;
-
-// offset
-typedef uint16_t OffsetNumber;
-
 typedef struct ItemIdData
 {
    unsigned lp_off: 15,       /* offset to tuple (from start of page) */
