@@ -37,4 +37,63 @@ typedef uint32_t BlockNumber;
 // offset
 typedef uint16_t OffsetNumber;
 
+
+typedef struct BlockIdData
+{
+    uint16_t bi_hi;
+    uint16_t bi_lo;
+} BlockIdData;
+
+typedef struct ItemPointerData
+{
+    BlockIdData ip_blkid;
+    OffsetNumber ip_posid;
+} ItemPointerData;
+typedef BlockIdData *BlockId;	/* block identifier */
+
+
+
+#define ItemPointerGetOffsetNumberNoCheck(pointer) \
+        ( \
+           (pointer)->ip_posid \
+        )
+
+/*
+ * ItemPointerGetOffsetNumber
+ *		As above, but verifies that the item pointer looks valid.
+ */
+#define ItemPointerGetOffsetNumber(pointer) \
+        ( \
+           ItemPointerGetOffsetNumberNoCheck(pointer) \
+        )
+
+/*
+ * ItemPointerGetBlockNumberNoCheck
+ *		Returns the block number of a disk item pointer.
+ */
+#define ItemPointerGetBlockNumberNoCheck(pointer) \
+        ( \
+           BlockIdGetBlockNumber(&(pointer)->ip_blkid) \
+        )
+
+/*
+ * ItemPointerGetBlockNumber
+ *		As above, but verifies that the item pointer looks valid.
+ */
+#define ItemPointerGetBlockNumber(pointer) \
+        ( \
+           ItemPointerGetBlockNumberNoCheck(pointer) \
+        )
+
+#define BlockIdGetBlockNumber(blockId) \
+        ( \
+           ((((BlockNumber) (blockId)->bi_hi) << 16) | ((BlockNumber) (blockId)->bi_lo)) \
+        )
+
+#define PostingItemGetBlockNumber(pointer) \
+	BlockIdGetBlockNumber(&(pointer)->child_blkno)
+
+#define PostingItemSetBlockNumber(pointer, blockNumber) \
+	BlockIdSet(&((pointer)->child_blkno), (blockNumber))
+
 #endif //PGMONETA_RM_H
