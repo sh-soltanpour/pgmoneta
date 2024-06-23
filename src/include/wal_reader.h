@@ -42,11 +42,13 @@ extern "C" {
 
 
 #define MAXIMUM_ALIGNOF 8 // TODO: double check this value
+#define ALIGNOF_SHORT 2 // TODO: double check this value
 #define MAXALIGN(x) (((x) + (sizeof(void*) - 1)) & ~(sizeof(void*) - 1))
 
 #define TYPEALIGN(ALIGNVAL, LEN)  \
         (((uintptr_t) (LEN) + ((ALIGNVAL) -1)) & ~((uintptr_t) ((ALIGNVAL) -1)))
 #define MAXALIGNTYPE(LEN) TYPEALIGN(MAXIMUM_ALIGNOF, (LEN))
+#define SHORTALIGN(LEN)			TYPEALIGN(ALIGNOF_SHORT, (LEN))
 
 #define XLOG_PAGE_MAGIC 0xD10D  // WAL version indicator
 
@@ -216,6 +218,14 @@ typedef struct DecodedXLogRecord
    int max_block_id;    /* highest block_id in use (-1 if none) */
    DecodedBkpBlock blocks[FLEXIBLE_ARRAY_MEMBER];
 } DecodedXLogRecord;
+
+
+typedef struct RelFileNode
+{
+    Oid spcNode;         /* tablespace */
+    Oid dbNode;             /* database */
+    Oid relNode;         /* relation */
+} RelFileNode;
 
 #define XLogRecHasBlockRef(record, block_id)           \
         ((record->max_block_id >= (block_id)) && \

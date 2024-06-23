@@ -196,23 +196,7 @@ typedef struct xl_heap_visible
 #define SizeOfHeapVisible (offsetof(xl_heap_visible, flags) + sizeof(uint8))
 
 typedef uint32_t CommandId;
-typedef struct RelFileNode
-{
-   Oid spcNode;         /* tablespace */
-   Oid dbNode;             /* database */
-   Oid relNode;         /* relation */
-} RelFileNode;
-typedef struct BlockIdData
-{
-   uint16_t bi_hi;
-   uint16_t bi_lo;
-} BlockIdData;
 
-typedef struct ItemPointerData
-{
-   BlockIdData ip_blkid;
-   OffsetNumber ip_posid;
-} ItemPointerData;
 
 typedef struct xl_heap_new_cid
 {
@@ -260,43 +244,6 @@ typedef struct xl_heap_lock_updated
    uint8_t infobits_set;
    uint8_t flags;
 } xl_heap_lock_updated;
-
-#define ItemPointerGetOffsetNumberNoCheck(pointer) \
-        ( \
-           (pointer)->ip_posid \
-        )
-
-/*
- * ItemPointerGetOffsetNumber
- *		As above, but verifies that the item pointer looks valid.
- */
-#define ItemPointerGetOffsetNumber(pointer) \
-        ( \
-           ItemPointerGetOffsetNumberNoCheck(pointer) \
-        )
-
-/*
- * ItemPointerGetBlockNumberNoCheck
- *		Returns the block number of a disk item pointer.
- */
-#define ItemPointerGetBlockNumberNoCheck(pointer) \
-        ( \
-           BlockIdGetBlockNumber(&(pointer)->ip_blkid) \
-        )
-
-/*
- * ItemPointerGetBlockNumber
- *		As above, but verifies that the item pointer looks valid.
- */
-#define ItemPointerGetBlockNumber(pointer) \
-        ( \
-           ItemPointerGetBlockNumberNoCheck(pointer) \
-        )
-
-#define BlockIdGetBlockNumber(blockId) \
-        ( \
-           ((((BlockNumber) (blockId)->bi_hi) << 16) | ((BlockNumber) (blockId)->bi_lo)) \
-        )
 
 char*heap_desc(char* buf, DecodedXLogRecord* record);
 
