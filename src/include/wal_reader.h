@@ -53,7 +53,6 @@ extern "C" {
 #define XLOG_PAGE_MAGIC 0xD10D  // WAL version indicator
 
 #define InvalidXLogRecPtr   0
-#define InvalidTransactionId        ((TransactionId) 0)
 #define InvalidBuffer   0
 
 #define XLP_FIRST_IS_CONTRECORD   0x0001
@@ -70,8 +69,10 @@ typedef int Buffer;
 typedef uint32_t BlockNumber;
 typedef unsigned int Oid;
 typedef Oid RelFileNumber;
+#define InvalidOid		((Oid) 0)
 
 #define FLEXIBLE_ARRAY_MEMBER   /* empty */
+
 
 typedef enum ForkNumber {
    InvalidForkNumber = -1,
@@ -309,9 +310,11 @@ void parse_page(char* page);
         ((xlogptr) & ((wal_segsz_bytes) - 1))
 
 #define LSN_FORMAT_ARGS(lsn) ((uint32_t) ((lsn) >> 32)), ((uint32_t) (lsn))
-
+#define XLogRecGetData(record) ((record)->main_data)
+#define XLogRecGetInfo(record) ((record)->header.xl_info)
 #define XLogRecGetBlock(record, i) (&record->blocks[(i)])
 #define XLogRecBlockImageApply(record, block_id) (record->blocks[block_id].apply_image)
+#define XLogRecGetOrigin(record) (record->record_origin)
 
 static inline void
 XLogFromFileName(const char* fname, TimeLineID* tli, XLogSegNo* logSegNo, int wal_segsz_bytes)
