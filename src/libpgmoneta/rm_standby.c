@@ -27,42 +27,44 @@
  */
 
 #include "rm_standby.h"
+#include "utils.h"
 
-static void
-standby_desc_running_xacts(xl_running_xacts* xlrec)
+static char*
+standby_desc_running_xacts(char* buf, xl_running_xacts* xlrec)
 {
    int i;
 
-   printf("nextXid %u latestCompletedXid %u oldestRunningXid %u",
+    pgmoneta_format_and_append(buf, "nextXid %u latestCompletedXid %u oldestRunningXid %u",
           xlrec->nextXid,
           xlrec->latestCompletedXid,
           xlrec->oldestRunningXid);
    if (xlrec->xcnt > 0)
    {
-      printf("; %d xacts:", xlrec->xcnt);
+       pgmoneta_format_and_append(buf, "; %d xacts:", xlrec->xcnt);
       for (i = 0; i < xlrec->xcnt; i++)
       {
-         printf(" %u", xlrec->xids[i]);
+          pgmoneta_format_and_append(buf," %u", xlrec->xids[i]);
       }
    }
 
    if (xlrec->subxid_overflow)
    {
-      printf("; subxid overflowed");
+       pgmoneta_format_and_append(buf,"; subxid overflowed");
    }
 
    if (xlrec->subxcnt > 0)
    {
-      printf("; %d subxacts:", xlrec->subxcnt);
+       pgmoneta_format_and_append(buf,"; %d subxacts:", xlrec->subxcnt);
       for (i = 0; i < xlrec->subxcnt; i++)
       {
-         printf(" %u", xlrec->xids[xlrec->xcnt + i]);
+          pgmoneta_format_and_append(buf," %u", xlrec->xids[xlrec->xcnt + i]);
       }
    }
+   return buf;
 }
 
-void
-standby_desc_invalidations(int nmsgs, SharedInvalidationMessage* msgs, Oid dbId, Oid tsId, bool relcacheInitFileInval
+char*
+standby_desc_invalidations(char* buf, int nmsgs, SharedInvalidationMessage* msgs, Oid dbId, Oid tsId, bool relcacheInitFileInval
                            )
 {
    int i;
@@ -70,54 +72,55 @@ standby_desc_invalidations(int nmsgs, SharedInvalidationMessage* msgs, Oid dbId,
    /* Do nothing if there are no invalidation messages */
    if (nmsgs <= 0)
    {
-      return;
+      return buf;
    }
 
    if (relcacheInitFileInval)
    {
-      printf("; relcache init file inval dbid %u tsid %u", dbId, tsId);
+      pgmoneta_format_and_append(buf, "; relcache init file inval dbid %u tsid %u", dbId, tsId);
    }
 
-   printf("; inval msgs:");
+   pgmoneta_format_and_append(buf, "; inval msgs:");
    for (i = 0; i < nmsgs; i++)
    {
       SharedInvalidationMessage* msg = &msgs[i];
 
       if (msg->id >= 0)
       {
-         printf(" catcache %d", msg->id);
+          pgmoneta_format_and_append(buf, " catcache %d", msg->id);
       }
       else if (msg->id == SHAREDINVALCATALOG_ID)
       {
-         printf(" catalog %u", msg->cat.catId);
+          pgmoneta_format_and_append(buf, " catalog %u", msg->cat.catId);
       }
       else if (msg->id == SHAREDINVALRELCACHE_ID)
       {
-         printf(" relcache %u", msg->rc.relId);
+          pgmoneta_format_and_append(buf, " relcache %u", msg->rc.relId);
       }
       /* not expected, but print something anyway */
       else if (msg->id == SHAREDINVALSMGR_ID)
       {
-         printf(" smgr");
+          pgmoneta_format_and_append(buf, " smgr");
       }
       /* not expected, but print something anyway */
       else if (msg->id == SHAREDINVALRELMAP_ID)
       {
-         printf(" relmap db %u", msg->rm.dbId);
+          pgmoneta_format_and_append(buf, " relmap db %u", msg->rm.dbId);
       }
       else if (msg->id == SHAREDINVALSNAPSHOT_ID)
       {
-         printf(" snapshot %u", msg->sn.relId);
+          pgmoneta_format_and_append(buf, " snapshot %u", msg->sn.relId);
       }
       else
       {
-         printf(" unrecognized id %d", msg->id);
+          pgmoneta_format_and_append(buf, " unrecognized id %d", msg->id);
       }
    }
+   return buf;
 }
 
-void
-standby_desc(DecodedXLogRecord* record)
+char*
+standby_desc(char* buf, DecodedXLogRecord* record)
 {
    char* rec = record->main_data;
    uint8_t info = record->header.xl_info & ~XLR_INFO_MASK;
@@ -129,7 +132,7 @@ standby_desc(DecodedXLogRecord* record)
 
       for (i = 0; i < xlrec->nlocks; i++)
       {
-         printf("xid %u db %u rel %u ",
+         pgmoneta_format_and_append(buf, "xid %u db %u rel %u ",
                 xlrec->locks[i].xid, xlrec->locks[i].dbOid,
                 xlrec->locks[i].relOid);
       }
@@ -138,14 +141,15 @@ standby_desc(DecodedXLogRecord* record)
    {
       xl_running_xacts* xlrec = (xl_running_xacts*) rec;
 
-      standby_desc_running_xacts(xlrec);
+      buf = standby_desc_running_xacts(buf, xlrec);
    }
    else if (info == XLOG_INVALIDATIONS)
    {
       xl_invalidations* xlrec = (xl_invalidations*) rec;
-      standby_desc_invalidations(xlrec->nmsgs, xlrec->msgs,
+      buf = standby_desc_invalidations(buf, xlrec->nmsgs, xlrec->msgs,
                                  xlrec->dbId, xlrec->tsId,
                                  xlrec->relcacheInitFileInval);
 
    }
+   return buf;
 }

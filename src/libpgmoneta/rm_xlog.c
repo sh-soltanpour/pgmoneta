@@ -31,6 +31,8 @@
 #include "pg_control.h"
 #include "utils.h"
 #include "rm_xlog.h"
+#include "pgmoneta.h"
+
 
 const struct config_enum_entry wal_level_options[] = {
         {"minimal", WAL_LEVEL_MINIMAL, false},
@@ -169,7 +171,6 @@ timestamptz_to_time_t(TimestampTz t)
 
     result = (pg_time_t) (t / USECS_PER_SEC +
                           ((POSTGRES_EPOCH_JDATE - UNIX_EPOCH_JDATE) * SECS_PER_DAY));
-
     return result;
 }
 

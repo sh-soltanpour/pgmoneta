@@ -35,6 +35,8 @@
 #include "rm_standby.h"
 #include "rm_btree.h"
 #include "rm_heap.h"
+#include "rm_xact.h"
+#include "pgmoneta.h"
 
 
 bool XLogRecGetBlockTagExtended(DecodedXLogRecord* pRecord, int id, RelFileLocator* pLocator, ForkNumber* pNumber,
@@ -200,7 +202,9 @@ display_decoded_record(DecodedXLogRecord* record)
    //if record is rmgr is standby
    if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Standby"))
    {
-      standby_desc(record);
+      char* buf = NULL;
+      standby_desc(buf, record);
+      printf("%s\n", buf);
    }
    else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Btree"))
    {
@@ -224,6 +228,12 @@ display_decoded_record(DecodedXLogRecord* record)
    {
        char* buf = NULL;
        buf = xlog_desc(buf, record);
+       printf("%s\n", buf);
+   }
+   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Transaction"))
+   {
+       char* buf = NULL;
+       buf = xact_desc(buf, record);
        printf("%s\n", buf);
    }
    else

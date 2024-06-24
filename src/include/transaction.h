@@ -43,6 +43,8 @@ typedef uint32_t MultiXactOffset;
 
 #define EpochFromFullTransactionId(x)   ((uint32_t) ((x).value >> 32))
 #define XidFromFullTransactionId(x)     ((uint32_t) (x).value)
+#define InvalidTransactionId        ((TransactionId) 0)
+#define TransactionIdIsValid(xid)		((xid) != InvalidTransactionId)
 
 
 
