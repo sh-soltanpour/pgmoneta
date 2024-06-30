@@ -31,12 +31,7 @@
 #include "rmgr.h"
 #include "string.h"
 #include "assert.h"
-#include "rm_xlog.h"
-#include "rm_standby.h"
-#include "rm_btree.h"
 #include "rm_heap.h"
-#include "rm_xact.h"
-#include "pgmoneta.h"
 
 
 bool XLogRecGetBlockTagExtended(DecodedXLogRecord* pRecord, int id, RelFileLocator* pLocator, ForkNumber* pNumber,
@@ -200,46 +195,50 @@ display_decoded_record(DecodedXLogRecord* record)
    printf("rec/tot_len: %u/%u\t", rec_len, record->header.xl_tot_len);
 
    //if record is rmgr is standby
-   if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Standby"))
-   {
-      char* buf = NULL;
-      standby_desc(buf, record);
-      printf("%s\n", buf);
-   }
-   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Btree"))
-   {
-      printf("%s\t", btree_identify(record->header.xl_info));
-      btree_desc(record);
-      printf("\n");
-   }
-   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Heap"))
-   {
-      char* buf = NULL;
-      buf = heap_desc(buf, record);
-      printf("%s\n", buf);
-   }
-   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Heap2"))
-   {
-      char* buf = NULL;
-      buf = heap2_desc(buf, record);
-      printf("%s\n", buf);
-   }
-   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "XLOG"))
-   {
-       char* buf = NULL;
-       buf = xlog_desc(buf, record);
-       printf("%s\n", buf);
-   }
-   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Transaction"))
-   {
-       char* buf = NULL;
-       buf = xact_desc(buf, record);
-       printf("%s\n", buf);
-   }
-   else
-   {
-      printf("No description for this record\t");
-   }
+   char* buf = NULL;
+   buf = RmgrTable[record->header.xl_rmid].rm_desc(buf, record);
+   printf("%s\n", buf);
+
+//   if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Standby"))
+//   {
+//      char* buf = NULL;
+//      standby_desc(buf, record);
+//      printf("%s\n", buf);
+//   }
+//   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Btree"))
+//   {
+//      printf("%s\t", btree_identify(record->header.xl_info));
+//      btree_desc(record);
+//      printf("\n");
+//   }
+//   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Heap"))
+//   {
+//      char* buf = NULL;
+//      buf = heap_desc(buf, record);
+//      printf("%s\n", buf);
+//   }
+//   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Heap2"))
+//   {
+//      char* buf = NULL;
+//      buf = heap2_desc(buf, record);
+//      printf("%s\n", buf);
+//   }
+//   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "XLOG"))
+//   {
+//       char* buf = NULL;
+//       buf = xlog_desc(buf, record);
+//       printf("%s\n", buf);
+//   }
+//   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Transaction"))
+//   {
+//       char* buf = NULL;
+//       buf = xact_desc(buf, record);
+//       printf("%s\n", buf);
+//   }
+//   else
+//   {
+//      printf("No description for this record\t");
+//   }
    XLogRecGetBlockRefInfo(record, false, true, &fpi_len);
    printf("\n------------------------------\n");
 }

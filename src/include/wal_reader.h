@@ -315,6 +315,7 @@ void parse_page(char* page);
 #define XLogRecGetBlock(record, i) (&record->blocks[(i)])
 #define XLogRecBlockImageApply(record, block_id) (record->blocks[block_id].apply_image)
 #define XLogRecGetOrigin(record) (record->record_origin)
+#define XLogRecGetDataLen(record) (record->main_data_len)
 
 static inline void
 XLogFromFileName(const char* fname, TimeLineID* tli, XLogSegNo* logSegNo, int wal_segsz_bytes)

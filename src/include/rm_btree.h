@@ -33,7 +33,7 @@
 #include "rm.h"
 #include "transaction.h"
 
-void btree_desc(DecodedXLogRecord* record);
+char* btree_desc(char* buf, DecodedXLogRecord* record);
 const char* btree_identify (uint8_t info);
 
 typedef struct ItemIdData

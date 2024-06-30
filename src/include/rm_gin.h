@@ -310,4 +310,7 @@ typedef struct
 #define SizeOfGinPostingList(plist) (offsetof(GinPostingList, bytes) + SHORTALIGN((plist)->nbytes) )
 
 
+char* gin_desc(char* buf, DecodedXLogRecord *record);
+
+
 #endif //PGMONETA_RM_GIN_H
