@@ -30,41 +30,43 @@
 #include "wal_reader.h"
 #include "rm_btree.h"
 #include "assert.h"
+#include "utils.h"
 
-void
-array_desc(void* array,
+char*
+array_desc(char*buf, void* array,
            size_t elem_size,
            int count
            )
 {
    if (count == 0)
    {
-      printf(" []");
-      return;
+      buf = pgmoneta_format_and_append(buf, " []");
+      return buf;
    }
-   printf(" [");
+   buf = pgmoneta_format_and_append(buf, " [");
    for (int i = 0; i < count; i++)
    {
-      printf("%u", *(OffsetNumber*) ((char*) array + elem_size * i));
+      buf = pgmoneta_format_and_append(buf, "%u", *(OffsetNumber*) ((char*) array + elem_size * i));
       if (i < count - 1)
       {
-         printf(", ");
+         buf = pgmoneta_format_and_append(buf, ", ");
       }
    }
-   printf("]");
+   buf = pgmoneta_format_and_append(buf, "]");
+   return buf;
 }
 
-static void
-delvacuum_desc(char* block_data, uint16_t ndeleted, uint16_t nupdated)
+static char*
+delvacuum_desc(char* buf, char* block_data, uint16_t ndeleted, uint16_t nupdated)
 {
    OffsetNumber* deletedoffsets;
    OffsetNumber* updatedoffsets;
    xl_btree_update* updates;
 
    /* Output deleted page offset number array */
-   printf(", deleted:");
+   buf = pgmoneta_format_and_append(buf, ", deleted:");
    deletedoffsets = (OffsetNumber*) block_data;
-   array_desc(deletedoffsets, sizeof(OffsetNumber), ndeleted);
+   buf = array_desc(buf, deletedoffsets, sizeof(OffsetNumber), ndeleted);
 
    /*
     * Output updates as an array of "update objects", where each element
@@ -72,7 +74,7 @@ delvacuum_desc(char* block_data, uint16_t ndeleted, uint16_t nupdated)
     * most literal representation of the underlying physical data structure
     * that we could use.  Readability seems more important here.)
     */
-   printf(", updated: [");
+   buf = pgmoneta_format_and_append(buf, ", updated: [");
    updatedoffsets = (OffsetNumber*) (block_data + ndeleted *
                                      sizeof(OffsetNumber));
    updates = (xl_btree_update*) ((char*) updatedoffsets +
@@ -90,35 +92,37 @@ delvacuum_desc(char* block_data, uint16_t ndeleted, uint16_t nupdated)
        * array of offsets into a posting list tuple's ItemPointerData array.
        * xl_btree_update describes a subset of the existing TIDs to delete.
        */
-      printf("{ off: %u, nptids: %u, ptids: [",
+      buf = pgmoneta_format_and_append(buf, "{ off: %u, nptids: %u, ptids: [",
              off, updates->ndeletedtids);
       for (int p = 0; p < updates->ndeletedtids; p++)
       {
          uint16_t* ptid;
 
          ptid = (uint16_t*) ((char*) updates + SizeOfBtreeUpdate) + p;
-         printf("%u", *ptid);
+         buf = pgmoneta_format_and_append(buf, "%u", *ptid);
 
          if (p < updates->ndeletedtids - 1)
          {
-            printf(", ");
+            buf = pgmoneta_format_and_append(buf, ", ");
          }
       }
-      printf("] }");
+      buf = pgmoneta_format_and_append(buf, "] }");
       if (i < nupdated - 1)
       {
-         printf(", ");
+         buf = pgmoneta_format_and_append(buf, ", ");
       }
 
       updates = (xl_btree_update*)
                 ((char*) updates + SizeOfBtreeUpdate +
                  updates->ndeletedtids * sizeof(uint16_t));
    }
-   printf("]");
+   buf = pgmoneta_format_and_append(buf, "]");
+
+   return buf;
 }
 
-void
-btree_desc(DecodedXLogRecord* record)
+char*
+btree_desc(char* buf, DecodedXLogRecord* record)
 {
    char* rec = record->main_data;
    uint8_t info = record->header.xl_info & ~XLR_INFO_MASK;
@@ -130,14 +134,14 @@ btree_desc(DecodedXLogRecord* record)
       case XLOG_BTREE_INSERT_META:
       case XLOG_BTREE_INSERT_POST: {
          xl_btree_insert* xlrec = (xl_btree_insert*) rec;
-         printf(" off: %u", xlrec->offnum);
+         buf = pgmoneta_format_and_append(buf, " off: %u", xlrec->offnum);
          break;
       }
       case XLOG_BTREE_SPLIT_L:
       case XLOG_BTREE_SPLIT_R: {
          xl_btree_split* xlrec = (xl_btree_split*) rec;
 
-         printf("level: %u, firstrightoff: %d, newitemoff: %d, postingoff: %d",
+         buf = pgmoneta_format_and_append(buf, "level: %u, firstrightoff: %d, newitemoff: %d, postingoff: %d",
                 xlrec->level, xlrec->firstrightoff,
                 xlrec->newitemoff, xlrec->postingoff);
          break;
@@ -145,18 +149,18 @@ btree_desc(DecodedXLogRecord* record)
       case XLOG_BTREE_DEDUP: {
          xl_btree_dedup* xlrec = (xl_btree_dedup*) rec;
 
-         printf("nintervals: %u", xlrec->nintervals);
+         buf = pgmoneta_format_and_append(buf, "nintervals: %u", xlrec->nintervals);
          break;
       }
       case XLOG_BTREE_VACUUM: {
          xl_btree_vacuum* xlrec = (xl_btree_vacuum*) rec;
 
-         printf("ndeleted: %u, nupdated: %u",
+         buf = pgmoneta_format_and_append(buf, "ndeleted: %u, nupdated: %u",
                 xlrec->ndeleted, xlrec->nupdated);
 
          if (XLogRecHasBlockData(record, 0))
          {
-            delvacuum_desc(XLogRecGetBlockData(record, 0, NULL),
+            buf = delvacuum_desc(buf, XLogRecGetBlockData(record, 0, NULL),
                            xlrec->ndeleted, xlrec->nupdated);
          }
          break;
@@ -164,14 +168,14 @@ btree_desc(DecodedXLogRecord* record)
       case XLOG_BTREE_DELETE: {
          xl_btree_delete* xlrec = (xl_btree_delete*) rec;
 
-         printf("snapshotConflictHorizon: %u, ndeleted: %u, nupdated: %u, isCatalogRel: %c",
+         buf = pgmoneta_format_and_append(buf, "snapshotConflictHorizon: %u, ndeleted: %u, nupdated: %u, isCatalogRel: %c",
                 xlrec->snapshotConflictHorizon,
                 xlrec->ndeleted, xlrec->nupdated,
                 xlrec->isCatalogRel ? 'T' : 'F');
 
          if (XLogRecHasBlockData(record, 0))
          {
-            delvacuum_desc(XLogRecGetBlockData(record, 0, NULL),
+            buf = delvacuum_desc(buf, XLogRecGetBlockData(record, 0, NULL),
                            xlrec->ndeleted, xlrec->nupdated);
          }
          break;
@@ -179,7 +183,7 @@ btree_desc(DecodedXLogRecord* record)
       case XLOG_BTREE_MARK_PAGE_HALFDEAD: {
          xl_btree_mark_page_halfdead* xlrec = (xl_btree_mark_page_halfdead*) rec;
 
-         printf("topparent: %u, leaf: %u, left: %u, right: %u",
+         buf = pgmoneta_format_and_append(buf, "topparent: %u, leaf: %u, left: %u, right: %u",
                 xlrec->topparent, xlrec->leafblk, xlrec->leftblk, xlrec->rightblk);
          break;
       }
@@ -187,11 +191,11 @@ btree_desc(DecodedXLogRecord* record)
       case XLOG_BTREE_UNLINK_PAGE: {
          xl_btree_unlink_page* xlrec = (xl_btree_unlink_page*) rec;
 
-         printf("left: %u, right: %u, level: %u, safexid: %u:%u, ",
+         buf = pgmoneta_format_and_append(buf, "left: %u, right: %u, level: %u, safexid: %u:%u, ",
                 xlrec->leftsib, xlrec->rightsib, xlrec->level,
                 EpochFromFullTransactionId(xlrec->safexid),
                 XidFromFullTransactionId(xlrec->safexid));
-         printf("leafleft: %u, leafright: %u, leaftopparent: %u",
+         buf = pgmoneta_format_and_append(buf, "leafleft: %u, leafright: %u, leaftopparent: %u",
                 xlrec->leafleftsib, xlrec->leafrightsib,
                 xlrec->leaftopparent);
          break;
@@ -199,13 +203,13 @@ btree_desc(DecodedXLogRecord* record)
       case XLOG_BTREE_NEWROOT: {
          xl_btree_newroot* xlrec = (xl_btree_newroot*) rec;
 
-         printf("level: %u", xlrec->level);
+         buf = pgmoneta_format_and_append(buf, "level: %u", xlrec->level);
          break;
       }
       case XLOG_BTREE_REUSE_PAGE: {
          xl_btree_reuse_page* xlrec = (xl_btree_reuse_page*) rec;
 
-         printf("rel: %u/%u/%u, snapshotConflictHorizon: %u:%u, isCatalogRel: %c",
+         buf = pgmoneta_format_and_append(buf, "rel: %u/%u/%u, snapshotConflictHorizon: %u:%u, isCatalogRel: %c",
                 xlrec->locator.spcOid, xlrec->locator.dbOid,
                 xlrec->locator.relNumber,
                 EpochFromFullTransactionId(xlrec->snapshotConflictHorizon),
@@ -217,11 +221,12 @@ btree_desc(DecodedXLogRecord* record)
          xl_btree_metadata* xlrec;
 
          xlrec = (xl_btree_metadata*) XLogRecGetBlockData(record, 0, NULL);
-         printf("last_cleanup_num_delpages: %u",
+         buf = pgmoneta_format_and_append(buf, "last_cleanup_num_delpages: %u",
                 xlrec->last_cleanup_num_delpages);
          break;
       }
    }
+   return buf;
 }
 
 const char*
