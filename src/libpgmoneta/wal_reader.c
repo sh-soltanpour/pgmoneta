@@ -32,6 +32,8 @@
 #include "string.h"
 #include "assert.h"
 #include "rm_heap.h"
+#include "time.h"
+#include "utils.h"
 
 
 bool XLogRecGetBlockTagExtended(DecodedXLogRecord* pRecord, int id, RelFileLocator* pLocator, ForkNumber* pNumber,
@@ -64,7 +66,7 @@ void
 print_record(XLogRecord* record)
 {
    printf("%s\t", RmgrTable[record->xl_rmid].name);
-   printf("%u\t", record->xl_tot_len);
+   printf("len: %u\t", record->xl_tot_len);
    printf("xl_xid: %u\n", record->xl_xid);
    printf("xl_info: %u\n", record->xl_info);
    printf("xl_prev: %llu\n", (unsigned long long) record->xl_prev);
@@ -72,9 +74,82 @@ print_record(XLogRecord* record)
 //    printf("-----------------\n");
 }
 
+void test()
+    {
+        char* buf;
+
+        // Test 1: Initial buffer is NULL, format string is empty
+        buf = pgmoneta_format_and_append(NULL, "");
+        printf("Test 1: '%s'\n", buf);
+        free(buf);
+
+        // Test 2: Initial buffer is NULL, simple format string
+        buf = pgmoneta_format_and_append(NULL, "Hello, World!");
+        printf("Test 2: '%s'\n", buf);
+        free(buf);
+
+        // Test 3: Initial buffer is not NULL, appending to existing buffer
+        buf = strdup("Initial ");
+        buf = pgmoneta_format_and_append(buf, "buffer content.");
+        printf("Test 3: '%s'\n", buf);
+        free(buf);
+
+        // Test 4: Format string with integer
+        buf = pgmoneta_format_and_append(NULL, "Value: %d", 42);
+        printf("Test 4: '%s'\n", buf);
+        free(buf);
+
+        // Test 5: Format string with multiple variables
+        buf = pgmoneta_format_and_append(NULL, "Name: %s, Age: %u", "Alice", 30);
+        printf("Test 5: '%s'\n", buf);
+        free(buf);
+
+        // Test 6: Format string with special characters
+        buf = pgmoneta_format_and_append(NULL, "Special chars: \t\n");
+        printf("Test 6: '%s'\n", buf);
+        free(buf);
+
+        // Test 7: Large formatted string
+        char large_format[1000];
+        memset(large_format, 'A', 999);
+        large_format[999] = '\0';
+        buf = pgmoneta_format_and_append(NULL, "%s", large_format);
+        printf("Test 7: Length of buffer: %zu\n", strlen(buf));
+        free(buf);
+
+        // Test 8: Format string with special characters and variables
+        buf = pgmoneta_format_and_append(NULL, "Path: %s\nError: %d\n", "/usr/local/bin", -1);
+        printf("Test 8: '%s'\n", buf);
+        free(buf);
+
+        // Test 9: Initial buffer with some content, appending formatted string
+        buf = strdup("Log: ");
+        buf = pgmoneta_format_and_append(buf, "Code %d, message: %s", 404, "Not Found");
+        printf("Test 9: '%s'\n", buf);
+        free(buf);
+
+        // Test 10: test within loop
+        buf = NULL;
+        for (int i = 0; i < 500; i++)
+        {
+            buf = pgmoneta_format_and_append(buf, "Iteration %d\n", i);
+            printf("Test 10: '%s'\n", buf);
+//            free(buf);
+        }
+        free(buf);
+    }
+
+
 void
 parse_wal_segment_headers(char* path)
 {
+    printf("here1\n");
+    time_t		t;
+    time(&t);
+    printf("test1 %ld\n", t);
+    struct tm  *ltime = localtime(&t);
+    printf("test2 %d\n", ltime->tm_mday);
+
    XLogRecord* record = NULL;
    XLogLongPageHeaderData* long_header = NULL;
    char* buffer = NULL;
@@ -87,6 +162,22 @@ parse_wal_segment_headers(char* path)
       pgmoneta_log_fatal("Error: Could not open file %s\n", path);
    }
 
+
+
+
+
+
+   //
+//   FILE* file2 = fopen(path, "rb");
+//   fseek(file2, 303176, SEEK_CUR);
+//   //read the record header
+//    record = malloc(SizeOfXLogRecord);
+//    fread(record, SizeOfXLogRecord, 1, file2);
+//    print_record(record);
+//    printf("))))))))))))))))))))))\n");
+//    return;
+
+    //
    long_header = malloc(SizeOfXLogLongPHD);
 //    printf("size of long header: %lu\n", SizeOfXLogLongPHD);
 
@@ -119,7 +210,7 @@ parse_wal_segment_headers(char* path)
    }
    ;
 
-   int next_record = ftell(file);
+   uint32_t next_record = ftell(file);
    int page_number = 0;
 
    while (true)
@@ -134,7 +225,17 @@ parse_wal_segment_headers(char* path)
          continue;
       }
       fseek(file, next_record, SEEK_SET);
-      if (fread(record, SizeOfXLogRecord, 1, file) != 1)
+      if (ftell(file) + SizeOfXLogRecord > long_header->xlp_xlog_blcksz * (page_number + 1))
+      {
+          uint32_t end_of_page = (page_number + 1) * long_header->xlp_xlog_blcksz;
+          size_t bytes_read = fread(record, 1, end_of_page - ftell(file), file);
+
+          fseek(file, SizeOfXLogShortPHD, SEEK_CUR);
+          fread(record + bytes_read, 1, SizeOfXLogRecord - bytes_read, file);
+          print_record(record);
+          page_number++;
+      }
+      else if (fread(record, SizeOfXLogRecord, 1, file) != 1)
       {
          pgmoneta_log_fatal("Error: Could not read second record\n");
          free(record);
@@ -177,9 +278,12 @@ parse_wal_segment_headers(char* path)
       }
 
       DecodedXLogRecord* decoded = malloc(sizeof(DecodedXLogRecord));
-      decode_xlog_record(buffer, decoded, record, long_header->xlp_xlog_blcksz);
+      bool result = decode_xlog_record(buffer, decoded, record, long_header->xlp_xlog_blcksz);
+      if (!result){
+            pgmoneta_log_fatal("error in decoding\n");
+          continue;
+      }
       display_decoded_record(decoded);
-      free(decoded);
 
    }
 }
@@ -197,53 +301,14 @@ display_decoded_record(DecodedXLogRecord* record)
    //if record is rmgr is standby
    char* buf = NULL;
    buf = RmgrTable[record->header.xl_rmid].rm_desc(buf, record);
-   printf("%s\n", buf);
+  printf("%s\n", buf);
+  free(buf);
 
-//   if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Standby"))
-//   {
-//      char* buf = NULL;
-//      standby_desc(buf, record);
-//      printf("%s\n", buf);
-//   }
-//   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Btree"))
-//   {
-//      printf("%s\t", btree_identify(record->header.xl_info));
-//      btree_desc(record);
-//      printf("\n");
-//   }
-//   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Heap"))
-//   {
-//      char* buf = NULL;
-//      buf = heap_desc(buf, record);
-//      printf("%s\n", buf);
-//   }
-//   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Heap2"))
-//   {
-//      char* buf = NULL;
-//      buf = heap2_desc(buf, record);
-//      printf("%s\n", buf);
-//   }
-//   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "XLOG"))
-//   {
-//       char* buf = NULL;
-//       buf = xlog_desc(buf, record);
-//       printf("%s\n", buf);
-//   }
-//   else if (!strcmp(RmgrTable[record->header.xl_rmid].name, "Transaction"))
-//   {
-//       char* buf = NULL;
-//       buf = xact_desc(buf, record);
-//       printf("%s\n", buf);
-//   }
-//   else
-//   {
-//      printf("No description for this record\t");
-//   }
    XLogRecGetBlockRefInfo(record, false, true, &fpi_len);
    printf("\n------------------------------\n");
 }
 
-void
+bool
 decode_xlog_record(char* buffer, DecodedXLogRecord* decoded, XLogRecord* record, uint32_t block_size)
 {
 #define COPY_HEADER_FIELD(_dst, _size)          \
@@ -482,20 +547,21 @@ decode_xlog_record(char* buffer, DecodedXLogRecord* decoded, XLogRecord* record,
       decoded->main_data = malloc(decoded->main_data_len);
       if (decoded->main_data == NULL)
       {
-         printf("Could not allocate memory for main data\n");
          goto
          shortdata_err;
       }
       memcpy(decoded->main_data, ptr, decoded->main_data_len);
    }
 
-   return;
+   return true;
 
 shortdata_err:
    printf("shortdata_err\n");
+    return false;
 
 err:
    printf("err\n");
+    return false;
 }
 
 char*

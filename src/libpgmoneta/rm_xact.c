@@ -64,7 +64,6 @@ xact_desc_relations(char *buf, char *label, int nrels,
 static char *
 xact_desc_commit(char *buf, uint8_t info, xl_xact_commit *xlrec, RepOriginId origin_id) {
     xl_xact_parsed_commit parsed;
-
     ParseCommitRecord(info, xlrec, &parsed);
 
     /* If this is a prepared xact, show the xid of the original xact */
@@ -159,14 +158,9 @@ xact_desc(char *buf, DecodedXLogRecord *record) {
     char *rec = XLogRecGetData(record);
     uint8_t info = XLogRecGetInfo(record) & XLOG_XACT_OPMASK;
 
-    printf("xact_desc\n");
-    printf("info: %d\n", info);
-    printf("main data len: %d\n", record->main_data_len);
 
     if (info == XLOG_XACT_COMMIT || info == XLOG_XACT_COMMIT_PREPARED) {
-        printf("is commit\n");
         xl_xact_commit *xlrec = (xl_xact_commit *) rec;
-        printf("xlrec timestamp %lld\n", xlrec->xact_time);
 
         buf = xact_desc_commit(buf, XLogRecGetInfo(record), xlrec,
                          XLogRecGetOrigin(record));

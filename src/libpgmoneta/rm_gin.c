@@ -39,7 +39,7 @@ desc_recompress_leaf(char* buf, ginxlogRecompressDataLeaf *insertData)
     int			i;
     char	   *walbuf = ((char *) insertData) + sizeof(ginxlogRecompressDataLeaf);
 
-    pgmoneta_format_and_append(buf, " %d segments:", (int) insertData->nactions);
+    buf = pgmoneta_format_and_append(buf, " %d segments:", (int) insertData->nactions);
 
     for (i = 0; i < insertData->nactions; i++)
     {
@@ -65,19 +65,19 @@ desc_recompress_leaf(char* buf, ginxlogRecompressDataLeaf *insertData)
         switch (a_action)
         {
             case GIN_SEGMENT_ADDITEMS:
-                pgmoneta_format_and_append(buf, " %d (add %d items)", a_segno, nitems);
+                buf = pgmoneta_format_and_append(buf, " %d (add %d items)", a_segno, nitems);
                 break;
             case GIN_SEGMENT_DELETE:
-                pgmoneta_format_and_append(buf, " %d (delete)", a_segno);
+                buf = pgmoneta_format_and_append(buf, " %d (delete)", a_segno);
                 break;
             case GIN_SEGMENT_INSERT:
-                pgmoneta_format_and_append(buf, " %d (insert)", a_segno);
+                buf = pgmoneta_format_and_append(buf, " %d (insert)", a_segno);
                 break;
             case GIN_SEGMENT_REPLACE:
-                pgmoneta_format_and_append(buf, " %d (replace)", a_segno);
+                buf = pgmoneta_format_and_append(buf, " %d (replace)", a_segno);
                 break;
             default:
-                pgmoneta_format_and_append(buf, " %d unknown action %d ???", a_segno, a_action);
+                buf = pgmoneta_format_and_append(buf, " %d unknown action %d ???", a_segno, a_action);
                 /* cannot decode unrecognized actions further */
                 break;
         }
@@ -97,7 +97,7 @@ gin_desc(char *buf, DecodedXLogRecord *record) {
         case XLOG_GIN_INSERT: {
             ginxlogInsert *xlrec = (ginxlogInsert *) rec;
 
-            pgmoneta_format_and_append(buf, "isdata: %c isleaf: %c",
+            buf = pgmoneta_format_and_append(buf, "isdata: %c isleaf: %c",
                              (xlrec->flags & GIN_INSERT_ISDATA) ? 'T' : 'F',
                              (xlrec->flags & GIN_INSERT_ISLEAF) ? 'T' : 'F');
             if (!(xlrec->flags & GIN_INSERT_ISLEAF)) {
@@ -109,27 +109,27 @@ gin_desc(char *buf, DecodedXLogRecord *record) {
                 payload += sizeof(BlockIdData);
                 rightChildBlkno = BlockIdGetBlockNumber((BlockId) payload);
                 payload += sizeof(BlockNumber);
-                pgmoneta_format_and_append(buf, " children: %u/%u",
+                buf = pgmoneta_format_and_append(buf, " children: %u/%u",
                                  leftChildBlkno, rightChildBlkno);
             }
             if (XLogRecHasBlockImage(record, 0)) {
                 if (XLogRecBlockImageApply(record, 0))
-                    pgmoneta_format_and_append(buf, " (full page image)");
+                    buf = pgmoneta_format_and_append(buf, " (full page image)");
                 else
-                    pgmoneta_format_and_append(buf, " (full page image, for WAL verification)");
+                    buf = pgmoneta_format_and_append(buf, " (full page image, for WAL verification)");
             } else {
                 char *payload = XLogRecGetBlockData(record, 0, NULL);
 
                 if (!(xlrec->flags & GIN_INSERT_ISDATA))
-                    pgmoneta_format_and_append(buf, " isdelete: %c",
+                    buf = pgmoneta_format_and_append(buf, " isdelete: %c",
                                      (((ginxlogInsertEntry *) payload)->isDelete) ? 'T' : 'F');
                 else if (xlrec->flags & GIN_INSERT_ISLEAF)
-                    desc_recompress_leaf(buf, (ginxlogRecompressDataLeaf *) payload);
+                    buf = desc_recompress_leaf(buf, (ginxlogRecompressDataLeaf *) payload);
                 else {
                     ginxlogInsertDataInternal *insertData =
                             (ginxlogInsertDataInternal *) payload;
 
-                    pgmoneta_format_and_append(buf, " pitem: %u-%u/%u",
+                    buf = pgmoneta_format_and_append(buf, " pitem: %u-%u/%u",
                                      PostingItemGetBlockNumber(&insertData->newitem),
                                      ItemPointerGetBlockNumber(&insertData->newitem.key),
                                      ItemPointerGetOffsetNumber(&insertData->newitem.key));
@@ -140,9 +140,9 @@ gin_desc(char *buf, DecodedXLogRecord *record) {
         case XLOG_GIN_SPLIT: {
             ginxlogSplit *xlrec = (ginxlogSplit *) rec;
 
-            pgmoneta_format_and_append(buf, "isrootsplit: %c",
+            buf = pgmoneta_format_and_append(buf, "isrootsplit: %c",
                              (((ginxlogSplit *) rec)->flags & GIN_SPLIT_ROOT) ? 'T' : 'F');
-            pgmoneta_format_and_append(buf, " isdata: %c isleaf: %c",
+            buf = pgmoneta_format_and_append(buf, " isdata: %c isleaf: %c",
                              (xlrec->flags & GIN_INSERT_ISDATA) ? 'T' : 'F',
                              (xlrec->flags & GIN_INSERT_ISLEAF) ? 'T' : 'F');
         }
@@ -153,14 +153,14 @@ gin_desc(char *buf, DecodedXLogRecord *record) {
         case XLOG_GIN_VACUUM_DATA_LEAF_PAGE: {
             if (XLogRecHasBlockImage(record, 0)) {
                 if (XLogRecBlockImageApply(record, 0))
-                    pgmoneta_format_and_append(buf, " (full page image)");
+                    buf = pgmoneta_format_and_append(buf, " (full page image)");
                 else
-                    pgmoneta_format_and_append(buf, " (full page image, for WAL verification)");
+                    buf = pgmoneta_format_and_append(buf, " (full page image, for WAL verification)");
             } else {
                 ginxlogVacuumDataLeafPage *xlrec =
                         (ginxlogVacuumDataLeafPage *) XLogRecGetBlockData(record, 0, NULL);
 
-                desc_recompress_leaf(buf, &xlrec->data);
+                buf = desc_recompress_leaf(buf, &xlrec->data);
             }
         }
             break;
@@ -174,7 +174,7 @@ gin_desc(char *buf, DecodedXLogRecord *record) {
             /* no further information */
             break;
         case XLOG_GIN_DELETE_LISTPAGE:
-            pgmoneta_format_and_append(buf, "ndeleted: %d",
+            buf = pgmoneta_format_and_append(buf, "ndeleted: %d",
                              ((ginxlogDeleteListPages *) rec)->ndeleted);
             break;
     }

@@ -34,30 +34,30 @@ standby_desc_running_xacts(char* buf, xl_running_xacts* xlrec)
 {
    int i;
 
-    pgmoneta_format_and_append(buf, "nextXid %u latestCompletedXid %u oldestRunningXid %u",
+    buf = pgmoneta_format_and_append(buf, "nextXid %u latestCompletedXid %u oldestRunningXid %u",
           xlrec->nextXid,
           xlrec->latestCompletedXid,
           xlrec->oldestRunningXid);
    if (xlrec->xcnt > 0)
    {
-       pgmoneta_format_and_append(buf, "; %d xacts:", xlrec->xcnt);
+       buf = pgmoneta_format_and_append(buf, "; %d xacts:", xlrec->xcnt);
       for (i = 0; i < xlrec->xcnt; i++)
       {
-          pgmoneta_format_and_append(buf," %u", xlrec->xids[i]);
+          buf = pgmoneta_format_and_append(buf," %u", xlrec->xids[i]);
       }
    }
 
    if (xlrec->subxid_overflow)
    {
-       pgmoneta_format_and_append(buf,"; subxid overflowed");
+       buf = pgmoneta_format_and_append(buf,"; subxid overflowed");
    }
 
    if (xlrec->subxcnt > 0)
    {
-       pgmoneta_format_and_append(buf,"; %d subxacts:", xlrec->subxcnt);
+       buf = pgmoneta_format_and_append(buf,"; %d subxacts:", xlrec->subxcnt);
       for (i = 0; i < xlrec->subxcnt; i++)
       {
-          pgmoneta_format_and_append(buf," %u", xlrec->xids[xlrec->xcnt + i]);
+          buf = pgmoneta_format_and_append(buf," %u", xlrec->xids[xlrec->xcnt + i]);
       }
    }
    return buf;
@@ -69,25 +69,26 @@ standby_desc_invalidations(char* buf, int nmsgs, SharedInvalidationMessage* msgs
 {
    int i;
 
-   /* Do nothing if there are no invalidation messages */
+    /* Do nothing if there are no invalidation messages */
    if (nmsgs <= 0)
    {
-      return buf;
+       return buf;
    }
 
    if (relcacheInitFileInval)
    {
-      pgmoneta_format_and_append(buf, "; relcache init file inval dbid %u tsid %u", dbId, tsId);
+       buf = pgmoneta_format_and_append(buf, "; relcache init file inval dbid %u tsid %u", dbId, tsId);
    }
 
-   pgmoneta_format_and_append(buf, "; inval msgs:");
+   buf = pgmoneta_format_and_append(buf, "; inval msgs:");
    for (i = 0; i < nmsgs; i++)
    {
+
       SharedInvalidationMessage* msg = &msgs[i];
 
       if (msg->id >= 0)
       {
-          pgmoneta_format_and_append(buf, " catcache %d", msg->id);
+          buf = pgmoneta_format_and_append(buf, " catcache %d", msg->id);
       }
       else if (msg->id == SHAREDINVALCATALOG_ID)
       {
@@ -95,25 +96,25 @@ standby_desc_invalidations(char* buf, int nmsgs, SharedInvalidationMessage* msgs
       }
       else if (msg->id == SHAREDINVALRELCACHE_ID)
       {
-          pgmoneta_format_and_append(buf, " relcache %u", msg->rc.relId);
+          buf = pgmoneta_format_and_append(buf, " relcache %u", msg->rc.relId);
       }
       /* not expected, but print something anyway */
       else if (msg->id == SHAREDINVALSMGR_ID)
       {
-          pgmoneta_format_and_append(buf, " smgr");
+          buf = pgmoneta_format_and_append(buf, " smgr");
       }
       /* not expected, but print something anyway */
       else if (msg->id == SHAREDINVALRELMAP_ID)
       {
-          pgmoneta_format_and_append(buf, " relmap db %u", msg->rm.dbId);
+          buf = pgmoneta_format_and_append(buf, " relmap db %u", msg->rm.dbId);
       }
       else if (msg->id == SHAREDINVALSNAPSHOT_ID)
       {
-          pgmoneta_format_and_append(buf, " snapshot %u", msg->sn.relId);
+          buf = pgmoneta_format_and_append(buf, " snapshot %u", msg->sn.relId);
       }
       else
       {
-          pgmoneta_format_and_append(buf, " unrecognized id %d", msg->id);
+          buf = pgmoneta_format_and_append(buf, " unrecognized id %d", msg->id);
       }
    }
    return buf;

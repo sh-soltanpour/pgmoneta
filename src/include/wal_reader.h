@@ -269,7 +269,7 @@ typedef struct RelFileNode
 
 void parse_wal_segment_headers(char* path);
 
-void decode_xlog_record(char* buffer, DecodedXLogRecord* decoded, XLogRecord* record, uint32_t block_size);
+bool decode_xlog_record(char* buffer, DecodedXLogRecord* decoded, XLogRecord* record, uint32_t block_size);
 
 void get_record_length(DecodedXLogRecord* record, uint32_t* rec_len, uint32_t* fpi_len);
 
