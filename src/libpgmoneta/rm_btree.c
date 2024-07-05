@@ -28,7 +28,7 @@
 
 #include "stdbool.h"
 #include "wal_reader.h"
-#include "rm_btree.h"
+#include "wal/rm_btree.h"
 #include "assert.h"
 #include "utils.h"
 

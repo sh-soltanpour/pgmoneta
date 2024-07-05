@@ -27,8 +27,8 @@
  */
 
 
-#include "rm_database.h"
-#include "rm.h"
+#include "wal/rm_database.h"
+#include "wal/rm.h"
 #include "utils.h"
 
 

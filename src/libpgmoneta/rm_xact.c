@@ -27,9 +27,9 @@
  */
 
 
-#include "rm_xact.h"
+#include "wal/rm_xact.h"
 #include "utils.h"
-#include "rm_standby.h"
+#include "wal/rm_standby.h"
 #include "relpath.h"
 
 

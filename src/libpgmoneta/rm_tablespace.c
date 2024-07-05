@@ -27,8 +27,8 @@
  */
 
 
-#include "rm_tablespace.h"
-#include "rm.h"
+#include "wal/rm_tablespace.h"
+#include "wal/rm.h"
 #include "utils.h"
 
 

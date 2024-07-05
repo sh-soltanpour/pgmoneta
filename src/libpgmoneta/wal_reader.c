@@ -28,10 +28,10 @@
 
 #include "logging.h"
 #include "wal_reader.h"
-#include "rmgr.h"
+#include "wal/rmgr.h"
 #include "string.h"
 #include "assert.h"
-#include "rm_heap.h"
+#include "wal/rm_heap.h"
 #include "time.h"
 #include "utils.h"
 

@@ -27,8 +27,8 @@
  */
 
 
-#include "rm_mxact.h"
-#include "rm.h"
+#include "wal/rm_mxact.h"
+#include "wal/rm.h"
 #include "utils.h"
 
 

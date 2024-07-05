@@ -2,7 +2,7 @@
 // Created by Shahryar Soltanpour on 2024-06-26.
 //
 
-#include "rm_commit_ts.h"
+#include "wal/rm_commit_ts.h"
 #include "utils.h"
 
 

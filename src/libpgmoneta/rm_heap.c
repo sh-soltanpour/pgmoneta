@@ -27,7 +27,7 @@
  */
 
 #include "wal_reader.h"
-#include "rm_heap.h"
+#include "wal/rm_heap.h"
 #include "utils.h"
 
 static char*

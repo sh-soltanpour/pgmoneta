@@ -5,7 +5,7 @@
 #ifndef PGMONETA_RM_HEAP_H
 #define PGMONETA_RM_HEAP_H
 
-#include <rm.h>
+#include "rm.h"
 #include "stdint.h"
 #include "wal_reader.h"
 

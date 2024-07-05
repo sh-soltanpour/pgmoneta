@@ -2,8 +2,8 @@
 // Created by Shahryar Soltanpour on 2024-06-26.
 //
 
-#include "rm_replorigin.h"
-#include "rm.h"
+#include "wal/rm_replorigin.h"
+#include "wal/rm.h"
 #include "utils.h"
 
 

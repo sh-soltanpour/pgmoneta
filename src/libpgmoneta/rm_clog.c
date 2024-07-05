@@ -26,10 +26,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rm_clog.h"
+#include "wal/rm_clog.h"
 #include "string.h"
 #include "utils.h"
-#include "rm.h"
+#include "wal/rm.h"
 
 char*
 clog_desc(char* buf,  DecodedXLogRecord *record)

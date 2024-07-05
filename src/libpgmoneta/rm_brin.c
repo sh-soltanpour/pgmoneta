@@ -2,7 +2,7 @@
 // Created by Shahryar Soltanpour on 2024-06-26.
 //
 
-#include "rm_brin.h"
+#include "wal/rm_brin.h"
 #include "utils.h"
 
 

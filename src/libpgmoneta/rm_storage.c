@@ -28,8 +28,8 @@
 
 
 #include "utils.h"
-#include "rm_storage.h"
-#include "rm.h"
+#include "wal/rm_storage.h"
+#include "wal/rm.h"
 #include "relpath.h"
 
 char*

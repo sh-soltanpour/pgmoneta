@@ -27,8 +27,8 @@
  */
 
 
-#include "rm_relmap.h"
-#include "rm.h"
+#include "wal/rm_relmap.h"
+#include "wal/rm.h"
 #include "utils.h"
 
 char *

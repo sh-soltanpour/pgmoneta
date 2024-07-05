@@ -28,8 +28,8 @@
 
 
 #include "wal_reader.h"
-#include "rm.h"
-#include "rm_gin.h"
+#include "wal/rm.h"
+#include "wal/rm_gin.h"
 #include "utils.h"
 
 

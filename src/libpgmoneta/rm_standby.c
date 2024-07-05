@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rm_standby.h"
+#include "wal/rm_standby.h"
 #include "utils.h"
 
 static char*

@@ -27,10 +27,10 @@
  */
 
 #include "wal_reader.h"
-#include "rm.h"
+#include "wal/rm.h"
 #include "pg_control.h"
 #include "utils.h"
-#include "rm_xlog.h"
+#include "wal/rm_xlog.h"
 #include "pgmoneta.h"
 
 

@@ -2,8 +2,8 @@
 // Created by Shahryar Soltanpour on 2024-06-26.
 //
 
-#include "rm_generic.h"
-#include "rm.h"
+#include "wal/rm_generic.h"
+#include "wal/rm.h"
 #include "utils.h"
 #include "string.h"
 

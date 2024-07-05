@@ -3,8 +3,8 @@
 //
 
 #include "wal_reader.h"
-#include "rm_logicalmsg.h"
-#include "rm.h"
+#include "wal/rm_logicalmsg.h"
+#include "wal/rm.h"
 #include "utils.h"
 #include "assert.h"
 

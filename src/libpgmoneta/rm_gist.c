@@ -26,8 +26,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rm_gist.h"
-#include "rm.h"
+#include "wal/rm_gist.h"
+#include "wal/rm.h"
 #include "utils.h"
 
 

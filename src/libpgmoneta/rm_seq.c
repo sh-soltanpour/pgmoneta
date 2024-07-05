@@ -26,8 +26,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rm_seq.h"
-#include "rm.h"
+#include "wal/rm_seq.h"
+#include "wal/rm.h"
 #include "utils.h"
 
 char*
