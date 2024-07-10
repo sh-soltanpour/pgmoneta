@@ -7,7 +7,7 @@
 
 #include "wal_reader.h"
 
-typedef char *Pointer;
+typedef char *pointer;
 
 char* generic_desc(char* buf, struct decoded_xlog_record *record);
 

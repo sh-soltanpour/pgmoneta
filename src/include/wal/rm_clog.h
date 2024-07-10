@@ -38,12 +38,12 @@ typedef int XidStatus;
 #define TRANSACTION_STATUS_ABORTED			0x02
 #define TRANSACTION_STATUS_SUB_COMMITTED	0x03
 
-typedef struct xl_clog_truncate
+struct xl_clog_truncate
 {
     int			pageno;
     TransactionId oldestXact;
     oid			oldestXactDb;
-} xl_clog_truncate;
+};
 
 #define CLOG_ZEROPAGE		0x00
 #define CLOG_TRUNCATE		0x10

@@ -40,7 +40,7 @@ database_desc(char* buf, struct decoded_xlog_record *record)
 
     if (info == XLOG_DBASE_CREATE)
     {
-        xl_dbase_create_rec *xlrec = (xl_dbase_create_rec *) rec;
+        struct xl_dbase_create_rec *xlrec = (struct xl_dbase_create_rec *) rec;
 
         buf = pgmoneta_format_and_append(buf, "copy dir %u/%u to %u/%u",
                          xlrec->src_tablespace_id, xlrec->src_db_id,
@@ -48,7 +48,7 @@ database_desc(char* buf, struct decoded_xlog_record *record)
     }
     else if (info == XLOG_DBASE_DROP)
     {
-        xl_dbase_drop_rec *xlrec = (xl_dbase_drop_rec *) rec;
+        struct xl_dbase_drop_rec *xlrec = (struct xl_dbase_drop_rec *) rec;
         int			i;
 
         buf = pgmoneta_format_and_append(buf, "dir");

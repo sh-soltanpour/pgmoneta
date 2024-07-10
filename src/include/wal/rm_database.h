@@ -35,21 +35,21 @@
 #define XLOG_DBASE_CREATE		0x00
 #define XLOG_DBASE_DROP			0x10
 
-typedef struct xl_dbase_create_rec
+struct xl_dbase_create_rec
 {
     /* Records copying of a single subdirectory incl. contents */
     oid			db_id;
     oid			tablespace_id;
     oid			src_db_id;
     oid			src_tablespace_id;
-} xl_dbase_create_rec;
+};
 
-typedef struct xl_dbase_drop_rec
+struct xl_dbase_drop_rec
 {
     oid			db_id;
     int			ntablespaces;	/* number of tablespace IDs */
     oid			tablespace_ids[FLEXIBLE_ARRAY_MEMBER];
-} xl_dbase_drop_rec;
+};
 #define MinSizeOfDbaseDropRec offsetof(xl_dbase_drop_rec, tablespace_ids)
 
 

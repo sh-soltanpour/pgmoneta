@@ -46,9 +46,9 @@ clog_desc(char* buf,  struct decoded_xlog_record *record)
     }
     else if (info == CLOG_TRUNCATE)
     {
-        xl_clog_truncate xlrec;
+        struct xl_clog_truncate xlrec;
 
-        memcpy(&xlrec, rec, sizeof(xl_clog_truncate));
+        memcpy(&xlrec, rec, sizeof(struct xl_clog_truncate));
         buf = pgmoneta_format_and_append(buf, "page %d; oldestXact %u",
                          xlrec.pageno, xlrec.oldestXact);
     }

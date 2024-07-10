@@ -7,15 +7,13 @@
 #include "utils.h"
 #include "string.h"
 
-char*
-generic_desc(char* buf, struct decoded_xlog_record *record)
-{
-    Pointer		ptr = XLogRecGetData(record),
+char *
+generic_desc(char *buf, struct decoded_xlog_record *record) {
+    pointer ptr = XLogRecGetData(record),
             end = ptr + XLogRecGetDataLen(record);
 
-    while (ptr < end)
-    {
-        OffsetNumber offset,
+    while (ptr < end) {
+        offset_number offset,
                 length;
 
         memcpy(&offset, ptr, sizeof(offset));

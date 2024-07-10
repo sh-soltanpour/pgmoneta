@@ -46,7 +46,7 @@ array_desc(char*buf, void* array,
    buf = pgmoneta_format_and_append(buf, " [");
    for (int i = 0; i < count; i++)
    {
-      buf = pgmoneta_format_and_append(buf, "%u", *(OffsetNumber*) ((char*) array + elem_size * i));
+      buf = pgmoneta_format_and_append(buf, "%u", *(offset_number*) ((char*) array + elem_size * i));
       if (i < count - 1)
       {
          buf = pgmoneta_format_and_append(buf, ", ");
@@ -59,14 +59,14 @@ array_desc(char*buf, void* array,
 static char*
 delvacuum_desc(char* buf, char* block_data, uint16_t ndeleted, uint16_t nupdated)
 {
-   OffsetNumber* deletedoffsets;
-   OffsetNumber* updatedoffsets;
-   xl_btree_update* updates;
+   offset_number* deletedoffsets;
+   offset_number* updatedoffsets;
+   struct xl_btree_update* updates;
 
    /* Output deleted page offset number array */
    buf = pgmoneta_format_and_append(buf, ", deleted:");
-   deletedoffsets = (OffsetNumber*) block_data;
-   buf = array_desc(buf, deletedoffsets, sizeof(OffsetNumber), ndeleted);
+   deletedoffsets = (offset_number*) block_data;
+   buf = array_desc(buf, deletedoffsets, sizeof(offset_number), ndeleted);
 
    /*
     * Output updates as an array of "update objects", where each element
@@ -75,21 +75,21 @@ delvacuum_desc(char* buf, char* block_data, uint16_t ndeleted, uint16_t nupdated
     * that we could use.  Readability seems more important here.)
     */
    buf = pgmoneta_format_and_append(buf, ", updated: [");
-   updatedoffsets = (OffsetNumber*) (block_data + ndeleted *
-                                     sizeof(OffsetNumber));
-   updates = (xl_btree_update*) ((char*) updatedoffsets +
+   updatedoffsets = (offset_number*) (block_data + ndeleted *
+                                                   sizeof(offset_number));
+   updates = (struct xl_btree_update*) ((char*) updatedoffsets +
                                  nupdated *
-                                 sizeof(OffsetNumber));
+                                 sizeof(offset_number));
    for (int i = 0; i < nupdated; i++)
    {
-      OffsetNumber off = updatedoffsets[i];
+      offset_number off = updatedoffsets[i];
 
       assert(OffsetNumberIsValid(off));
       assert(updates->ndeletedtids > 0);
 
       /*
        * "ptid" is the symbol name used when building each xl_btree_update's
-       * array of offsets into a posting list tuple's ItemPointerData array.
+       * array of offsets into a posting list tuple's item_pointer_data array.
        * xl_btree_update describes a subset of the existing TIDs to delete.
        */
       buf = pgmoneta_format_and_append(buf, "{ off: %u, nptids: %u, ptids: [",
@@ -112,7 +112,7 @@ delvacuum_desc(char* buf, char* block_data, uint16_t ndeleted, uint16_t nupdated
          buf = pgmoneta_format_and_append(buf, ", ");
       }
 
-      updates = (xl_btree_update*)
+      updates = (struct xl_btree_update*)
                 ((char*) updates + SizeOfBtreeUpdate +
                  updates->ndeletedtids * sizeof(uint16_t));
    }
@@ -133,13 +133,13 @@ btree_desc(char* buf, struct decoded_xlog_record* record)
       case XLOG_BTREE_INSERT_UPPER:
       case XLOG_BTREE_INSERT_META:
       case XLOG_BTREE_INSERT_POST: {
-         xl_btree_insert* xlrec = (xl_btree_insert*) rec;
+          struct xl_btree_insert* xlrec = (struct xl_btree_insert*) rec;
          buf = pgmoneta_format_and_append(buf, " off: %u", xlrec->offnum);
          break;
       }
       case XLOG_BTREE_SPLIT_L:
       case XLOG_BTREE_SPLIT_R: {
-         xl_btree_split* xlrec = (xl_btree_split*) rec;
+          struct xl_btree_split* xlrec = (struct xl_btree_split*) rec;
 
          buf = pgmoneta_format_and_append(buf, "level: %u, firstrightoff: %d, newitemoff: %d, postingoff: %d",
                 xlrec->level, xlrec->firstrightoff,
@@ -147,13 +147,13 @@ btree_desc(char* buf, struct decoded_xlog_record* record)
          break;
       }
       case XLOG_BTREE_DEDUP: {
-         xl_btree_dedup* xlrec = (xl_btree_dedup*) rec;
+          struct xl_btree_dedup* xlrec = (struct xl_btree_dedup*) rec;
 
          buf = pgmoneta_format_and_append(buf, "nintervals: %u", xlrec->nintervals);
          break;
       }
       case XLOG_BTREE_VACUUM: {
-         xl_btree_vacuum* xlrec = (xl_btree_vacuum*) rec;
+          struct xl_btree_vacuum* xlrec = (struct xl_btree_vacuum*) rec;
 
          buf = pgmoneta_format_and_append(buf, "ndeleted: %u, nupdated: %u",
                 xlrec->ndeleted, xlrec->nupdated);
@@ -166,7 +166,7 @@ btree_desc(char* buf, struct decoded_xlog_record* record)
          break;
       }
       case XLOG_BTREE_DELETE: {
-         xl_btree_delete* xlrec = (xl_btree_delete*) rec;
+          struct xl_btree_delete* xlrec = (struct xl_btree_delete*) rec;
 
          buf = pgmoneta_format_and_append(buf, "snapshotConflictHorizon: %u, ndeleted: %u, nupdated: %u, isCatalogRel: %c",
                 xlrec->snapshotConflictHorizon,
@@ -181,7 +181,7 @@ btree_desc(char* buf, struct decoded_xlog_record* record)
          break;
       }
       case XLOG_BTREE_MARK_PAGE_HALFDEAD: {
-         xl_btree_mark_page_halfdead* xlrec = (xl_btree_mark_page_halfdead*) rec;
+          struct xl_btree_mark_page_halfdead* xlrec = (struct xl_btree_mark_page_halfdead*) rec;
 
          buf = pgmoneta_format_and_append(buf, "topparent: %u, leaf: %u, left: %u, right: %u",
                 xlrec->topparent, xlrec->leafblk, xlrec->leftblk, xlrec->rightblk);
@@ -189,7 +189,7 @@ btree_desc(char* buf, struct decoded_xlog_record* record)
       }
       case XLOG_BTREE_UNLINK_PAGE_META:
       case XLOG_BTREE_UNLINK_PAGE: {
-         xl_btree_unlink_page* xlrec = (xl_btree_unlink_page*) rec;
+          struct xl_btree_unlink_page* xlrec = (struct xl_btree_unlink_page*) rec;
 
          buf = pgmoneta_format_and_append(buf, "left: %u, right: %u, level: %u, safexid: %u:%u, ",
                 xlrec->leftsib, xlrec->rightsib, xlrec->level,
@@ -201,13 +201,13 @@ btree_desc(char* buf, struct decoded_xlog_record* record)
          break;
       }
       case XLOG_BTREE_NEWROOT: {
-         xl_btree_newroot* xlrec = (xl_btree_newroot*) rec;
+          struct xl_btree_newroot* xlrec = (struct xl_btree_newroot*) rec;
 
          buf = pgmoneta_format_and_append(buf, "level: %u", xlrec->level);
          break;
       }
       case XLOG_BTREE_REUSE_PAGE: {
-         xl_btree_reuse_page* xlrec = (xl_btree_reuse_page*) rec;
+          struct xl_btree_reuse_page* xlrec = (struct xl_btree_reuse_page*) rec;
 
          buf = pgmoneta_format_and_append(buf, "rel: %u/%u/%u, snapshotConflictHorizon: %u:%u, isCatalogRel: %c",
                 xlrec->locator.spcOid, xlrec->locator.dbOid,
@@ -218,9 +218,9 @@ btree_desc(char* buf, struct decoded_xlog_record* record)
          break;
       }
       case XLOG_BTREE_META_CLEANUP: {
-         xl_btree_metadata* xlrec;
+          struct xl_btree_metadata* xlrec;
 
-         xlrec = (xl_btree_metadata*) XLogRecGetBlockData(record, 0, NULL);
+         xlrec = (struct xl_btree_metadata*) XLogRecGetBlockData(record, 0, NULL);
          buf = pgmoneta_format_and_append(buf, "last_cleanup_num_delpages: %u",
                 xlrec->last_cleanup_num_delpages);
          break;

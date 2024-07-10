@@ -51,9 +51,9 @@
  * savings to be had anyway, for usual values of INDEX_MAX_KEYS.
  */
 
-typedef struct IndexTupleData
+struct index_tuple_data
 {
-    ItemPointerData t_tid;		/* reference TID to heap tuple */
+    struct item_pointer_data t_tid;		/* reference TID to heap tuple */
 
     /* ---------------
      * t_info is laid out in the following fashion:
@@ -67,19 +67,19 @@ typedef struct IndexTupleData
 
     unsigned short t_info;		/* various info about tuple */
 
-} IndexTupleData;				/* MORE DATA FOLLOWS AT END OF STRUCT */
+};				/* MORE DATA FOLLOWS AT END OF STRUCT */
 
 
 
 /*
  * Posting item in a non-leaf posting-tree page
  */
-typedef struct
+struct posting_item
 {
-    /* We use BlockIdData not block_number to avoid padding space wastage */
-    BlockIdData child_blkno;
-    ItemPointerData key;
-} PostingItem;
+    /* We use block_id_data not block_number to avoid padding space wastage */
+    struct block_id_data child_blkno;
+    struct item_pointer_data key;
+} ;
 
 
 /*
@@ -91,11 +91,11 @@ typedef struct
 
 
 
-typedef struct ginxlogCreatePostingTree
+struct gin_xlog_create_posting_tree
 {
     uint32_t		size;
     /* A compressed posting list follows */
-} ginxlogCreatePostingTree;
+};
 
 /*
  * The format of the insertion record varies depending on the page type.
@@ -107,7 +107,7 @@ typedef struct ginxlogCreatePostingTree
 
 #define XLOG_GIN_INSERT  0x20
 
-typedef struct
+struct gin_xlog_insert
 {
     uint16_t		flags;			/* GIN_INSERT_ISLEAF and/or GIN_INSERT_ISDATA */
 
@@ -115,7 +115,7 @@ typedef struct
      * FOLLOWS:
      *
      * 1. if not leaf page, block numbers of the left and right child pages
-     * whose split this insertion finishes, as BlockIdData[2] (beware of
+     * whose split this insertion finishes, as block_id_data[2] (beware of
      * adding fields in this struct that would make them not 16-bit aligned)
      *
      * 2. a ginxlogInsertEntry or ginxlogRecompressDataLeaf struct, depending
@@ -125,13 +125,13 @@ typedef struct
      * ginxlogInsert struct! Beware of adding fields to them that require
      * stricter alignment.
      */
-} ginxlogInsert;
+};
 
 typedef struct
 {
-    OffsetNumber offset;
+    offset_number offset;
     bool		isDelete;
-    IndexTupleData tuple;		/* variable length */
+    struct index_tuple_data tuple;		/* variable length */
 } ginxlogInsertEntry;
 
 
@@ -142,17 +142,17 @@ typedef struct
     /* Variable number of 'actions' follow */
 } ginxlogRecompressDataLeaf;
 
-typedef struct
+struct gin_xlog_insert_data_internal
 {
-    OffsetNumber offset;
-    PostingItem newitem;
-} ginxlogInsertDataInternal;
+    offset_number offset;
+    struct posting_item newitem;
+};
 
 #define XLOG_GIN_SPLIT	0x30
 
 
 
-typedef struct ginxlogSplit
+struct gin_xlog_split
 {
     RelFileNode node;
     block_number rrlink;			/* right link, or root's blocknumber if root
@@ -160,7 +160,7 @@ typedef struct ginxlogSplit
     block_number leftChildBlkno; /* valid on a non-leaf split */
     block_number rightChildBlkno;
     uint16_t		flags;			/* see below */
-} ginxlogSplit;
+};
 
 /*
  * Vacuum simply WAL-logs the whole page, when anything is modified. This
@@ -177,25 +177,25 @@ typedef struct ginxlogSplit
  */
 #define XLOG_GIN_VACUUM_DATA_LEAF_PAGE	0x90
 
-typedef struct ginxlogVacuumDataLeafPage
+struct gin_xlog_vacuum_data_leaf_page
 {
     ginxlogRecompressDataLeaf data;
-} ginxlogVacuumDataLeafPage;
+};
 
 
 #define XLOG_GIN_DELETE_PAGE	0x50
 
-typedef struct ginxlogDeletePage
+struct gin_xlog_delete_page
 {
-    OffsetNumber parentOffset;
+    offset_number parentOffset;
     block_number rightLink;
     TransactionId deleteXid;	/* last Xid which could see this page in scan */
-} ginxlogDeletePage;
+};
 
 #define XLOG_GIN_UPDATE_META_PAGE 0x60
 
 
-typedef struct GinMetaPageData
+struct gin_meta_page_data
 {
     /*
      * Pointers to head and tail of pending list, which consists of GIN_LIST
@@ -241,7 +241,7 @@ typedef struct GinMetaPageData
      * Reject full-index-scan attempts on such indexes.
      */
     int32_t		ginVersion;
-} GinMetaPageData;
+};
 
 #define GIN_CURRENT_VERSION		2
 
@@ -250,26 +250,26 @@ typedef struct GinMetaPageData
  * Backup Blk 0: metapage
  * Backup Blk 1: tail page
  */
-typedef struct ginxlogUpdateMeta
+struct gin_xlog_update_meta
 {
     RelFileNode node;
-    GinMetaPageData metadata;
+    struct gin_meta_page_data metadata;
     block_number prevTail;
     block_number newRightlink;
     int32_t		ntuples;		/* if ntuples > 0 then metadata.tail was
 								 * updated with that many tuples; else new sub
 								 * list was inserted */
     /* array of inserted tuples follows */
-} ginxlogUpdateMeta;
+};
 
 #define XLOG_GIN_INSERT_LISTPAGE  0x70
 
-typedef struct ginxlogInsertListPage
+struct gin_xlog_insert_list_page
 {
     block_number rightlink;
     int32_t		ntuples;
     /* array of inserted tuples follows */
-} ginxlogInsertListPage;
+};
 
 /*
  * Backup Blk 0: metapage
@@ -285,19 +285,19 @@ typedef struct ginxlogInsertListPage
  * metapage.)
  */
 #define GIN_NDELETE_AT_ONCE Min(16, XLR_MAX_BLOCK_ID - 1)
-typedef struct ginxlogDeleteListPages
+struct gin_xlog_delete_list_pages
 {
-    GinMetaPageData metadata;
+    struct gin_meta_page_data metadata;
     int32_t		ndeleted;
-} ginxlogDeleteListPages;
+};
 
 
-typedef struct
+struct gin_posting_list
 {
-    ItemPointerData first;		/* first item in this posting list (unpacked) */
+    struct item_pointer_data first;		/* first item in this posting list (unpacked) */
     uint16_t		nbytes;			/* number of bytes that follow */
     unsigned char bytes[FLEXIBLE_ARRAY_MEMBER]; /* varbyte encoded items */
-} GinPostingList;
+};
 
 /* Action types */
 #define GIN_SEGMENT_UNMODIFIED	0	/* no action (not used in WAL records) */
@@ -307,7 +307,7 @@ typedef struct
 #define GIN_SEGMENT_ADDITEMS	4	/* items are added to existing segment */
 
 
-#define SizeOfGinPostingList(plist) (offsetof(GinPostingList, bytes) + SHORTALIGN((plist)->nbytes) )
+#define SizeOfGinPostingList(plist) (offsetof(struct gin_posting_list, bytes) + SHORTALIGN((plist)->nbytes) )
 
 
 char* gin_desc(char* buf, struct decoded_xlog_record *record);

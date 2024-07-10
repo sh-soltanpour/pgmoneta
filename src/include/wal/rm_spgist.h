@@ -62,10 +62,10 @@ typedef struct spgxlogAddLeaf
 {
     bool		newPage;		/* init dest page? */
     bool		storesNulls;	/* page is in the nulls tree? */
-    OffsetNumber offnumLeaf;	/* offset where leaf tuple gets placed */
-    OffsetNumber offnumHeadLeaf;	/* offset of head tuple in chain, if any */
+    offset_number offnumLeaf;	/* offset where leaf tuple gets placed */
+    offset_number offnumHeadLeaf;	/* offset of head tuple in chain, if any */
 
-    OffsetNumber offnumParent;	/* where the parent downlink is, if any */
+    offset_number offnumParent;	/* where the parent downlink is, if any */
     uint16_t		nodeI;
 
     /* new leaf tuple follows (unaligned!) */
@@ -84,7 +84,7 @@ typedef struct spgxlogMoveLeafs
     bool		storesNulls;	/* pages are in the nulls tree? */
 
     /* where the parent downlink is */
-    OffsetNumber offnumParent;
+    offset_number offnumParent;
     uint16_t		nodeI;
 
     spgxlogState stateSrc;
@@ -100,7 +100,7 @@ typedef struct spgxlogMoveLeafs
      * the dead tuple from the source
      *----------
      */
-    OffsetNumber offsets[FLEXIBLE_ARRAY_MEMBER];
+    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 } spgxlogMoveLeafs;
 
 #define SizeOfSpgxlogMoveLeafs	offsetof(spgxlogMoveLeafs, offsets)
@@ -117,13 +117,13 @@ typedef struct spgxlogAddNode
      * Offset of the original inner tuple, in the original page (on backup
      * block 0).
      */
-    OffsetNumber offnum;
+    offset_number offnum;
 
     /*
      * Offset of the new tuple, on the new page (on backup block 1). Invalid,
      * if we overwrote the old tuple in the original page).
      */
-    OffsetNumber offnumNew;
+    offset_number offnumNew;
     bool		newPage;		/* init new page? */
 
     /*----
@@ -138,7 +138,7 @@ typedef struct spgxlogAddNode
      *----
      */
     int8_t		parentBlk;
-    OffsetNumber offnumParent;	/* offset within the parent page */
+    offset_number offnumParent;	/* offset within the parent page */
 
     uint16_t		nodeI;
 
@@ -156,10 +156,10 @@ typedef struct spgxlogAddNode
 typedef struct spgxlogSplitTuple
 {
     /* where the prefix tuple goes */
-    OffsetNumber offnumPrefix;
+    offset_number offnumPrefix;
 
     /* where the postfix tuple goes */
-    OffsetNumber offnumPostfix;
+    offset_number offnumPostfix;
     bool		newPage;		/* need to init that page? */
     bool		postfixBlkSame; /* was postfix tuple put on same page as
 								 * prefix? */
@@ -187,14 +187,14 @@ typedef struct spgxlogPickSplit
     bool		initDest;		/* re-init the Dest page? */
 
     /* where to put new inner tuple */
-    OffsetNumber offnumInner;
+    offset_number offnumInner;
     bool		initInner;		/* re-init the Inner page? */
 
     bool		storesNulls;	/* pages are in the nulls tree? */
 
     /* where the parent downlink is, if any */
     bool		innerIsParent;	/* is parent the same as inner page? */
-    OffsetNumber offnumParent;
+    offset_number offnumParent;
     uint16_t		nodeI;
 
     spgxlogState stateSrc;
@@ -208,7 +208,7 @@ typedef struct spgxlogPickSplit
      *		list of leaf tuples, length nInsert (unaligned!)
      *----------
      */
-    OffsetNumber offsets[FLEXIBLE_ARRAY_MEMBER];
+    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 } spgxlogPickSplit;
 
 #define SizeOfSpgxlogPickSplit offsetof(spgxlogPickSplit, offsets)
@@ -232,7 +232,7 @@ typedef struct spgxlogVacuumLeaf
      *		tuple numbers to insert in nextOffset links
      *----------
      */
-    OffsetNumber offsets[FLEXIBLE_ARRAY_MEMBER];
+    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 } spgxlogVacuumLeaf;
 
 #define SizeOfSpgxlogVacuumLeaf offsetof(spgxlogVacuumLeaf, offsets)
@@ -245,7 +245,7 @@ typedef struct spgxlogVacuumRoot
     spgxlogState stateSrc;
 
     /* offsets of tuples to delete follow */
-    OffsetNumber offsets[FLEXIBLE_ARRAY_MEMBER];
+    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 } spgxlogVacuumRoot;
 
 #define SizeOfSpgxlogVacuumRoot offsetof(spgxlogVacuumRoot, offsets)
@@ -253,11 +253,11 @@ typedef struct spgxlogVacuumRoot
 typedef struct spgxlogVacuumRedirect
 {
     uint16_t		nToPlaceholder; /* number of redirects to make placeholders */
-    OffsetNumber firstPlaceholder;	/* first placeholder tuple to remove */
+    offset_number firstPlaceholder;	/* first placeholder tuple to remove */
     TransactionId newestRedirectXid;	/* newest XID of removed redirects */
 
     /* offsets of redirect tuples to make placeholders follow */
-    OffsetNumber offsets[FLEXIBLE_ARRAY_MEMBER];
+    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 } spgxlogVacuumRedirect;
 
 #define SizeOfSpgxlogVacuumRedirect offsetof(spgxlogVacuumRedirect, offsets)

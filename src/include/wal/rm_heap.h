@@ -47,7 +47,7 @@
 
 typedef struct xl_heap_insert
 {
-   OffsetNumber offnum;         /* inserted tuple's offset */
+   offset_number offnum;         /* inserted tuple's offset */
    uint8_t flags;
 
    /* xl_heap_header & TUPLE DATA in backup block 0 */
@@ -59,7 +59,7 @@ typedef struct xl_heap_insert
 typedef struct xl_heap_delete
 {
    TransactionId xmax;             /* xmax of the deleted tuple */
-   OffsetNumber offnum;         /* deleted tuple's offset */
+   offset_number offnum;         /* deleted tuple's offset */
    uint8_t infobits_set;     /* infomask bits */
    uint8_t flags;
 } xl_heap_delete;
@@ -69,11 +69,11 @@ typedef struct xl_heap_delete
 typedef struct xl_heap_update
 {
    TransactionId old_xmax;         /* xmax of the old tuple */
-   OffsetNumber old_offnum;     /* old tuple's offset */
+   offset_number old_offnum;     /* old tuple's offset */
    uint8_t old_infobits_set;     /* infomask bits to set on old tuple */
    uint8_t flags;
    TransactionId new_xmax;         /* xmax of the new tuple */
-   OffsetNumber new_offnum;     /* new tuple's offset */
+   offset_number new_offnum;     /* new tuple's offset */
 
    /*
     * If XLH_UPDATE_CONTAINS_OLD_TUPLE or XLH_UPDATE_CONTAINS_OLD_KEY flags
@@ -101,7 +101,7 @@ typedef struct xl_heap_truncate
 /* This is what we need to know about confirmation of speculative insertion */
 typedef struct xl_heap_confirm
 {
-   OffsetNumber offnum;         /* confirmed tuple's offset on page */
+   offset_number offnum;         /* confirmed tuple's offset on page */
 } xl_heap_confirm;
 
 #define SizeOfHeapConfirm    (offsetof(xl_heap_confirm, offnum) + sizeof(OffsetNumber))
@@ -113,7 +113,7 @@ typedef struct xl_heap_confirm
 typedef struct xl_heap_lock
 {
    TransactionId locking_xid;     /* might be a MultiXactId not xid */
-   OffsetNumber offnum;         /* locked tuple's offset on page */
+   offset_number offnum;         /* locked tuple's offset on page */
    int8_t infobits_set;     /* infomask and infomask2 bits to set */
    uint8_t flags;             /* XLH_LOCK_* flag bits */
 } xl_heap_lock;
@@ -123,7 +123,7 @@ typedef struct xl_heap_lock
 /* This is what we need to know about in-place update */
 typedef struct xl_heap_inplace
 {
-   OffsetNumber offnum;         /* updated tuple's offset on page */
+   offset_number offnum;         /* updated tuple's offset on page */
    /* TUPLE DATA FOLLOWS AT END OF STRUCT */
 } xl_heap_inplace;
 
@@ -213,7 +213,7 @@ typedef struct xl_heap_new_cid
     * Store the relfilenode/ctid pair to facilitate lookups.
     */
    RelFileNode target_node;
-   ItemPointerData target_tid;
+   struct item_pointer_data target_tid;
 } xl_heap_new_cid;
 
 /*
@@ -231,7 +231,7 @@ typedef struct xl_heap_multi_insert
 {
    uint8_t flags;
    uint16_t ntuples;
-   OffsetNumber offsets[FLEXIBLE_ARRAY_MEMBER];
+   offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 } xl_heap_multi_insert;
 
 #define SizeOfHeapMultiInsert    offsetof(xl_heap_multi_insert, offsets)
@@ -240,7 +240,7 @@ typedef struct xl_heap_multi_insert
 typedef struct xl_heap_lock_updated
 {
    TransactionId xmax;
-   OffsetNumber offnum;
+   offset_number offnum;
    uint8_t infobits_set;
    uint8_t flags;
 } xl_heap_lock_updated;

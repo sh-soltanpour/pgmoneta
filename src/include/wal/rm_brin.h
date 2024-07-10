@@ -35,11 +35,11 @@
  *
  * Backup block 0: metapage
  */
-typedef struct xl_brin_createidx
+struct xl_brin_createidx
 {
     block_number pagesPerRange;
     uint16_t		version;
-} xl_brin_createidx;
+};
 #define SizeOfBrinCreateIdx (offsetof(xl_brin_createidx, version) + sizeof(uint16))
 
 /*
@@ -48,7 +48,7 @@ typedef struct xl_brin_createidx
  * Backup block 0: main page, block data is the new BrinTuple.
  * Backup block 1: revmap page
  */
-typedef struct xl_brin_insert
+struct xl_brin_insert
 {
     block_number heapBlk;
 
@@ -56,8 +56,8 @@ typedef struct xl_brin_insert
     block_number pagesPerRange;
 
     /* offset number in the main page to insert the tuple to. */
-    OffsetNumber offnum;
-} xl_brin_insert;
+    offset_number offnum;
+};
 
 #define SizeOfBrinInsert	(offsetof(xl_brin_insert, offnum) + sizeof(OffsetNumber))
 
@@ -72,13 +72,13 @@ typedef struct xl_brin_insert
  * And in addition:
  * Backup block 2: old page
  */
-typedef struct xl_brin_update
+struct xl_brin_update
 {
     /* offset number of old tuple on old page */
-    OffsetNumber oldOffnum;
+    offset_number oldOffnum;
 
-    xl_brin_insert insert;
-} xl_brin_update;
+    struct xl_brin_insert insert;
+};
 
 #define SizeOfBrinUpdate	(offsetof(xl_brin_update, insert) + SizeOfBrinInsert)
 
@@ -87,10 +87,10 @@ typedef struct xl_brin_update
  *
  * Backup block 0: updated page, with new BrinTuple as block data
  */
-typedef struct xl_brin_samepage_update
+struct xl_brin_samepage_update
 {
-    OffsetNumber offnum;
-} xl_brin_samepage_update;
+    offset_number offnum;
+};
 
 #define SizeOfBrinSamepageUpdate		(sizeof(OffsetNumber))
 
@@ -100,14 +100,14 @@ typedef struct xl_brin_samepage_update
  * Backup block 0: metapage
  * Backup block 1: new revmap page
  */
-typedef struct xl_brin_revmap_extend
+struct xl_brin_revmap_extend
 {
     /*
      * XXX: This is actually redundant - the block number is stored as part of
      * backup block 1.
      */
     block_number targetBlk;
-} xl_brin_revmap_extend;
+};
 
 #define SizeOfBrinRevmapExtend	(offsetof(xl_brin_revmap_extend, targetBlk) + \
 								 sizeof(BlockNumber))
@@ -118,14 +118,14 @@ typedef struct xl_brin_revmap_extend
  * Backup block 0: revmap page
  * Backup block 1: regular page
  */
-typedef struct xl_brin_desummarize
+struct xl_brin_desummarize
 {
     block_number pagesPerRange;
     /* page number location to set to invalid */
     block_number heapBlk;
     /* offset of item to delete in regular index page */
-    OffsetNumber regOffset;
-} xl_brin_desummarize;
+    offset_number regOffset;
+};
 
 #define SizeOfBrinDesummarize	(offsetof(xl_brin_desummarize, regOffset) + \
 								 sizeof(OffsetNumber))

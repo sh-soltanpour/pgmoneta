@@ -35,21 +35,21 @@
 typedef uint32_t block_number;
 
 // offset
-typedef uint16_t OffsetNumber;
+typedef uint16_t offset_number;
 
 
-typedef struct BlockIdData
+struct block_id_data
 {
     uint16_t bi_hi;
     uint16_t bi_lo;
-} BlockIdData;
+};
 
-typedef struct ItemPointerData
+struct item_pointer_data
 {
-    BlockIdData ip_blkid;
-    OffsetNumber ip_posid;
-} ItemPointerData;
-typedef BlockIdData *BlockId;	/* block identifier */
+    struct block_id_data ip_blkid;
+    offset_number ip_posid;
+};
+typedef struct block_id_data *BlockId;	/* block identifier */
 
 
 

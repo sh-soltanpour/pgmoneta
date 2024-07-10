@@ -43,9 +43,9 @@ typedef struct ItemIdData
             lp_len: 15; /* byte length of tuple */
 } ItemIdData;
 
-#define InvalidOffsetNumber     ((OffsetNumber) 0)
-#define FirstOffsetNumber       ((OffsetNumber) 1)
-#define MaxOffsetNumber         ((OffsetNumber) (8192 / sizeof(ItemIdData))) // TODO: Replace 8192 with block size from pg_control
+#define InvalidOffsetNumber     ((offset_number) 0)
+#define FirstOffsetNumber       ((offset_number) 1)
+#define MaxOffsetNumber         ((offset_number) (8192 / sizeof(ItemIdData))) // TODO: Replace 8192 with block size from pg_control
 
 /* ----------------
  *      support macros
@@ -83,7 +83,7 @@ typedef struct ItemIdData
 /*
  * All that we need to regenerate the meta-data page
  */
-typedef struct xl_btree_metadata
+struct xl_btree_metadata
 {
    uint32_t version;
    block_number root;
@@ -92,7 +92,7 @@ typedef struct xl_btree_metadata
    uint32_t fastlevel;
    uint32_t last_cleanup_num_delpages;
    bool allequalimage;
-} xl_btree_metadata;
+};
 
 /*
  * This is what we need to know about simple (without split) insert.
@@ -113,13 +113,13 @@ typedef struct xl_btree_metadata
  * that was split as an extra step.  Also, recovery generates a "final"
  * newitem.  See _bt_swap_posting() for details on posting list splits.
  */
-typedef struct xl_btree_insert
+struct xl_btree_insert
 {
-   OffsetNumber offnum;
+   offset_number offnum;
 
    /* POSTING SPLIT OFFSET FOLLOWS (INSERT_POST case) */
    /* NEW TUPLE ALWAYS FOLLOWS AT THE END */
-} xl_btree_insert;
+};
 
 #define SizeOfBtreeInsert   (offsetof(xl_btree_insert, offnum) + sizeof(OffsetNumber))
 
@@ -187,13 +187,13 @@ typedef struct xl_btree_insert
  * Backup Blk 2: next block (orig page's rightlink), if any
  * Backup Blk 3: child's left sibling, if non-leaf split
  */
-typedef struct xl_btree_split
+struct xl_btree_split
 {
    uint32_t level;           /* tree level of page being split */
-   OffsetNumber firstrightoff;  /* first origpage item on rightpage */
-   OffsetNumber newitemoff;     /* new item's offset */
+   offset_number firstrightoff;  /* first origpage item on rightpage */
+   offset_number newitemoff;     /* new item's offset */
    uint16_t postingoff;      /* offset inside orig posting tuple */
-} xl_btree_split;
+};
 
 #define SizeOfBtreeSplit    (offsetof(xl_btree_split, postingoff) + sizeof(uint16_t))
 
@@ -204,12 +204,12 @@ typedef struct xl_btree_split
  * The WAL record represents a deduplication pass for a leaf page.  An array
  * of BTDedupInterval structs follows.
  */
-typedef struct xl_btree_dedup
+struct xl_btree_dedup
 {
    uint16_t nintervals;
 
    /* DEDUPLICATION INTERVALS FOLLOW */
-} xl_btree_dedup;
+};
 
 #define SizeOfBtreeDedup    (offsetof(xl_btree_dedup, nintervals) + sizeof(uint16_t))
 
@@ -220,14 +220,14 @@ typedef struct xl_btree_dedup
  * Note that we must include a rel_file_locator in the record because we don't
  * actually register the buffer with the record.
  */
-typedef struct xl_btree_reuse_page
+struct xl_btree_reuse_page
 {
    struct rel_file_locator locator;
    block_number block;
    FullTransactionId snapshotConflictHorizon;
    bool isCatalogRel;    /* to handle recovery conflict during logical
                           * decoding on standby */
-} xl_btree_reuse_page;
+};
 
 #define SizeOfBtreeReusePage    (offsetof(xl_btree_reuse_page, isCatalogRel) + sizeof(bool))
 
@@ -257,7 +257,7 @@ typedef struct xl_btree_reuse_page
  * Updates are only used when there will be some remaining TIDs left by the
  * REDO routine.  Otherwise the posting list tuple just gets deleted outright.
  */
-typedef struct xl_btree_vacuum
+struct xl_btree_vacuum
 {
    uint16_t ndeleted;
    uint16_t nupdated;
@@ -269,11 +269,11 @@ typedef struct xl_btree_vacuum
     * - UPDATED TUPLES METADATA (xl_btree_update) ITEMS
     *----
     */
-} xl_btree_vacuum;
+};
 
 #define SizeOfBtreeVacuum   (offsetof(xl_btree_vacuum, nupdated) + sizeof(uint16_t))
 
-typedef struct xl_btree_delete
+struct xl_btree_delete
 {
    TransactionId snapshotConflictHorizon;
    uint16_t ndeleted;
@@ -288,7 +288,7 @@ typedef struct xl_btree_delete
     * - UPDATED TUPLES METADATA (xl_btree_update) ITEMS
     *----
     */
-} xl_btree_delete;
+};
 
 #define SizeOfBtreeDelete   (offsetof(xl_btree_delete, isCatalogRel) + sizeof(bool))
 
@@ -298,14 +298,14 @@ typedef struct xl_btree_delete
  * 0-based.  The page offset number for the original posting list tuple comes
  * from the main xl_btree_vacuum/xl_btree_delete record.
  */
-typedef struct xl_btree_update
+struct xl_btree_update
 {
    uint16_t ndeletedtids;
 
    /* POSTING LIST uint16_t OFFSETS TO A DELETED TID FOLLOW */
-} xl_btree_update;
+};
 
-#define SizeOfBtreeUpdate   (offsetof(xl_btree_update, ndeletedtids) + sizeof(uint16_t))
+#define SizeOfBtreeUpdate   (offsetof(struct xl_btree_update, ndeletedtids) + sizeof(uint16_t))
 
 /*
  * This is what we need to know about marking an empty subtree for deletion.
@@ -317,16 +317,16 @@ typedef struct xl_btree_update
  * Backup Blk 0: leaf block
  * Backup Blk 1: top parent
  */
-typedef struct xl_btree_mark_page_halfdead
+struct xl_btree_mark_page_halfdead
 {
-   OffsetNumber poffset;        /* deleted tuple id in parent page */
+   offset_number poffset;        /* deleted tuple id in parent page */
 
    /* information needed to recreate the leaf page: */
    block_number leafblk;         /* leaf block ultimately being deleted */
    block_number leftblk;         /* leaf block's left sibling, if any */
    block_number rightblk;        /* leaf block's right sibling */
    block_number topparent;       /* topmost internal page in the subtree */
-} xl_btree_mark_page_halfdead;
+};
 
 #define SizeOfBtreeMarkPageHalfDead (offsetof(xl_btree_mark_page_halfdead, topparent) + sizeof(BlockNumber))
 
@@ -344,7 +344,7 @@ typedef struct xl_btree_mark_page_halfdead
  * Backup Blk 3: leaf block (if different from target)
  * Backup Blk 4: metapage (if rightsib becomes new fast root)
  */
-typedef struct xl_btree_unlink_page
+struct xl_btree_unlink_page
 {
    block_number leftsib;         /* target block's left sibling, if any */
    block_number rightsib;        /* target block's right sibling */
@@ -363,7 +363,7 @@ typedef struct xl_btree_unlink_page
    block_number leaftopparent;   /* next child down in the subtree */
 
    /* xl_btree_metadata FOLLOWS IF XLOG_BTREE_UNLINK_PAGE_META */
-} xl_btree_unlink_page;
+};
 
 #define SizeOfBtreeUnlinkPage   (offsetof(xl_btree_unlink_page, leaftopparent) + sizeof(BlockNumber))
 
@@ -378,11 +378,11 @@ typedef struct xl_btree_unlink_page
  * Backup Blk 1: left child (if splitting an old root)
  * Backup Blk 2: metapage
  */
-typedef struct xl_btree_newroot
+struct xl_btree_newroot
 {
    block_number rootblk;         /* location of new root (redundant with blk 0) */
    uint32_t level;           /* its tree level */
-} xl_btree_newroot;
+};
 
 #define SizeOfBtreeNewroot  (offsetof(xl_btree_newroot, level) + sizeof(uint32_t))
 

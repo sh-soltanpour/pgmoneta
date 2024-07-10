@@ -31,8 +31,7 @@
 
 #include "wal_reader.h"
 #include "rm.h"
-typedef oid regproc;
-typedef regproc RegProcedure;
+typedef oid reg_procedure;
 /* Number of buffers required for XLOG_HASH_SQUEEZE_PAGE operation */
 #define HASH_XLOG_FREE_OVFL_BUFS	6
 
@@ -74,10 +73,10 @@ typedef regproc RegProcedure;
  * Backup Blk 0: original page (data contains the inserted tuple)
  * Backup Blk 1: metapage (HashMetaPageData)
  */
-typedef struct xl_hash_insert
+struct xl_hash_insert
 {
-    OffsetNumber offnum;
-} xl_hash_insert;
+    offset_number offnum;
+};
 
 #define SizeOfHashInsert	(offsetof(xl_hash_insert, offnum) + sizeof(OffsetNumber))
 
@@ -92,11 +91,11 @@ typedef struct xl_hash_insert
  * Backup Blk 3: new bitmap page
  * Backup Blk 4: metapage
  */
-typedef struct xl_hash_add_ovfl_page
+struct xl_hash_add_ovfl_page
 {
     uint16_t		bmsize;
     bool		bmpage_found;
-} xl_hash_add_ovfl_page;
+};
 
 #define SizeOfHashAddOvflPage	\
 	(offsetof(xl_hash_add_ovfl_page, bmpage_found) + sizeof(bool))
@@ -110,13 +109,13 @@ typedef struct xl_hash_add_ovfl_page
  * Backup Blk 1: page for new bucket
  * Backup Blk 2: metapage
  */
-typedef struct xl_hash_split_allocate_page
+struct xl_hash_split_allocate_page
 {
     uint32_t		new_bucket;
     uint16_t		old_bucket_flag;
     uint16_t		new_bucket_flag;
     uint8_t		flags;
-} xl_hash_split_allocate_page;
+};
 
 #define SizeOfHashSplitAllocPage	\
 	(offsetof(xl_hash_split_allocate_page, flags) + sizeof(uint8_t))
@@ -129,11 +128,11 @@ typedef struct xl_hash_split_allocate_page
  * Backup Blk 0: page for old bucket
  * Backup Blk 1: page for new bucket
  */
-typedef struct xl_hash_split_complete
+struct xl_hash_split_complete
 {
     uint16_t		old_bucket_flag;
     uint16_t		new_bucket_flag;
-} xl_hash_split_complete;
+};
 
 #define SizeOfHashSplitComplete \
 	(offsetof(xl_hash_split_complete, new_bucket_flag) + sizeof(uint16_t))
@@ -148,13 +147,13 @@ typedef struct xl_hash_split_complete
  * Backup Blk 1: page containing moved tuples
  * Backup Blk 2: page from which tuples will be removed
  */
-typedef struct xl_hash_move_page_contents
+struct xl_hash_move_page_contents
 {
     uint16_t		ntups;
     bool		is_prim_bucket_same_wrt;	/* true if the page to which
 											 * tuples are moved is same as
 											 * primary bucket page */
-} xl_hash_move_page_contents;
+};
 
 #define SizeOfHashMovePageContents	\
 	(offsetof(xl_hash_move_page_contents, is_prim_bucket_same_wrt) + sizeof(bool))
@@ -171,7 +170,7 @@ typedef struct xl_hash_move_page_contents
  * Backup Blk 4: bitmap page containing info of freed overflow page
  * Backup Blk 5: meta page
  */
-typedef struct xl_hash_squeeze_page
+struct xl_hash_squeeze_page
 {
     block_number prevblkno;
     block_number nextblkno;
@@ -183,7 +182,7 @@ typedef struct xl_hash_squeeze_page
 											 * tuples are moved is the page
 											 * previous to the freed overflow
 											 * page */
-} xl_hash_squeeze_page;
+};
 
 #define SizeOfHashSqueezePage	\
 	(offsetof(xl_hash_squeeze_page, is_prev_bucket_same_wrt) + sizeof(bool))
@@ -196,13 +195,13 @@ typedef struct xl_hash_squeeze_page
  * Backup Blk 0: primary bucket page
  * Backup Blk 1: page from which tuples are deleted
  */
-typedef struct xl_hash_delete
+struct xl_hash_delete
 {
     bool		clear_dead_marking; /* true if this operation clears
 									 * LH_PAGE_HAS_DEAD_TUPLES flag */
     bool		is_primary_bucket_page; /* true if the operation is for
 										 * primary bucket page */
-} xl_hash_delete;
+};
 
 #define SizeOfHashDelete	(offsetof(xl_hash_delete, is_primary_bucket_page) + sizeof(bool))
 
@@ -213,10 +212,10 @@ typedef struct xl_hash_delete
  *
  * Backup Blk 0: meta page
  */
-typedef struct xl_hash_update_meta_page
+struct xl_hash_update_meta_page
 {
     double		ntuples;
-} xl_hash_update_meta_page;
+};
 
 #define SizeOfHashUpdateMetaPage	\
 	(offsetof(xl_hash_update_meta_page, ntuples) + sizeof(double))
@@ -228,12 +227,12 @@ typedef struct xl_hash_update_meta_page
  *
  * Backup Blk 0: meta page
  */
-typedef struct xl_hash_init_meta_page
+struct xl_hash_init_meta_page
 {
     double		num_tuples;
-    RegProcedure procid;
+    reg_procedure procid;
     uint16_t		ffactor;
-} xl_hash_init_meta_page;
+};
 
 #define SizeOfHashInitMetaPage		\
 	(offsetof(xl_hash_init_meta_page, ffactor) + sizeof(uint16_t))
@@ -246,10 +245,10 @@ typedef struct xl_hash_init_meta_page
  * Backup Blk 0: bitmap page
  * Backup Blk 1: meta page
  */
-typedef struct xl_hash_init_bitmap_page
+struct xl_hash_init_bitmap_page
 {
     uint16_t		bmsize;
-} xl_hash_init_bitmap_page;
+};
 
 #define SizeOfHashInitBitmapPage	\
 	(offsetof(xl_hash_init_bitmap_page, bmsize) + sizeof(uint16_t))
@@ -263,13 +262,13 @@ typedef struct xl_hash_init_bitmap_page
  * Backup Blk 0: bucket page
  * Backup Blk 1: meta page
  */
-typedef struct xl_hash_vacuum_one_page
+struct xl_hash_vacuum_one_page
 {
     TransactionId latestRemovedXid;
     int			ntuples;
 
     /* TARGET OFFSET NUMBERS FOLLOW AT THE END */
-} xl_hash_vacuum_one_page;
+};
 
 #define SizeOfHashVacuumOnePage \
 	(offsetof(xl_hash_vacuum_one_page, ntuples) + sizeof(int))
