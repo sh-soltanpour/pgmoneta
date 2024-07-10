@@ -171,7 +171,7 @@ typedef struct spgxlogSplitTuple
 } spgxlogSplitTuple;
 
 /*
- * Buffer references in the rdata array are:
+ * buffer references in the rdata array are:
  * Backup Blk 0: Src page (only if not root)
  * Backup Blk 1: Dest page (if used)
  * Backup Blk 2: Inner page
@@ -262,6 +262,6 @@ typedef struct spgxlogVacuumRedirect
 
 #define SizeOfSpgxlogVacuumRedirect offsetof(spgxlogVacuumRedirect, offsets)
 
-char* spg_desc(char* buf, DecodedXLogRecord* record);
+char* spg_desc(char* buf, struct decoded_xlog_record *record);
 
 #endif //PGMONETA_RM_SPGIST_H

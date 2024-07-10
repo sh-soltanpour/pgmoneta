@@ -38,21 +38,21 @@
 typedef struct xl_dbase_create_rec
 {
     /* Records copying of a single subdirectory incl. contents */
-    Oid			db_id;
-    Oid			tablespace_id;
-    Oid			src_db_id;
-    Oid			src_tablespace_id;
+    oid			db_id;
+    oid			tablespace_id;
+    oid			src_db_id;
+    oid			src_tablespace_id;
 } xl_dbase_create_rec;
 
 typedef struct xl_dbase_drop_rec
 {
-    Oid			db_id;
+    oid			db_id;
     int			ntablespaces;	/* number of tablespace IDs */
-    Oid			tablespace_ids[FLEXIBLE_ARRAY_MEMBER];
+    oid			tablespace_ids[FLEXIBLE_ARRAY_MEMBER];
 } xl_dbase_drop_rec;
 #define MinSizeOfDbaseDropRec offsetof(xl_dbase_drop_rec, tablespace_ids)
 
 
-char* database_desc(char* buf, DecodedXLogRecord *record);
+char* database_desc(char* buf, struct decoded_xlog_record *record);
 
 #endif //PGMONETA_RM_DATABASE_H

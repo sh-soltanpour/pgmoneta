@@ -40,8 +40,8 @@
 
 typedef struct xl_standby_lock {
     TransactionId xid;           /* xid of holder of AccessExclusiveLock */
-    Oid dbOid;           /* DB containing table */
-    Oid relOid;          /* OID of table */
+    oid dbOid;           /* DB containing table */
+    oid relOid;          /* OID of table */
 } xl_standby_lock;
 
 typedef struct xl_standby_locks {
@@ -64,8 +64,8 @@ typedef struct xl_running_xacts {
 } xl_running_xacts;
 
 typedef struct xl_invalidations {
-    Oid dbId;            /* MyDatabaseId */
-    Oid tsId;            /* MyDatabaseTableSpace */
+    oid dbId;            /* MyDatabaseId */
+    oid tsId;            /* MyDatabaseTableSpace */
     bool relcacheInitFileInval;   /* invalidate relcache init files */
     int nmsgs;           /* number of shared inval msgs */
     SharedInvalidationMessage msgs[FLEXIBLE_ARRAY_MEMBER];
@@ -74,10 +74,10 @@ typedef struct xl_invalidations {
 #define MinSizeOfInvalidations offsetof(xl_invalidations, msgs)
 
 char *
-standby_desc(char *buf, DecodedXLogRecord *record);
+standby_desc(char *buf, struct decoded_xlog_record *record);
 
 char *
-standby_desc_invalidations(char *buf, int nmsgs, SharedInvalidationMessage *msgs, Oid dbId, Oid tsId,
+standby_desc_invalidations(char *buf, int nmsgs, SharedInvalidationMessage *msgs, oid dbId, oid tsId,
                            bool relcacheInitFileInval);
 
 

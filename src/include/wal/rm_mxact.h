@@ -104,7 +104,7 @@ typedef struct xl_multixact_create
 
 typedef struct xl_multixact_truncate
 {
-    Oid			oldestMultiDB;
+    oid			oldestMultiDB;
 
     /* to-be-truncated range of multixact offsets */
     MultiXactId startTruncOff;	/* just for completeness' sake */
@@ -118,7 +118,7 @@ typedef struct xl_multixact_truncate
 #define SizeOfMultiXactTruncate (sizeof(xl_multixact_truncate))
 
 
-char* multixact_desc(char* buf, DecodedXLogRecord *record);
+char* multixact_desc(char* buf, struct decoded_xlog_record* record);
 
 
 #endif //PGMONETA_RM_MXACT_H

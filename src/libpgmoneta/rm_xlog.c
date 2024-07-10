@@ -45,7 +45,7 @@ const struct config_enum_entry wal_level_options[] = {
 
 
 char*
-xlog_desc(char* buf,  DecodedXLogRecord* record)
+xlog_desc(char* buf,  struct decoded_xlog_record* record)
 {
     char	   *rec = record->main_data;
     uint8_t		info = record->header.xl_info & ~XLR_INFO_MASK;
@@ -81,9 +81,9 @@ xlog_desc(char* buf,  DecodedXLogRecord* record)
     }
     else if (info == XLOG_NEXTOID)
     {
-        Oid			nextOid;
+        oid			nextOid;
 
-        memcpy(&nextOid, rec, sizeof(Oid));
+        memcpy(&nextOid, rec, sizeof(oid));
         buf = pgmoneta_format_and_append(buf, "%u", nextOid);
     }
     else if (info == XLOG_RESTORE_POINT)
@@ -98,9 +98,9 @@ xlog_desc(char* buf,  DecodedXLogRecord* record)
     }
     else if (info == XLOG_BACKUP_END)
     {
-        XLogRecPtr	startpoint;
+        xlog_rec_ptr	startpoint;
 
-        memcpy(&startpoint, rec, sizeof(XLogRecPtr));
+        memcpy(&startpoint, rec, sizeof(xlog_rec_ptr));
         buf = pgmoneta_format_and_append(buf, "%X/%X", LSN_FORMAT_ARGS(startpoint));
     }
     else if (info == XLOG_PARAMETER_CHANGE)

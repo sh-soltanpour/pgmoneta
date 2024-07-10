@@ -85,10 +85,10 @@ typedef struct xl_heap_update
 
 typedef struct xl_heap_truncate
 {
-   Oid dbId;
+   oid dbId;
    uint32_t nrelids;
    uint8_t flags;
-   Oid relids[FLEXIBLE_ARRAY_MEMBER];
+   oid relids[FLEXIBLE_ARRAY_MEMBER];
 } xl_heap_truncate;
 
 #define SizeOfHeapTruncate    (offsetof(xl_heap_truncate, relids))
@@ -245,8 +245,8 @@ typedef struct xl_heap_lock_updated
    uint8_t flags;
 } xl_heap_lock_updated;
 
-char*heap_desc(char* buf, DecodedXLogRecord* record);
+char*heap_desc(char* buf, struct decoded_xlog_record* record);
 
-char*heap2_desc(char* buf, DecodedXLogRecord* record);
+char*heap2_desc(char* buf, struct decoded_xlog_record* record);
 
 #endif //PGMONETA_RM_HEAP_H

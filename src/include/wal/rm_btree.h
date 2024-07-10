@@ -33,7 +33,7 @@
 #include "rm.h"
 #include "transaction.h"
 
-char* btree_desc(char* buf, DecodedXLogRecord* record);
+char* btree_desc(char* buf, struct decoded_xlog_record* record);
 const char* btree_identify (uint8_t info);
 
 typedef struct ItemIdData
@@ -86,9 +86,9 @@ typedef struct ItemIdData
 typedef struct xl_btree_metadata
 {
    uint32_t version;
-   BlockNumber root;
+   block_number root;
    uint32_t level;
-   BlockNumber fastroot;
+   block_number fastroot;
    uint32_t fastlevel;
    uint32_t last_cleanup_num_delpages;
    bool allequalimage;
@@ -217,13 +217,13 @@ typedef struct xl_btree_dedup
  * This is what we need to know about page reuse within btree.  This record
  * only exists to generate a conflict point for Hot Standby.
  *
- * Note that we must include a RelFileLocator in the record because we don't
+ * Note that we must include a rel_file_locator in the record because we don't
  * actually register the buffer with the record.
  */
 typedef struct xl_btree_reuse_page
 {
-   RelFileLocator locator;
-   BlockNumber block;
+   struct rel_file_locator locator;
+   block_number block;
    FullTransactionId snapshotConflictHorizon;
    bool isCatalogRel;    /* to handle recovery conflict during logical
                           * decoding on standby */
@@ -322,10 +322,10 @@ typedef struct xl_btree_mark_page_halfdead
    OffsetNumber poffset;        /* deleted tuple id in parent page */
 
    /* information needed to recreate the leaf page: */
-   BlockNumber leafblk;         /* leaf block ultimately being deleted */
-   BlockNumber leftblk;         /* leaf block's left sibling, if any */
-   BlockNumber rightblk;        /* leaf block's right sibling */
-   BlockNumber topparent;       /* topmost internal page in the subtree */
+   block_number leafblk;         /* leaf block ultimately being deleted */
+   block_number leftblk;         /* leaf block's left sibling, if any */
+   block_number rightblk;        /* leaf block's right sibling */
+   block_number topparent;       /* topmost internal page in the subtree */
 } xl_btree_mark_page_halfdead;
 
 #define SizeOfBtreeMarkPageHalfDead (offsetof(xl_btree_mark_page_halfdead, topparent) + sizeof(BlockNumber))
@@ -346,8 +346,8 @@ typedef struct xl_btree_mark_page_halfdead
  */
 typedef struct xl_btree_unlink_page
 {
-   BlockNumber leftsib;         /* target block's left sibling, if any */
-   BlockNumber rightsib;        /* target block's right sibling */
+   block_number leftsib;         /* target block's left sibling, if any */
+   block_number rightsib;        /* target block's right sibling */
    uint32_t level;           /* target block's level */
    FullTransactionId safexid;   /* target block's BTPageSetDeleted() XID */
 
@@ -358,9 +358,9 @@ typedef struct xl_btree_unlink_page
     * from scratch to keep things simple (this is the same convenient
     * approach used for the target page itself).
     */
-   BlockNumber leafleftsib;
-   BlockNumber leafrightsib;
-   BlockNumber leaftopparent;   /* next child down in the subtree */
+   block_number leafleftsib;
+   block_number leafrightsib;
+   block_number leaftopparent;   /* next child down in the subtree */
 
    /* xl_btree_metadata FOLLOWS IF XLOG_BTREE_UNLINK_PAGE_META */
 } xl_btree_unlink_page;
@@ -380,7 +380,7 @@ typedef struct xl_btree_unlink_page
  */
 typedef struct xl_btree_newroot
 {
-   BlockNumber rootblk;         /* location of new root (redundant with blk 0) */
+   block_number rootblk;         /* location of new root (redundant with blk 0) */
    uint32_t level;           /* its tree level */
 } xl_btree_newroot;
 

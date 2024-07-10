@@ -64,7 +64,7 @@ standby_desc_running_xacts(char* buf, xl_running_xacts* xlrec)
 }
 
 char*
-standby_desc_invalidations(char* buf, int nmsgs, SharedInvalidationMessage* msgs, Oid dbId, Oid tsId, bool relcacheInitFileInval
+standby_desc_invalidations(char* buf, int nmsgs, SharedInvalidationMessage* msgs, oid dbId, oid tsId, bool relcacheInitFileInval
                            )
 {
    int i;
@@ -121,7 +121,7 @@ standby_desc_invalidations(char* buf, int nmsgs, SharedInvalidationMessage* msgs
 }
 
 char*
-standby_desc(char* buf, DecodedXLogRecord* record)
+standby_desc(char* buf, struct decoded_xlog_record *record)
 {
    char* rec = record->main_data;
    uint8_t info = record->header.xl_info & ~XLR_INFO_MASK;

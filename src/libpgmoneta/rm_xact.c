@@ -34,7 +34,7 @@
 
 
 static char *xact_desc_relations(char *buf, char *label, int nrels, RelFileNode *xnodes);
-static char *xact_desc_commit(char *buf, uint8_t info, xl_xact_commit *xlrec, RepOriginId origin_id);
+static char *xact_desc_commit(char *buf, uint8_t info, xl_xact_commit *xlrec, rep_origin_id origin_id);
 static char *xact_desc_abort(char *buf, uint8_t info, xl_xact_abort *xlrec);
 static char *xact_desc_prepare(char *buf, uint8_t info, xl_xact_prepare *xlrec);
 static char *xact_desc_assignment(char *buf, xl_xact_assignment *xlrec);
@@ -62,7 +62,7 @@ xact_desc_relations(char *buf, char *label, int nrels,
 }
 
 static char *
-xact_desc_commit(char *buf, uint8_t info, xl_xact_commit *xlrec, RepOriginId origin_id) {
+xact_desc_commit(char *buf, uint8_t info, xl_xact_commit *xlrec, rep_origin_id origin_id) {
     xl_xact_parsed_commit parsed;
     ParseCommitRecord(info, xlrec, &parsed);
 
@@ -154,7 +154,7 @@ xact_desc_subxacts(char* buf, int nsubxacts, TransactionId *subxacts)
 }
 
 char *
-xact_desc(char *buf, DecodedXLogRecord *record) {
+xact_desc(char *buf, struct decoded_xlog_record *record) {
     char *rec = XLogRecGetData(record);
     uint8_t info = XLogRecGetInfo(record) & XLOG_XACT_OPMASK;
 

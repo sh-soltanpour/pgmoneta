@@ -31,7 +31,7 @@
 
 #include "wal_reader.h"
 #include "rm.h"
-typedef Oid regproc;
+typedef oid regproc;
 typedef regproc RegProcedure;
 /* Number of buffers required for XLOG_HASH_SQUEEZE_PAGE operation */
 #define HASH_XLOG_FREE_OVFL_BUFS	6
@@ -173,8 +173,8 @@ typedef struct xl_hash_move_page_contents
  */
 typedef struct xl_hash_squeeze_page
 {
-    BlockNumber prevblkno;
-    BlockNumber nextblkno;
+    block_number prevblkno;
+    block_number nextblkno;
     uint16_t		ntups;
     bool		is_prim_bucket_same_wrt;	/* true if the page to which
 											 * tuples are moved is same as
@@ -275,6 +275,6 @@ typedef struct xl_hash_vacuum_one_page
 	(offsetof(xl_hash_vacuum_one_page, ntuples) + sizeof(int))
 
 
-char* hash_desc(char* buf, DecodedXLogRecord *record);
+char* hash_desc(char* buf, struct decoded_xlog_record *record);
 
 #endif //PGMONETA_RM_HASH_H

@@ -69,7 +69,7 @@ typedef struct xl_restore_point
 /* Overwrite of prior contrecord */
 typedef struct xl_overwrite_contrecord
 {
-    XLogRecPtr	overwritten_lsn;
+    xlog_rec_ptr	overwritten_lsn;
     TimestampTz overwrite_time;
 } xl_overwrite_contrecord;
 
@@ -77,8 +77,8 @@ typedef struct xl_overwrite_contrecord
 typedef struct xl_end_of_recovery
 {
     TimestampTz end_time;
-    TimeLineID	ThisTimeLineID; /* new TLI */
-    TimeLineID	PrevTimeLineID; /* previous TLI we forked off from */
+    timeline_id	ThisTimeLineID; /* new TLI */
+    timeline_id	PrevTimeLineID; /* previous TLI we forked off from */
 } xl_end_of_recovery;
 
 struct config_enum_entry
@@ -92,6 +92,6 @@ const char *
 timestamptz_to_str(TimestampTz dt);
 
 char*
-xlog_desc(char* buf,  DecodedXLogRecord* record);
+xlog_desc(char* buf, struct decoded_xlog_record* record);
 
 #endif //PGMONETA_RM_XLOG_H

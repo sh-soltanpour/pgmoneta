@@ -8,7 +8,7 @@
 
 
 char*
-replorigin_desc(char* buf, DecodedXLogRecord *record)
+replorigin_desc(char* buf, struct decoded_xlog_record *record)
 {
     char	   *rec = XLogRecGetData(record);
     uint8_t		info = XLogRecGetInfo(record) & ~XLR_INFO_MASK;

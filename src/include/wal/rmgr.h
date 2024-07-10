@@ -59,7 +59,7 @@
 typedef struct
 {
     char* name;
-    char* (*rm_desc)(char* buf, DecodedXLogRecord *record);
+    char* (*rm_desc)(char* buf, struct decoded_xlog_record *record);
 } RmgrData;
 
 RmgrData RmgrTable[RM_MAX_ID + 1] = {

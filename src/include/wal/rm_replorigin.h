@@ -9,14 +9,14 @@
 
 typedef struct xl_replorigin_set
 {
-    XLogRecPtr	remote_lsn;
-    RepOriginId node_id;
+    xlog_rec_ptr	remote_lsn;
+    rep_origin_id node_id;
     bool		force;
 } xl_replorigin_set;
 
 typedef struct xl_replorigin_drop
 {
-    RepOriginId node_id;
+    rep_origin_id node_id;
 } xl_replorigin_drop;
 
 #define XLOG_REPLORIGIN_SET		0x00
@@ -25,7 +25,7 @@ typedef struct xl_replorigin_drop
 #define InvalidRepOriginId 0
 #define DoNotReplicateId PG_UINT16_MAX
 
-char* replorigin_desc(char* buf, DecodedXLogRecord *record);
+char* replorigin_desc(char* buf, struct decoded_xlog_record *record);
 
 
 #endif //PGMONETA_RM_REPLORIGIN_H

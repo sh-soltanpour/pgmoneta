@@ -42,12 +42,12 @@ typedef struct xl_clog_truncate
 {
     int			pageno;
     TransactionId oldestXact;
-    Oid			oldestXactDb;
+    oid			oldestXactDb;
 } xl_clog_truncate;
 
 #define CLOG_ZEROPAGE		0x00
 #define CLOG_TRUNCATE		0x10
 
-char* clog_desc(char* buf, DecodedXLogRecord *record);
+char* clog_desc(char* buf, struct decoded_xlog_record *record);
 
 #endif //PGMONETA_RM_CLOG_H

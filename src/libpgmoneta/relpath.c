@@ -43,8 +43,8 @@
 
 
 char *
-GetRelationPath(Oid dbNode, Oid spcNode, Oid relNode,
-                int backendId, ForkNumber forkNumber)
+GetRelationPath(oid dbNode, oid spcNode, oid relNode,
+                int backendId, enum fork_number forkNumber)
 {
     const char *const forkNames[] = {
             "main",						/* MAIN_FORKNUM */

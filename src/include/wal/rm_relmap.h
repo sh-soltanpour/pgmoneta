@@ -34,14 +34,14 @@
 
 typedef struct xl_relmap_update
 {
-    Oid			dbid;			/* database ID, or 0 for shared map */
-    Oid			tsid;			/* database's tablespace, or pg_global */
+    oid			dbid;			/* database ID, or 0 for shared map */
+    oid			tsid;			/* database's tablespace, or pg_global */
     int32_t 		nbytes;			/* size of relmap data */
     char		data[FLEXIBLE_ARRAY_MEMBER];
 } xl_relmap_update;
 
 #define MinSizeOfRelmapUpdate offsetof(xl_relmap_update, data)
 
-char* relmap_desc(char* buf, DecodedXLogRecord *record);
+char* relmap_desc(char* buf, struct decoded_xlog_record *record);
 
 #endif //PGMONETA_RM_RELMAP_H

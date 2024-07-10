@@ -37,15 +37,15 @@
 
 typedef struct xl_tblspc_create_rec
 {
-    Oid			ts_id;
+    oid			ts_id;
     char		ts_path[FLEXIBLE_ARRAY_MEMBER]; /* null-terminated string */
 } xl_tblspc_create_rec;
 
 typedef struct xl_tblspc_drop_rec
 {
-    Oid			ts_id;
+    oid			ts_id;
 } xl_tblspc_drop_rec;
 
-char* tablespace_desc(char* buf, DecodedXLogRecord *record);
+char* tablespace_desc(char* buf, struct decoded_xlog_record *record);
 
 #endif //PGMONETA_RM_TABLESPACE_H

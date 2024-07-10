@@ -40,6 +40,6 @@ typedef struct xl_seq_rec
     /* SEQUENCE TUPLE DATA FOLLOWS AT THE END */
 } xl_seq_rec;
 
-char* seq_desc(char* buf, DecodedXLogRecord *record);
+char* seq_desc(char* buf, struct decoded_xlog_record *record);
 
 #endif //PGMONETA_RM_SEQ_H

@@ -142,8 +142,8 @@ typedef struct xl_xact_xinfo {
 } xl_xact_xinfo;
 
 typedef struct xl_xact_dbinfo {
-    Oid dbId;            /* MyDatabaseId */
-    Oid tsId;            /* MyDatabaseTableSpace */
+    oid dbId;            /* MyDatabaseId */
+    oid tsId;            /* MyDatabaseTableSpace */
 } xl_xact_dbinfo;
 
 typedef struct xl_xact_subxacts {
@@ -169,7 +169,7 @@ typedef struct xl_xact_twophase {
 } xl_xact_twophase;
 
 typedef struct xl_xact_origin {
-    XLogRecPtr origin_lsn;
+    xlog_rec_ptr origin_lsn;
     TimestampTz origin_timestamp;
 } xl_xact_origin;
 
@@ -205,16 +205,16 @@ typedef struct xl_xact_prepare {
     uint32_t magic;            /* format identifier */
     uint32_t total_len;        /* actual file length */
     TransactionId xid;            /* original transaction XID */
-    Oid database;        /* OID of database it was in */
+    oid database;        /* OID of database it was in */
     TimestampTz prepared_at;    /* time of preparation */
-    Oid owner;            /* user running the transaction */
+    oid owner;            /* user running the transaction */
     int32_t nsubxacts;        /* number of following subxact XIDs */
     int32_t ncommitrels;    /* number of delete-on-commit rels */
     int32_t nabortrels;        /* number of delete-on-abort rels */
     int32_t ninvalmsgs;        /* number of cache invalidation messages */
     bool initfileinval;    /* does relcache init file need invalidation? */
     uint16_t gidlen;            /* length of the GID - GID follows the header */
-    XLogRecPtr origin_lsn;        /* lsn of this record at origin node */
+    xlog_rec_ptr origin_lsn;        /* lsn of this record at origin node */
     TimestampTz origin_timestamp;    /* time of prepare at origin node */
 } xl_xact_prepare;
 
@@ -227,8 +227,8 @@ typedef struct xl_xact_parsed_commit {
     TimestampTz xact_time;
     uint32_t xinfo;
 
-    Oid dbId;            /* MyDatabaseId */
-    Oid tsId;            /* MyDatabaseTableSpace */
+    oid dbId;            /* MyDatabaseId */
+    oid tsId;            /* MyDatabaseTableSpace */
 
     int nsubxacts;
     TransactionId *subxacts;
@@ -244,7 +244,7 @@ typedef struct xl_xact_parsed_commit {
     int nabortrels;        /* only for 2PC */
     RelFileNode *abortnodes;    /* only for 2PC */
 
-    XLogRecPtr origin_lsn;
+    xlog_rec_ptr origin_lsn;
     TimestampTz origin_timestamp;
 } xl_xact_parsed_commit;
 
@@ -254,8 +254,8 @@ typedef struct xl_xact_parsed_abort {
     TimestampTz xact_time;
     uint32_t xinfo;
 
-    Oid dbId;            /* MyDatabaseId */
-    Oid tsId;            /* MyDatabaseTableSpace */
+    oid dbId;            /* MyDatabaseId */
+    oid tsId;            /* MyDatabaseTableSpace */
 
     int nsubxacts;
     TransactionId *subxacts;
@@ -266,12 +266,12 @@ typedef struct xl_xact_parsed_abort {
     TransactionId twophase_xid; /* only for 2PC */
     char twophase_gid[GIDSIZE];    /* only for 2PC */
 
-    XLogRecPtr origin_lsn;
+    xlog_rec_ptr origin_lsn;
     TimestampTz origin_timestamp;
 } xl_xact_parsed_abort;
 
 
-char *xact_desc(char *buf, DecodedXLogRecord *record);
+char *xact_desc(char *buf, struct decoded_xlog_record *record);
 
 
 #endif //PGMONETA_RM_XACT_H

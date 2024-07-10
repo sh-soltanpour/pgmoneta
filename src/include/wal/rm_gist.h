@@ -32,7 +32,7 @@
 #include "wal_reader.h"
 #include "rm.h"
 
-typedef XLogRecPtr GistNSN;
+typedef xlog_rec_ptr GistNSN;
 
 
 #define XLOG_GIST_PAGE_UPDATE		0x00
@@ -84,7 +84,7 @@ typedef struct gistxlogDelete
  */
 typedef struct gistxlogPageSplit
 {
-    BlockNumber origrlink;		/* rightlink of the page before split */
+    block_number origrlink;		/* rightlink of the page before split */
     GistNSN		orignsn;		/* NSN of the page before split */
     bool		origleaf;		/* was splitted page a leaf page? */
 
@@ -116,13 +116,13 @@ typedef struct gistxlogPageDelete
 typedef struct gistxlogPageReuse
 {
     RelFileNode node;
-    BlockNumber block;
+    block_number block;
     FullTransactionId latestRemovedFullXid;
 } gistxlogPageReuse;
 
 #define SizeOfGistxlogPageReuse	(offsetof(gistxlogPageReuse, latestRemovedFullXid) + sizeof(FullTransactionId))
 
 
-char* gist_desc(char* buf, DecodedXLogRecord *record);
+char* gist_desc(char* buf, struct decoded_xlog_record *record);
 
 #endif //PGMONETA_RM_GIST_H

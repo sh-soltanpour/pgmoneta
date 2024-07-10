@@ -11,7 +11,7 @@
 
 typedef struct xl_logical_message
 {
-    Oid			dbId;			/* database Oid emitted from */
+    oid			dbId;			/* database oid emitted from */
     bool		transactional;	/* is message transactional? */
     size_t 		prefix_size;	/* length of prefix */
     size_t 		message_size;	/* size of the message */
@@ -21,6 +21,6 @@ typedef struct xl_logical_message
 
 #define SizeOfLogicalMessage	(offsetof(xl_logical_message, message))
 
-char* logicalmsg_desc(char* buf, DecodedXLogRecord *record);
+char* logicalmsg_desc(char* buf, struct decoded_xlog_record *record);
 
 #endif //PGMONETA_RM_LOGICALMSG_H

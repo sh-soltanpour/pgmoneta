@@ -17,7 +17,7 @@
 typedef struct xl_commit_ts_set
 {
     TimestampTz timestamp;
-    RepOriginId nodeid;
+    rep_origin_id nodeid;
     TransactionId mainxid;
     /* subxact Xids follow */
 }			xl_commit_ts_set;
@@ -34,7 +34,7 @@ typedef struct xl_commit_ts_truncate
 #define SizeOfCommitTsTruncate	(offsetof(xl_commit_ts_truncate, oldestXid) + \
 								 sizeof(TransactionId))
 
-char* commit_ts_desc(char* buf, DecodedXLogRecord *record);
+char* commit_ts_desc(char* buf, struct decoded_xlog_record *record);
 
 
 #endif //PGMONETA_RM_COMMIT_TS_H

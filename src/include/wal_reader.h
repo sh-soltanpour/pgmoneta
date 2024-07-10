@@ -58,23 +58,23 @@ extern "C" {
 #define XLP_FIRST_IS_CONTRECORD   0x0001
 #define XLP_LONG_HEADER   0x0002
 
-typedef uint32_t TimeLineID;
-typedef uint64_t XLogRecPtr;
+typedef uint32_t timeline_id;
+typedef uint64_t xlog_rec_ptr;
 typedef uint32_t pg_crc32c;
-typedef uint8_t RmgrId;
-typedef uint64_t XLogSegNo;
-typedef uint16_t RepOriginId;
+typedef uint8_t rmgr_id;
+typedef uint64_t xlog_seg_no;
+typedef uint16_t rep_origin_id;
 
-typedef int Buffer;
-typedef uint32_t BlockNumber;
-typedef unsigned int Oid;
-typedef Oid RelFileNumber;
-#define InvalidOid		((Oid) 0)
+typedef int buffer;
+typedef uint32_t block_number;
+typedef unsigned int oid;
+typedef oid rel_file_number;
+#define InvalidOid		((oid) 0)
 
 #define FLEXIBLE_ARRAY_MEMBER   /* empty */
 
 
-typedef enum ForkNumber {
+enum fork_number {
    InvalidForkNumber = -1,
    MAIN_FORKNUM = 0,
    FSM_FORKNUM,
@@ -86,53 +86,53 @@ typedef enum ForkNumber {
     * FORKNAMECHARS below, and update the forkNames array in
     * src/common/relpath.c
     */
-} ForkNumber;
+};
 
 
-typedef enum WalLevel
+enum wal_level
 {
     WAL_LEVEL_MINIMAL = 0,
     WAL_LEVEL_REPLICA,
     WAL_LEVEL_LOGICAL
-} WalLevel;
+};
 
 
 #define InvalidRepOriginId   0
 
-typedef struct XLogPageHeaderData
+struct xlog_page_header_data
 {
    uint16_t xlp_magic;         /* magic value for correctness checks */
    uint16_t xlp_info;          /* flag bits, see below */
-   TimeLineID xlp_tli;       /* TimeLineID of first record on page */
-   XLogRecPtr xlp_pageaddr;      /* XLOG address of this page */
+   timeline_id xlp_tli;       /* timeline_id of first record on page */
+   xlog_rec_ptr xlp_pageaddr;      /* XLOG address of this page */
    uint32_t xlp_rem_len;       /* total len of remaining data for record */
-} XLogPageHeaderData;
+};
 
-typedef XLogPageHeaderData* XLogPageHeader;
+typedef struct xlog_page_header_data* XLogPageHeader;
 
-typedef struct XLogLongPageHeaderData
+struct xlog_long_page_header_data
 {
-   XLogPageHeaderData std;        /* standard header fields */
+   struct xlog_page_header_data std;        /* standard header fields */
    uint64_t xlp_sysid;         /* system identifier from pg_control */
    uint32_t xlp_seg_size;      /* just as a cross-check */
    uint32_t xlp_xlog_blcksz;       /* just as a cross-check */
-} XLogLongPageHeaderData;
+};
 
-typedef struct XLogRecord
+struct xlog_record
 {
    uint32_t xl_tot_len;      /* total len of entire record */
    TransactionId xl_xid;        /* xact id */
-   XLogRecPtr xl_prev;         /* ptr to previous record in log */
+   xlog_rec_ptr xl_prev;         /* ptr to previous record in log */
    uint8_t xl_info;         /* flag bits, see below */
-   RmgrId xl_rmid;         /* resource manager for this record */
+   rmgr_id xl_rmid;         /* resource manager for this record */
    /* 2 bytes of padding here, initialize to zero */
    pg_crc32c xl_crc;          /* CRC for this record */
 
    /* XLogRecordBlockHeaders and XLogRecordDataHeader follow, no padding */
 
-} XLogRecord;
+};
 
-typedef struct XLogRecordBlockHeader
+struct xlog_record_bloch_header
 {
    uint8_t id;              /* block reference ID */
    uint8_t fork_flags;      /* fork within the relation, and flags */
@@ -140,13 +140,13 @@ typedef struct XLogRecordBlockHeader
                               * image) */
 
    /* If BKPBLOCK_HAS_IMAGE, an XLogRecordBlockImageHeader struct follows */
-   /* If BKPBLOCK_SAME_REL is not set, a RelFileLocator follows */
-   /* BlockNumber follows */
-} XLogRecordBlockHeader;
+   /* If BKPBLOCK_SAME_REL is not set, a rel_file_locator follows */
+   /* block_number follows */
+};
 
-#define SizeOfXLogRecordBlockHeader (offsetof(XLogRecordBlockHeader, data_length) + sizeof(uint16_t))
+#define SizeOfXLogRecordBlockHeader (offsetof(xlog_record_bloch_header, data_length) + sizeof(uint16_t))
 
-typedef struct XLogRecordDataHeaderShort
+typedef struct xlog_record_data_header_short
 {
    uint8_t id;              /* XLR_BLOCK_ID_DATA_SHORT */
    uint8_t data_length;     /* number of payload bytes */
@@ -154,7 +154,7 @@ typedef struct XLogRecordDataHeaderShort
 
 #define SizeOfXLogRecordDataHeaderShort (sizeof(uint8_t) * 2)
 
-typedef struct XLogRecordDataHeaderLong
+typedef struct xlog_record_data_header_long
 {
    uint8_t id;              /* XLR_BLOCK_ID_DATA_LONG */
    /* followed by uint32 data_length, unaligned */
@@ -162,27 +162,27 @@ typedef struct XLogRecordDataHeaderLong
 
 #define SizeOfXLogRecordDataHeaderLong (sizeof(uint8_t) + sizeof(uint32))
 
-typedef struct RelFileLocator
+struct rel_file_locator
 {
-   Oid spcOid;          /* tablespace */
-   Oid dbOid;           /* database */
-   RelFileNumber relNumber;     /* relation */
-} RelFileLocator;
+   oid spcOid;          /* tablespace */
+   oid dbOid;           /* database */
+   rel_file_number relNumber;     /* relation */
+};
 
-typedef struct
+struct decoded_bkp_block
 {
    /* Is this block ref in use? */
    bool in_use;
 
    /* Identify the block this refers to */
-   RelFileLocator rlocator;
-   ForkNumber forknum;
-   BlockNumber blkno;
+   struct rel_file_locator rlocator;
+   enum fork_number forknum;
+   block_number blkno;
 
    /* Prefetching workspace. */
-   Buffer prefetch_buffer;
+   buffer prefetch_buffer;
 
-   /* copy of the fork_flags field from the XLogRecordBlockHeader */
+   /* copy of the fork_flags field from the xlog_record_bloch_header */
    uint8_t flags;
 
    /* Information on full-page image, if any */
@@ -194,38 +194,38 @@ typedef struct
    uint16_t bimg_len;
    uint8_t bimg_info;
 
-   /* Buffer holding the rmgr-specific data associated with this block */
+   /* buffer holding the rmgr-specific data associated with this block */
    bool has_data;
    char* data;
    uint16_t data_len;
    uint16_t data_bufsz;
-} DecodedBkpBlock;
+} ;
 
-typedef struct DecodedXLogRecord
+struct decoded_xlog_record
 {
    /* Private member used for resource management. */
    size_t size;            /* total size of decoded record */
    bool oversized;       /* outside the regular decode buffer? */
-   struct DecodedXLogRecord* next;  /* decoded record queue link */
+   struct decoded_xlog_record* next;  /* decoded record queue link */
 
    /* Public members. */
-   XLogRecPtr lsn;             /* location */
-   XLogRecPtr next_lsn;        /* location of next record */
-   XLogRecord header;          /* header */
-   RepOriginId record_origin;
+   xlog_rec_ptr lsn;             /* location */
+   xlog_rec_ptr next_lsn;        /* location of next record */
+   struct xlog_record header;          /* header */
+   rep_origin_id record_origin;
    TransactionId toplevel_xid;  /* XID of top-level transaction */
    char* main_data;       /* record's main data portion */
    uint32_t main_data_len;   /* main data portion's length */
    int max_block_id;    /* highest block_id in use (-1 if none) */
-   DecodedBkpBlock blocks[FLEXIBLE_ARRAY_MEMBER];
-} DecodedXLogRecord;
+   struct decoded_bkp_block blocks[FLEXIBLE_ARRAY_MEMBER];
+};
 
 
 typedef struct RelFileNode
 {
-    Oid spcNode;         /* tablespace */
-    Oid dbNode;             /* database */
-    Oid relNode;         /* relation */
+    oid spcNode;         /* tablespace */
+    oid dbNode;             /* database */
+    oid relNode;         /* relation */
 } RelFileNode;
 
 #define XLogRecHasBlockRef(record, block_id)           \
@@ -250,7 +250,7 @@ typedef struct RelFileNode
 #define BKPBLOCK_HAS_IMAGE  0x10    /* block data is an XLogRecordBlockImage */
 #define BKPBLOCK_HAS_DATA   0x20
 #define BKPBLOCK_WILL_INIT  0x40    /* redo will re-init the page */
-#define BKPBLOCK_SAME_REL   0x80    /* RelFileLocator omitted, same as
+#define BKPBLOCK_SAME_REL   0x80    /* rel_file_locator omitted, same as
                                      * previous */
 
 /* Information stored in bimg_info */
@@ -269,23 +269,23 @@ typedef struct RelFileNode
 
 void parse_wal_segment_headers(char* path);
 
-bool decode_xlog_record(char* buffer, DecodedXLogRecord* decoded, XLogRecord* record, uint32_t block_size);
+bool decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlog_record* record, uint32_t block_size);
 
-void get_record_length(DecodedXLogRecord* record, uint32_t* rec_len, uint32_t* fpi_len);
+void get_record_length(struct decoded_xlog_record* record, uint32_t* rec_len, uint32_t* fpi_len);
 
-void display_decoded_record(DecodedXLogRecord* record);
+void display_decoded_record(struct decoded_xlog_record* record);
 
-void XLogRecGetBlockRefInfo(DecodedXLogRecord* record, bool pretty, bool detailed_format, uint32_t* fpi_len);
+void XLogRecGetBlockRefInfo(struct decoded_xlog_record* record, bool pretty, bool detailed_format, uint32_t* fpi_len);
 
-char*XLogRecGetBlockData(DecodedXLogRecord* record, uint8_t block_id, size_t* len);
+char*XLogRecGetBlockData(struct decoded_xlog_record* record, uint8_t block_id, size_t* len);
 
-void find_next_record(FILE* file, XLogRecord* record, XLogRecPtr RecPtr, XLogLongPageHeaderData* pData);
+void find_next_record(FILE* file, struct xlog_record* record, xlog_rec_ptr RecPtr, struct xlog_long_page_header_data* pData);
 
 void parse_page(char* page);
 
-#define SizeOfXLogLongPHD   MAXALIGN(sizeof(XLogLongPageHeaderData))
-#define SizeOfXLogShortPHD   MAXALIGN(sizeof(XLogPageHeaderData))
-#define SizeOfXLogRecord    (offsetof(XLogRecord, xl_crc) + sizeof(pg_crc32c))
+#define SizeOfXLogLongPHD   MAXALIGN(sizeof(struct xlog_long_page_header_data))
+#define SizeOfXLogShortPHD   MAXALIGN(sizeof(struct xlog_page_header_data))
+#define SizeOfXLogRecord    (offsetof(struct xlog_record, xl_crc) + sizeof(pg_crc32c))
 #define XLogPageHeaderSize(hdr)    (((hdr)->xlp_info & XLP_LONG_HEADER) ? SizeOfXLogLongPHD : SizeOfXLogShortPHD)
 #define XLogSegNoOffsetToRecPtr(segno, offset, wal_segsz_bytes, dest)  (dest) = (segno) * (wal_segsz_bytes) + (offset)
 #define XLogSegmentsPerXLogId(wal_segsz_bytes)  (UINT64_C(0x100000000) / (wal_segsz_bytes))
@@ -318,7 +318,7 @@ void parse_page(char* page);
 #define XLogRecGetDataLen(record) (record->main_data_len)
 
 static inline void
-XLogFromFileName(const char* fname, TimeLineID* tli, XLogSegNo* logSegNo, int wal_segsz_bytes)
+XLogFromFileName(const char* fname, timeline_id* tli, xlog_seg_no* logSegNo, int wal_segsz_bytes)
 {
    uint32_t log;
    uint32_t seg;

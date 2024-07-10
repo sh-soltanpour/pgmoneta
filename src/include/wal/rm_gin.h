@@ -76,7 +76,7 @@ typedef struct IndexTupleData
  */
 typedef struct
 {
-    /* We use BlockIdData not BlockNumber to avoid padding space wastage */
+    /* We use BlockIdData not block_number to avoid padding space wastage */
     BlockIdData child_blkno;
     ItemPointerData key;
 } PostingItem;
@@ -155,10 +155,10 @@ typedef struct
 typedef struct ginxlogSplit
 {
     RelFileNode node;
-    BlockNumber rrlink;			/* right link, or root's blocknumber if root
+    block_number rrlink;			/* right link, or root's blocknumber if root
 								 * split */
-    BlockNumber leftChildBlkno; /* valid on a non-leaf split */
-    BlockNumber rightChildBlkno;
+    block_number leftChildBlkno; /* valid on a non-leaf split */
+    block_number rightChildBlkno;
     uint16_t		flags;			/* see below */
 } ginxlogSplit;
 
@@ -188,7 +188,7 @@ typedef struct ginxlogVacuumDataLeafPage
 typedef struct ginxlogDeletePage
 {
     OffsetNumber parentOffset;
-    BlockNumber rightLink;
+    block_number rightLink;
     TransactionId deleteXid;	/* last Xid which could see this page in scan */
 } ginxlogDeletePage;
 
@@ -202,8 +202,8 @@ typedef struct GinMetaPageData
      * pages.  These store fast-inserted entries that haven't yet been moved
      * into the regular GIN structure.
      */
-    BlockNumber head;
-    BlockNumber tail;
+    block_number head;
+    block_number tail;
 
     /*
      * Free space in bytes in the pending list's tail page.
@@ -214,15 +214,15 @@ typedef struct GinMetaPageData
      * We store both number of pages and number of heap tuples that are in the
      * pending list.
      */
-    BlockNumber nPendingPages;
+    block_number nPendingPages;
     int64_t		nPendingHeapTuples;
 
     /*
      * Statistics for planner use (accurate as of last VACUUM)
      */
-    BlockNumber nTotalPages;
-    BlockNumber nEntryPages;
-    BlockNumber nDataPages;
+    block_number nTotalPages;
+    block_number nEntryPages;
+    block_number nDataPages;
     int64_t		nEntries;
 
     /*
@@ -254,8 +254,8 @@ typedef struct ginxlogUpdateMeta
 {
     RelFileNode node;
     GinMetaPageData metadata;
-    BlockNumber prevTail;
-    BlockNumber newRightlink;
+    block_number prevTail;
+    block_number newRightlink;
     int32_t		ntuples;		/* if ntuples > 0 then metadata.tail was
 								 * updated with that many tuples; else new sub
 								 * list was inserted */
@@ -266,7 +266,7 @@ typedef struct ginxlogUpdateMeta
 
 typedef struct ginxlogInsertListPage
 {
-    BlockNumber rightlink;
+    block_number rightlink;
     int32_t		ntuples;
     /* array of inserted tuples follows */
 } ginxlogInsertListPage;
@@ -310,7 +310,7 @@ typedef struct
 #define SizeOfGinPostingList(plist) (offsetof(GinPostingList, bytes) + SHORTALIGN((plist)->nbytes) )
 
 
-char* gin_desc(char* buf, DecodedXLogRecord *record);
+char* gin_desc(char* buf, struct decoded_xlog_record *record);
 
 
 #endif //PGMONETA_RM_GIN_H

@@ -57,7 +57,7 @@ out_infobits(char* buf, uint8_t infobits)
 }
 
 char*
-heap_desc(char* buf, DecodedXLogRecord* record)
+heap_desc(char* buf, struct decoded_xlog_record* record)
 {
    char* rec = record->main_data;
    uint8_t info = record->header.xl_info & ~XLR_INFO_MASK;
@@ -147,7 +147,7 @@ heap_desc(char* buf, DecodedXLogRecord* record)
 }
 
 char*
-heap2_desc(char* buf, DecodedXLogRecord* record)
+heap2_desc(char* buf, struct decoded_xlog_record* record)
 {
    char* rec = record->main_data;
    uint8_t info = record->header.xl_info & ~XLR_INFO_MASK;

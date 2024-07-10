@@ -41,20 +41,20 @@ typedef int64_t pg_time_t;
  */
 typedef struct CheckPoint
 {
-    XLogRecPtr	redo;			/* next RecPtr available when we began to
+    xlog_rec_ptr	redo;			/* next RecPtr available when we began to
 								 * create CheckPoint (i.e. REDO start point) */
-    TimeLineID	ThisTimeLineID; /* current TLI */
-    TimeLineID	PrevTimeLineID; /* previous TLI, if this record begins a new
+    timeline_id	ThisTimeLineID; /* current TLI */
+    timeline_id	PrevTimeLineID; /* previous TLI, if this record begins a new
 								 * timeline (equals ThisTimeLineID otherwise) */
     bool		fullPageWrites; /* current full_page_writes */
     FullTransactionId nextXid;	/* next free transaction ID */
-    Oid			nextOid;		/* next free OID */
+    oid			nextOid;		/* next free OID */
     MultiXactId nextMulti;		/* next free MultiXactId */
     MultiXactOffset nextMultiOffset;	/* next free MultiXact offset */
     TransactionId oldestXid;	/* cluster-wide minimum datfrozenxid */
-    Oid			oldestXidDB;	/* database with minimum datfrozenxid */
+    oid			oldestXidDB;	/* database with minimum datfrozenxid */
     MultiXactId oldestMulti;	/* cluster-wide minimum datminmxid */
-    Oid			oldestMultiDB;	/* database with minimum datminmxid */
+    oid			oldestMultiDB;	/* database with minimum datminmxid */
     pg_time_t	time;			/* time stamp of checkpoint */
     TransactionId oldestCommitTsXid;	/* oldest Xid with valid commit
 										 * timestamp */

@@ -37,7 +37,7 @@
  */
 typedef struct xl_brin_createidx
 {
-    BlockNumber pagesPerRange;
+    block_number pagesPerRange;
     uint16_t		version;
 } xl_brin_createidx;
 #define SizeOfBrinCreateIdx (offsetof(xl_brin_createidx, version) + sizeof(uint16))
@@ -50,10 +50,10 @@ typedef struct xl_brin_createidx
  */
 typedef struct xl_brin_insert
 {
-    BlockNumber heapBlk;
+    block_number heapBlk;
 
     /* extra information needed to update the revmap */
-    BlockNumber pagesPerRange;
+    block_number pagesPerRange;
 
     /* offset number in the main page to insert the tuple to. */
     OffsetNumber offnum;
@@ -106,7 +106,7 @@ typedef struct xl_brin_revmap_extend
      * XXX: This is actually redundant - the block number is stored as part of
      * backup block 1.
      */
-    BlockNumber targetBlk;
+    block_number targetBlk;
 } xl_brin_revmap_extend;
 
 #define SizeOfBrinRevmapExtend	(offsetof(xl_brin_revmap_extend, targetBlk) + \
@@ -120,9 +120,9 @@ typedef struct xl_brin_revmap_extend
  */
 typedef struct xl_brin_desummarize
 {
-    BlockNumber pagesPerRange;
+    block_number pagesPerRange;
     /* page number location to set to invalid */
-    BlockNumber heapBlk;
+    block_number heapBlk;
     /* offset of item to delete in regular index page */
     OffsetNumber regOffset;
 } xl_brin_desummarize;
@@ -132,6 +132,6 @@ typedef struct xl_brin_desummarize
 
 
 char*
-brin_desc(char* buf, DecodedXLogRecord *record);
+brin_desc(char* buf, struct decoded_xlog_record *record);
 
 #endif //PGMONETA_RM_BRIN_H

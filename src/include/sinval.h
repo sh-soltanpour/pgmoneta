@@ -36,7 +36,7 @@ typedef signed char int8;       /* == 8 bits */
 typedef struct
 {
    int8 id;                     /* cache ID --- must be first */
-   Oid dbId;                    /* database ID, or 0 if a shared relation */
+   oid dbId;                    /* database ID, or 0 if a shared relation */
    uint32_t hashValue;            /* hash value of key for this catcache */
 } SharedInvalCatcacheMsg;
 
@@ -45,8 +45,8 @@ typedef struct
 typedef struct
 {
    int8 id;                     /* type field --- must be first */
-   Oid dbId;                    /* database ID, or 0 if a shared catalog */
-   Oid catId;                   /* ID of catalog whose contents are invalid */
+   oid dbId;                    /* database ID, or 0 if a shared catalog */
+   oid catId;                   /* ID of catalog whose contents are invalid */
 } SharedInvalCatalogMsg;
 
 #define SHAREDINVALRELCACHE_ID  (-2)
@@ -54,8 +54,8 @@ typedef struct
 typedef struct
 {
    int8 id;                     /* type field --- must be first */
-   Oid dbId;                    /* database ID, or 0 if a shared relation */
-   Oid relId;                   /* relation ID, or 0 if whole relcache */
+   oid dbId;                    /* database ID, or 0 if a shared relation */
+   oid relId;                   /* relation ID, or 0 if whole relcache */
 } SharedInvalRelcacheMsg;
 
 #define SHAREDINVALSMGR_ID      (-3)
@@ -66,7 +66,7 @@ typedef struct
    int8 id;                     /* type field --- must be first */
    int8 backend_hi;             /* high bits of backend procno, if temprel */
    uint16_t backend_lo;           /* low bits of backend procno, if temprel */
-   RelFileLocator rlocator;     /* spcOid, dbOid, relNumber */
+   struct rel_file_locator rlocator;     /* spcOid, dbOid, relNumber */
 } SharedInvalSmgrMsg;
 
 #define SHAREDINVALRELMAP_ID    (-4)
@@ -74,7 +74,7 @@ typedef struct
 typedef struct
 {
    int8 id;                     /* type field --- must be first */
-   Oid dbId;                    /* database ID, or 0 for shared catalogs */
+   oid dbId;                    /* database ID, or 0 for shared catalogs */
 } SharedInvalRelmapMsg;
 
 #define SHAREDINVALSNAPSHOT_ID  (-5)
@@ -82,8 +82,8 @@ typedef struct
 typedef struct
 {
    int8 id;                     /* type field --- must be first */
-   Oid dbId;                    /* database ID, or 0 if a shared relation */
-   Oid relId;                   /* relation ID */
+   oid dbId;                    /* database ID, or 0 if a shared relation */
+   oid relId;                   /* relation ID */
 } SharedInvalSnapshotMsg;
 
 typedef union

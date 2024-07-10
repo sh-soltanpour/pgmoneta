@@ -32,7 +32,7 @@
 #define XLR_INFO_MASK           0x0F
 #define XLR_RMGR_INFO_MASK      0xF0
 
-typedef uint32_t BlockNumber;
+typedef uint32_t block_number;
 
 // offset
 typedef uint16_t OffsetNumber;
@@ -87,7 +87,7 @@ typedef BlockIdData *BlockId;	/* block identifier */
 
 #define BlockIdGetBlockNumber(blockId) \
         ( \
-           ((((BlockNumber) (blockId)->bi_hi) << 16) | ((BlockNumber) (blockId)->bi_lo)) \
+           ((((block_number) (blockId)->bi_hi) << 16) | ((block_number) (blockId)->bi_lo)) \
         )
 
 #define PostingItemGetBlockNumber(pointer) \

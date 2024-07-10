@@ -8,7 +8,7 @@
 #include "string.h"
 
 char*
-generic_desc(char* buf, DecodedXLogRecord *record)
+generic_desc(char* buf, struct decoded_xlog_record *record)
 {
     Pointer		ptr = XLogRecGetData(record),
             end = ptr + XLogRecGetDataLen(record);

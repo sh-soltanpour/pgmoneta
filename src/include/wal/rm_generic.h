@@ -9,6 +9,6 @@
 
 typedef char *Pointer;
 
-char* generic_desc(char* buf, DecodedXLogRecord *record);
+char* generic_desc(char* buf, struct decoded_xlog_record *record);
 
 #endif //PGMONETA_RM_GENERIC_H

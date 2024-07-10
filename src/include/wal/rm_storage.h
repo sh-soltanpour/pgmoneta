@@ -42,7 +42,7 @@
 typedef struct xl_smgr_create
 {
     RelFileNode rnode;
-    ForkNumber	forkNum;
+    enum fork_number	forkNum;
 } xl_smgr_create;
 
 /* flags for xl_smgr_truncate */
@@ -54,12 +54,12 @@ typedef struct xl_smgr_create
 
 typedef struct xl_smgr_truncate
 {
-    BlockNumber blkno;
+    block_number blkno;
     RelFileNode rnode;
     int			flags;
 } xl_smgr_truncate;
 
-char* storage_desc(char* buf, DecodedXLogRecord *record);
+char* storage_desc(char* buf, struct decoded_xlog_record *record);
 
 
 #endif //PGMONETA_RM_STORAGE_H

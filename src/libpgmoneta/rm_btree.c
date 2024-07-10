@@ -122,7 +122,7 @@ delvacuum_desc(char* buf, char* block_data, uint16_t ndeleted, uint16_t nupdated
 }
 
 char*
-btree_desc(char* buf, DecodedXLogRecord* record)
+btree_desc(char* buf, struct decoded_xlog_record* record)
 {
    char* rec = record->main_data;
    uint8_t info = record->header.xl_info & ~XLR_INFO_MASK;

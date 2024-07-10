@@ -86,7 +86,7 @@ desc_recompress_leaf(char* buf, ginxlogRecompressDataLeaf *insertData)
 }
 
 char *
-gin_desc(char *buf, DecodedXLogRecord *record) {
+gin_desc(char *buf, struct decoded_xlog_record *record) {
     char *rec = record->main_data;
     uint8_t info = record->header.xl_info & ~XLR_INFO_MASK;
 
@@ -102,13 +102,13 @@ gin_desc(char *buf, DecodedXLogRecord *record) {
                              (xlrec->flags & GIN_INSERT_ISLEAF) ? 'T' : 'F');
             if (!(xlrec->flags & GIN_INSERT_ISLEAF)) {
                 char *payload = rec + sizeof(ginxlogInsert);
-                BlockNumber leftChildBlkno;
-                BlockNumber rightChildBlkno;
+                block_number leftChildBlkno;
+                block_number rightChildBlkno;
 
                 leftChildBlkno = BlockIdGetBlockNumber((BlockId) payload);
                 payload += sizeof(BlockIdData);
                 rightChildBlkno = BlockIdGetBlockNumber((BlockId) payload);
-                payload += sizeof(BlockNumber);
+                payload += sizeof(block_number);
                 buf = pgmoneta_format_and_append(buf, " children: %u/%u",
                                  leftChildBlkno, rightChildBlkno);
             }
