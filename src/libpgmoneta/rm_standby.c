@@ -64,7 +64,7 @@ standby_desc_running_xacts(char* buf, struct xl_running_xacts* xlrec)
 }
 
 char*
-standby_desc_invalidations(char* buf, int nmsgs, SharedInvalidationMessage* msgs, oid dbId, oid tsId, bool relcacheInitFileInval
+standby_desc_invalidations(char* buf, int nmsgs, union shared_invalidation_message* msgs, oid dbId, oid tsId, bool relcacheInitFileInval
                            )
 {
    int i;
@@ -84,7 +84,7 @@ standby_desc_invalidations(char* buf, int nmsgs, SharedInvalidationMessage* msgs
    for (i = 0; i < nmsgs; i++)
    {
 
-      SharedInvalidationMessage* msg = &msgs[i];
+      union shared_invalidation_message* msg = &msgs[i];
 
       if (msg->id >= 0)
       {

@@ -68,7 +68,7 @@ struct xl_invalidations {
     oid tsId;            /* MyDatabaseTableSpace */
     bool relcacheInitFileInval;   /* invalidate relcache init files */
     int nmsgs;           /* number of shared inval msgs */
-    SharedInvalidationMessage msgs[FLEXIBLE_ARRAY_MEMBER];
+    union shared_invalidation_message msgs[FLEXIBLE_ARRAY_MEMBER];
 };
 
 #define MinSizeOfInvalidations offsetof(xl_invalidations, msgs)
@@ -77,7 +77,7 @@ char *
 standby_desc(char *buf, struct decoded_xlog_record *record);
 
 char *
-standby_desc_invalidations(char *buf, int nmsgs, SharedInvalidationMessage *msgs, oid dbId, oid tsId,
+standby_desc_invalidations(char *buf, int nmsgs, union shared_invalidation_message *msgs, oid dbId, oid tsId,
                            bool relcacheInitFileInval);
 
 

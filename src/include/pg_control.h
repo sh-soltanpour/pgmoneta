@@ -47,7 +47,7 @@ struct check_point
     timeline_id	PrevTimeLineID; /* previous TLI, if this record begins a new
 								 * timeline (equals ThisTimeLineID otherwise) */
     bool		fullPageWrites; /* current full_page_writes */
-    full_transaction_id nextXid;	/* next free transaction ID */
+    struct full_transaction_id nextXid;	/* next free transaction ID */
     oid			nextOid;		/* next free OID */
     multi_xact_id nextMulti;		/* next free multi_xact_id */
     multi_xact_offset nextMultiOffset;	/* next free MultiXact offset */

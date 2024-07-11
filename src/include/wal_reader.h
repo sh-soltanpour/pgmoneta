@@ -108,7 +108,7 @@ struct xlog_page_header_data
    uint32_t xlp_rem_len;       /* total len of remaining data for record */
 };
 
-typedef struct xlog_page_header_data* XLogPageHeader;
+struct xlog_page_header_data* XLogPageHeader;
 
 struct xlog_long_page_header_data
 {
@@ -146,7 +146,7 @@ struct xlog_record_bloch_header
 
 #define SizeOfXLogRecordBlockHeader (offsetof(xlog_record_bloch_header, data_length) + sizeof(uint16_t))
 
-typedef struct xlog_record_data_header_short
+struct xlog_record_data_header_short
 {
    uint8_t id;              /* XLR_BLOCK_ID_DATA_SHORT */
    uint8_t data_length;     /* number of payload bytes */
@@ -154,7 +154,7 @@ typedef struct xlog_record_data_header_short
 
 #define SizeOfXLogRecordDataHeaderShort (sizeof(uint8_t) * 2)
 
-typedef struct xlog_record_data_header_long
+struct xlog_record_data_header_long
 {
    uint8_t id;              /* XLR_BLOCK_ID_DATA_LONG */
    /* followed by uint32 data_length, unaligned */
@@ -221,12 +221,12 @@ struct decoded_xlog_record
 };
 
 
-typedef struct RelFileNode
+struct rel_file_node
 {
     oid spcNode;         /* tablespace */
     oid dbNode;             /* database */
     oid relNode;         /* relation */
-} RelFileNode;
+};
 
 #define XLogRecHasBlockRef(record, block_id)           \
         ((record->max_block_id >= (block_id)) && \

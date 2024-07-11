@@ -34,10 +34,10 @@
 
 
 static char*
-desc_recompress_leaf(char* buf, ginxlogRecompressDataLeaf *insertData)
+desc_recompress_leaf(char* buf, struct gin_xlog_recompress_data_leaf *insertData)
 {
     int			i;
-    char	   *walbuf = ((char *) insertData) + sizeof(ginxlogRecompressDataLeaf);
+    char	   *walbuf = ((char *) insertData) + sizeof(struct gin_xlog_recompress_data_leaf);
 
     buf = pgmoneta_format_and_append(buf, " %d segments:", (int) insertData->nactions);
 
@@ -122,9 +122,9 @@ gin_desc(char *buf, struct decoded_xlog_record *record) {
 
                 if (!(xlrec->flags & GIN_INSERT_ISDATA))
                     buf = pgmoneta_format_and_append(buf, " isdelete: %c",
-                                     (((ginxlogInsertEntry *) payload)->isDelete) ? 'T' : 'F');
+                                                     (((struct gin_xlog_insert_entry *) payload)->isDelete) ? 'T' : 'F');
                 else if (xlrec->flags & GIN_INSERT_ISLEAF)
-                    buf = desc_recompress_leaf(buf, (ginxlogRecompressDataLeaf *) payload);
+                    buf = desc_recompress_leaf(buf, (struct gin_xlog_recompress_data_leaf *) payload);
                 else {
                     struct gin_xlog_insert_data_internal *insertData =
                             (struct gin_xlog_insert_data_internal *) payload;

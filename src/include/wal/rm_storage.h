@@ -41,7 +41,7 @@
 
 struct xl_smgr_create
 {
-    RelFileNode rnode;
+    struct rel_file_node rnode;
     enum fork_number	forkNum;
 };
 
@@ -55,7 +55,7 @@ struct xl_smgr_create
 struct xl_smgr_truncate
 {
     block_number blkno;
-    RelFileNode rnode;
+    struct rel_file_node rnode;
     int			flags;
 };
 

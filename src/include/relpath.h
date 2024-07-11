@@ -26,7 +26,7 @@ typedef int BackendId;			/* unique currently active backend identifier */
 	GetRelationPath((rnode).dbNode, (rnode).spcNode, (rnode).relNode, \
 					backend, forknum)
 
-/* First argument is a RelFileNode */
+/* First argument is a rel_file_node */
 #define relpathperm(rnode, forknum) \
 	relpathbackend(rnode, InvalidBackendId, forknum)
 

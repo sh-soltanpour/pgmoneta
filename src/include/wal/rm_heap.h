@@ -236,7 +236,7 @@ struct xl_heap_new_cid
    /*
     * Store the relfilenode/ctid pair to facilitate lookups.
     */
-   RelFileNode target_node;
+   struct rel_file_node target_node;
    struct item_pointer_data target_tid;
 };
 

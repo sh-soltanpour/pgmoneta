@@ -102,7 +102,7 @@ struct gist_xlog_page_split
  */
 struct gist_xlog_page_delete
 {
-    full_transaction_id deleteXid;	/* last Xid which could see page in scan */
+    struct full_transaction_id deleteXid;	/* last Xid which could see page in scan */
     offset_number downlinkOffset;	/* Offset of downlink referencing this
 									 * page */
 };
@@ -115,9 +115,9 @@ struct gist_xlog_page_delete
  */
 struct gist_xlog_page_reuse
 {
-    RelFileNode node;
+    struct rel_file_node node;
     block_number block;
-    full_transaction_id latestRemovedFullXid;
+    struct full_transaction_id latestRemovedFullXid;
 };
 
 #define SizeOfGistxlogPageReuse	(offsetof(gistxlogPageReuse, latestRemovedFullXid) + sizeof(FullTransactionId))

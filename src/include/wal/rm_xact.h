@@ -154,13 +154,13 @@ struct xl_xact_subxacts {
 
 struct xl_xact_relfilenodes {
     int nrels;            /* number of relations */
-    RelFileNode xnodes[FLEXIBLE_ARRAY_MEMBER];
+    struct rel_file_node xnodes[FLEXIBLE_ARRAY_MEMBER];
 };
 #define MinSizeOfXactRelfilenodes offsetof(struct xl_xact_relfilenodes, xnodes)
 
 struct xl_xact_invals {
     int nmsgs;            /* number of shared inval msgs */
-    SharedInvalidationMessage msgs[FLEXIBLE_ARRAY_MEMBER];
+    union shared_invalidation_message msgs[FLEXIBLE_ARRAY_MEMBER];
 };
 #define MinSizeOfXactInvals offsetof(struct xl_xact_invals, msgs)
 
@@ -234,15 +234,15 @@ struct xl_xact_parsed_commit {
     transaction_id *subxacts;
 
     int nrels;
-    RelFileNode *xnodes;
+    struct rel_file_node *xnodes;
 
     int nmsgs;
-    SharedInvalidationMessage *msgs;
+    union shared_invalidation_message *msgs;
 
     transaction_id twophase_xid; /* only for 2PC */
     char twophase_gid[GIDSIZE];    /* only for 2PC */
     int nabortrels;        /* only for 2PC */
-    RelFileNode *abortnodes;    /* only for 2PC */
+    struct rel_file_node *abortnodes;    /* only for 2PC */
 
     xlog_rec_ptr origin_lsn;
     TimestampTz origin_timestamp;
@@ -261,7 +261,7 @@ struct xl_xact_parsed_abort {
     transaction_id *subxacts;
 
     int nrels;
-    RelFileNode *xnodes;
+    struct rel_file_node *xnodes;
 
     transaction_id twophase_xid; /* only for 2PC */
     char twophase_gid[GIDSIZE];    /* only for 2PC */

@@ -33,7 +33,7 @@
 #include "relpath.h"
 
 
-static char *xact_desc_relations(char *buf, char *label, int nrels, RelFileNode *xnodes);
+static char *xact_desc_relations(char *buf, char *label, int nrels, struct rel_file_node *xnodes);
 static char *xact_desc_commit(char *buf, uint8_t info, struct xl_xact_commit *xlrec, rep_origin_id origin_id);
 static char *xact_desc_abort(char *buf, uint8_t info, struct xl_xact_abort *xlrec);
 static char *xact_desc_prepare(char *buf, uint8_t info, struct xl_xact_prepare *xlrec);
@@ -46,7 +46,7 @@ void ParseCommitRecord(uint8_t info, struct xl_xact_commit *xlrec, struct xl_xac
 
 static char *
 xact_desc_relations(char *buf, char *label, int nrels,
-                    RelFileNode *xnodes) {
+                    struct rel_file_node *xnodes) {
     int i;
 
     if (nrels > 0) {
@@ -241,7 +241,7 @@ ParseAbortRecord(uint8_t info, struct xl_xact_abort *xlrec, struct xl_xact_parse
         parsed->xnodes = xl_relfilenodes->xnodes;
 
         data += MinSizeOfXactRelfilenodes;
-        data += xl_relfilenodes->nrels * sizeof(RelFileNode);
+        data += xl_relfilenodes->nrels * sizeof(struct rel_file_node);
     }
 
     if (parsed->xinfo & XACT_XINFO_HAS_TWOPHASE)
@@ -303,14 +303,14 @@ ParsePrepareRecord(uint8_t info, struct xl_xact_prepare *xlrec, xl_xact_parsed_p
     parsed->subxacts = (transaction_id *) bufptr;
     bufptr += MAXALIGN(xlrec->nsubxacts * sizeof(transaction_id));
 
-    parsed->xnodes = (RelFileNode *) bufptr;
-    bufptr += MAXALIGN(xlrec->ncommitrels * sizeof(RelFileNode));
+    parsed->xnodes = (struct rel_file_node *) bufptr;
+    bufptr += MAXALIGN(xlrec->ncommitrels * sizeof(struct rel_file_node));
 
-    parsed->abortnodes = (RelFileNode *) bufptr;
-    bufptr += MAXALIGN(xlrec->nabortrels * sizeof(RelFileNode));
+    parsed->abortnodes = (struct rel_file_node *) bufptr;
+    bufptr += MAXALIGN(xlrec->nabortrels * sizeof(struct rel_file_node));
 
-    parsed->msgs = (SharedInvalidationMessage *) bufptr;
-    bufptr += MAXALIGN(xlrec->ninvalmsgs * sizeof(SharedInvalidationMessage));
+    parsed->msgs = (union shared_invalidation_message *) bufptr;
+    bufptr += MAXALIGN(xlrec->ninvalmsgs * sizeof(union shared_invalidation_message));
 }
 
 void
@@ -363,7 +363,7 @@ ParseCommitRecord(uint8_t info, struct xl_xact_commit *xlrec, struct xl_xact_par
         parsed->xnodes = xl_relfilenodes->xnodes;
 
         data += MinSizeOfXactRelfilenodes;
-        data += xl_relfilenodes->nrels * sizeof(RelFileNode);
+        data += xl_relfilenodes->nrels * sizeof(struct rel_file_node);
     }
 
     if (parsed->xinfo & XACT_XINFO_HAS_INVALS)
@@ -374,7 +374,7 @@ ParseCommitRecord(uint8_t info, struct xl_xact_commit *xlrec, struct xl_xact_par
         parsed->msgs = xl_invals->msgs;
 
         data += MinSizeOfXactInvals;
-        data += xl_invals->nmsgs * sizeof(SharedInvalidationMessage);
+        data += xl_invals->nmsgs * sizeof(union shared_invalidation_message);
     }
 
     if (parsed->xinfo & XACT_XINFO_HAS_TWOPHASE)

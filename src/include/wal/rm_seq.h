@@ -36,7 +36,7 @@
 
 struct xl_seq_rec
 {
-    RelFileNode node;
+    struct rel_file_node node;
     /* SEQUENCE TUPLE DATA FOLLOWS AT THE END */
 };
 

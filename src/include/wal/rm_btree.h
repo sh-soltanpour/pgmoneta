@@ -36,16 +36,16 @@
 char* btree_desc(char* buf, struct decoded_xlog_record* record);
 const char* btree_identify (uint8_t info);
 
-typedef struct ItemIdData
+struct item_id_data
 {
    unsigned lp_off: 15,       /* offset to tuple (from start of page) */
             lp_flags: 2, /* state of line pointer, see below */
             lp_len: 15; /* byte length of tuple */
-} ItemIdData;
+};
 
 #define InvalidOffsetNumber     ((offset_number) 0)
 #define FirstOffsetNumber       ((offset_number) 1)
-#define MaxOffsetNumber         ((offset_number) (8192 / sizeof(ItemIdData))) // TODO: Replace 8192 with block size from pg_control
+#define MaxOffsetNumber         ((offset_number) (8192 / sizeof(struct item_id_data))) // TODO: Replace 8192 with block size from pg_control
 
 /* ----------------
  *      support macros
@@ -224,7 +224,7 @@ struct xl_btree_reuse_page
 {
    struct rel_file_locator locator;
    block_number block;
-   full_transaction_id snapshotConflictHorizon;
+   struct full_transaction_id snapshotConflictHorizon;
    bool isCatalogRel;    /* to handle recovery conflict during logical
                           * decoding on standby */
 };
@@ -349,7 +349,7 @@ struct xl_btree_unlink_page
    block_number leftsib;         /* target block's left sibling, if any */
    block_number rightsib;        /* target block's right sibling */
    uint32_t level;           /* target block's level */
-   full_transaction_id safexid;   /* target block's BTPageSetDeleted() XID */
+   struct full_transaction_id safexid;   /* target block's BTPageSetDeleted() XID */
 
    /*
     * Information needed to recreate a half-dead leaf page with correct

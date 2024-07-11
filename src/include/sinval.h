@@ -38,7 +38,7 @@ struct shared_inval_catcache_msg
    int8 id;                     /* cache ID --- must be first */
    oid dbId;                    /* database ID, or 0 if a shared relation */
    uint32_t hashValue;            /* hash value of key for this catcache */
-} ;
+};
 
 #define SHAREDINVALCATALOG_ID   (-1)
 
@@ -47,54 +47,54 @@ struct shared_inval_catalog_msg
    int8 id;                     /* type field --- must be first */
    oid dbId;                    /* database ID, or 0 if a shared catalog */
    oid catId;                   /* ID of catalog whose contents are invalid */
-} ;
+};
 
 #define SHAREDINVALRELCACHE_ID  (-2)
 
-typedef struct
+struct shared_inval_relcache_msg
 {
    int8 id;                     /* type field --- must be first */
    oid dbId;                    /* database ID, or 0 if a shared relation */
    oid relId;                   /* relation ID, or 0 if whole relcache */
-} SharedInvalRelcacheMsg;
+};
 
 #define SHAREDINVALSMGR_ID      (-3)
 
-typedef struct
+struct shared_inval_smgr_msg
 {
    /* note: field layout chosen to pack into 16 bytes */
    int8 id;                     /* type field --- must be first */
    int8 backend_hi;             /* high bits of backend procno, if temprel */
    uint16_t backend_lo;           /* low bits of backend procno, if temprel */
    struct rel_file_locator rlocator;     /* spcOid, dbOid, relNumber */
-} SharedInvalSmgrMsg;
+};
 
 #define SHAREDINVALRELMAP_ID    (-4)
 
-typedef struct
+struct shared_inval_relmap_msg
 {
    int8 id;                     /* type field --- must be first */
    oid dbId;                    /* database ID, or 0 for shared catalogs */
-} SharedInvalRelmapMsg;
+};
 
 #define SHAREDINVALSNAPSHOT_ID  (-5)
 
-typedef struct
+struct shared_inval_snapshot_msg
 {
    int8 id;                     /* type field --- must be first */
    oid dbId;                    /* database ID, or 0 if a shared relation */
    oid relId;                   /* relation ID */
-} SharedInvalSnapshotMsg;
+};
 
-typedef union
+union shared_invalidation_message
 {
    int8 id;                     /* type field --- must be first */
    struct shared_inval_catcache_msg cc;
    struct shared_inval_catalog_msg cat;
-   SharedInvalRelcacheMsg rc;
-   SharedInvalSmgrMsg sm;
-   SharedInvalRelmapMsg rm;
-   SharedInvalSnapshotMsg sn;
-} SharedInvalidationMessage;
+   struct shared_inval_relcache_msg rc;
+   struct shared_inval_smgr_msg sm;
+   struct shared_inval_relmap_msg rm;
+   struct shared_inval_snapshot_msg sn;
+};
 
 #endif //PGMONETA_SINVAL_H

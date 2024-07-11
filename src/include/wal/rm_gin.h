@@ -118,7 +118,7 @@ struct gin_xlog_insert
      * whose split this insertion finishes, as block_id_data[2] (beware of
      * adding fields in this struct that would make them not 16-bit aligned)
      *
-     * 2. a ginxlogInsertEntry or ginxlogRecompressDataLeaf struct, depending
+     * 2. a gin_xlog_insert_entry or gin_xlog_recompress_data_leaf struct, depending
      * on tree type.
      *
      * NB: the below structs are only 16-bit aligned when appended to a
@@ -127,20 +127,20 @@ struct gin_xlog_insert
      */
 };
 
-typedef struct
+struct gin_xlog_insert_entry
 {
     offset_number offset;
     bool		isDelete;
     struct index_tuple_data tuple;		/* variable length */
-} ginxlogInsertEntry;
+};
 
 
-typedef struct
+struct gin_xlog_recompress_data_leaf
 {
     uint16_t		nactions;
 
     /* Variable number of 'actions' follow */
-} ginxlogRecompressDataLeaf;
+};
 
 struct gin_xlog_insert_data_internal
 {
@@ -154,7 +154,7 @@ struct gin_xlog_insert_data_internal
 
 struct gin_xlog_split
 {
-    RelFileNode node;
+    struct rel_file_node node;
     block_number rrlink;			/* right link, or root's blocknumber if root
 								 * split */
     block_number leftChildBlkno; /* valid on a non-leaf split */
@@ -179,7 +179,7 @@ struct gin_xlog_split
 
 struct gin_xlog_vacuum_data_leaf_page
 {
-    ginxlogRecompressDataLeaf data;
+    struct gin_xlog_recompress_data_leaf data;
 };
 
 
@@ -252,7 +252,7 @@ struct gin_meta_page_data
  */
 struct gin_xlog_update_meta
 {
-    RelFileNode node;
+    struct rel_file_node node;
     struct gin_meta_page_data metadata;
     block_number prevTail;
     block_number newRightlink;
