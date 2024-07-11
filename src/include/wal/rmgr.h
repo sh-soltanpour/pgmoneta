@@ -56,13 +56,13 @@
 #define PG_RMGR(symname, name, desc) {name, desc},
 #define RM_MAX_ID           UINT8_MAX
 
-typedef struct
+struct rmgr_data
 {
     char* name;
     char* (*rm_desc)(char* buf, struct decoded_xlog_record *record);
-} RmgrData;
+};
 
-RmgrData RmgrTable[RM_MAX_ID + 1] = {
+struct rmgr_data RmgrTable[RM_MAX_ID + 1] = {
         PG_RMGR(RM_XLOG_ID, "XLOG", xlog_desc)
         PG_RMGR(RM_XACT_ID, "Transaction", xact_desc)
         PG_RMGR(RM_SMGR_ID, "Storage", storage_desc)

@@ -37,7 +37,7 @@ relmap_desc(char *buf, struct decoded_xlog_record *record) {
     uint8_t info = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
 
     if (info == XLOG_RELMAP_UPDATE) {
-        xl_relmap_update *xlrec = (xl_relmap_update *) rec;
+        struct xl_relmap_update *xlrec = (struct xl_relmap_update *) rec;
 
         buf = pgmoneta_format_and_append(buf, "database %u tablespace %u size %u",
                                          xlrec->dbid, xlrec->tsid, xlrec->nbytes);

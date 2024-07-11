@@ -40,7 +40,7 @@ storage_desc(char* buf, struct decoded_xlog_record *record)
 
     if (info == XLOG_SMGR_CREATE)
     {
-        xl_smgr_create *xlrec = (xl_smgr_create *) rec;
+        struct xl_smgr_create *xlrec = (struct xl_smgr_create *) rec;
         char	   *path = relpathperm(xlrec->rnode, xlrec->forkNum);
 
         buf = pgmoneta_format_and_append(buf, path);
@@ -48,7 +48,7 @@ storage_desc(char* buf, struct decoded_xlog_record *record)
     }
     else if (info == XLOG_SMGR_TRUNCATE)
     {
-        xl_smgr_truncate *xlrec = (xl_smgr_truncate *) rec;
+        struct xl_smgr_truncate *xlrec = (struct xl_smgr_truncate *) rec;
         char	   *path = relpathperm(xlrec->rnode, MAIN_FORKNUM);
 
         buf = pgmoneta_format_and_append(buf, "%s to %u blocks flags %d", path,

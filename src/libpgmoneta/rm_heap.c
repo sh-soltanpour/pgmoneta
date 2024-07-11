@@ -65,13 +65,13 @@ heap_desc(char* buf, struct decoded_xlog_record* record)
    info &= XLOG_HEAP_OPMASK;
    if (info == XLOG_HEAP_INSERT)
    {
-      xl_heap_insert* xlrec = (xl_heap_insert*) rec;
+      struct xl_heap_insert* xlrec = (struct xl_heap_insert*) rec;
 
       buf = pgmoneta_format_and_append(buf, "off %u flags 0x%02X", xlrec->offnum, xlrec->flags);
    }
    else if (info == XLOG_HEAP_DELETE)
    {
-      xl_heap_delete* xlrec = (xl_heap_delete*) rec;
+       struct xl_heap_delete* xlrec = (struct xl_heap_delete*) rec;
 
       buf = pgmoneta_format_and_append(buf, "off %u flags 0x%02X ",
                                        xlrec->offnum,
@@ -80,7 +80,7 @@ heap_desc(char* buf, struct decoded_xlog_record* record)
    }
    else if (info == XLOG_HEAP_UPDATE)
    {
-      xl_heap_update* xlrec = (xl_heap_update*) rec;
+       struct xl_heap_update* xlrec = (struct xl_heap_update*) rec;
 
        buf = pgmoneta_format_and_append(buf, "off %u xmax %u flags 0x%02X ",
                                  xlrec->old_offnum,
@@ -93,7 +93,7 @@ heap_desc(char* buf, struct decoded_xlog_record* record)
    }
    else if (info == XLOG_HEAP_HOT_UPDATE)
    {
-      xl_heap_update* xlrec = (xl_heap_update*) rec;
+       struct xl_heap_update* xlrec = (struct xl_heap_update*) rec;
 
        buf = pgmoneta_format_and_append(buf, "off %u xmax %u flags 0x%02X ",
                                  xlrec->old_offnum,
@@ -106,7 +106,7 @@ heap_desc(char* buf, struct decoded_xlog_record* record)
    }
    else if (info == XLOG_HEAP_TRUNCATE)
    {
-      xl_heap_truncate* xlrec = (xl_heap_truncate*) rec;
+       struct xl_heap_truncate* xlrec = (struct xl_heap_truncate*) rec;
       int i;
 
       if (xlrec->flags & XLH_TRUNCATE_CASCADE)
@@ -125,13 +125,13 @@ heap_desc(char* buf, struct decoded_xlog_record* record)
    }
    else if (info == XLOG_HEAP_CONFIRM)
    {
-      xl_heap_confirm* xlrec = (xl_heap_confirm*) rec;
+       struct xl_heap_confirm* xlrec = (struct xl_heap_confirm*) rec;
 
        buf = pgmoneta_format_and_append(buf, "off %u", xlrec->offnum);
    }
    else if (info == XLOG_HEAP_LOCK)
    {
-      xl_heap_lock* xlrec = (xl_heap_lock*) rec;
+       struct xl_heap_lock* xlrec = (struct xl_heap_lock*) rec;
 
        buf = pgmoneta_format_and_append(buf, "off %u: xid %u: flags 0x%02X ",
                                  xlrec->offnum, xlrec->locking_xid, xlrec->flags);
@@ -139,7 +139,7 @@ heap_desc(char* buf, struct decoded_xlog_record* record)
    }
    else if (info == XLOG_HEAP_INPLACE)
    {
-      xl_heap_inplace* xlrec = (xl_heap_inplace*) rec;
+       struct xl_heap_inplace* xlrec = (struct xl_heap_inplace*) rec;
 
        buf = pgmoneta_format_and_append(buf, "off %u", xlrec->offnum);
    }
@@ -155,7 +155,7 @@ heap2_desc(char* buf, struct decoded_xlog_record* record)
    info &= XLOG_HEAP_OPMASK;
    if (info == XLOG_HEAP2_PRUNE)
    {
-      xl_heap_prune* xlrec = (xl_heap_prune*) rec;
+       struct xl_heap_prune* xlrec = (struct xl_heap_prune*) rec;
 
        buf = pgmoneta_format_and_append(buf, "latestRemovedXid %u nredirected %u ndead %u",
                                  xlrec->latestRemovedXid,
@@ -164,34 +164,34 @@ heap2_desc(char* buf, struct decoded_xlog_record* record)
    }
    else if (info == XLOG_HEAP2_VACUUM)
    {
-      xl_heap_vacuum* xlrec = (xl_heap_vacuum*) rec;
+       struct xl_heap_vacuum* xlrec = (struct xl_heap_vacuum*) rec;
 
        buf = pgmoneta_format_and_append(buf, "nunused %u", xlrec->nunused);
    }
    else if (info == XLOG_HEAP2_FREEZE_PAGE)
    {
-      xl_heap_freeze_page* xlrec = (xl_heap_freeze_page*) rec;
+       struct xl_heap_freeze_page* xlrec = (struct xl_heap_freeze_page*) rec;
 
        buf = pgmoneta_format_and_append(buf, "cutoff xid %u ntuples %u",
                                  xlrec->cutoff_xid, xlrec->ntuples);
    }
    else if (info == XLOG_HEAP2_VISIBLE)
    {
-      xl_heap_visible* xlrec = (xl_heap_visible*) rec;
+       struct xl_heap_visible* xlrec = (struct xl_heap_visible*) rec;
 
        buf = pgmoneta_format_and_append(buf, "cutoff xid %u flags 0x%02X",
                                  xlrec->cutoff_xid, xlrec->flags);
    }
    else if (info == XLOG_HEAP2_MULTI_INSERT)
    {
-      xl_heap_multi_insert* xlrec = (xl_heap_multi_insert*) rec;
+       struct xl_heap_multi_insert* xlrec = (struct xl_heap_multi_insert*) rec;
 
        buf = pgmoneta_format_and_append(buf, "%d tuples flags 0x%02X", xlrec->ntuples,
                                  xlrec->flags);
    }
    else if (info == XLOG_HEAP2_LOCK_UPDATED)
    {
-      xl_heap_lock_updated* xlrec = (xl_heap_lock_updated*) rec;
+       struct xl_heap_lock_updated* xlrec = (struct xl_heap_lock_updated*) rec;
 
        buf = pgmoneta_format_and_append(buf, "off %u: xmax %u: flags 0x%02X ",
                                  xlrec->offnum, xlrec->xmax, xlrec->flags);
@@ -199,7 +199,7 @@ heap2_desc(char* buf, struct decoded_xlog_record* record)
    }
    else if (info == XLOG_HEAP2_NEW_CID)
    {
-      xl_heap_new_cid* xlrec = (xl_heap_new_cid*) rec;
+       struct xl_heap_new_cid* xlrec = (struct xl_heap_new_cid*) rec;
 
       buf = pgmoneta_format_and_append(buf, "rel %u/%u/%u; tid %u/%u",
                                  xlrec->target_node.spcNode,

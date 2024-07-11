@@ -1,6 +1,30 @@
-//
-// Created by Shahryar Soltanpour on 2024-06-18.
-//
+/*
+ * Copyright (C) 2024 The pgmoneta community
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this list
+ * of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this
+ * list of conditions and the following disclaimer in the documentation and/or other
+ * materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without specific
+ * prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+ * THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+ * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #ifndef PGMONETA_RM_HEAP_H
 #define PGMONETA_RM_HEAP_H
@@ -45,51 +69,51 @@
 #define XLHL_XMAX_KEYSHR_LOCK    0x08
 #define XLHL_KEYS_UPDATED        0x10
 
-typedef struct xl_heap_insert
+struct xl_heap_insert
 {
    offset_number offnum;         /* inserted tuple's offset */
    uint8_t flags;
 
    /* xl_heap_header & TUPLE DATA in backup block 0 */
-} xl_heap_insert;
+};
 
 #define SizeOfHeapInsert    (offsetof(xl_heap_insert, flags) + sizeof(uint8))
 
 /* This is what we need to know about delete */
-typedef struct xl_heap_delete
+struct xl_heap_delete
 {
-   TransactionId xmax;             /* xmax of the deleted tuple */
+   transaction_id xmax;             /* xmax of the deleted tuple */
    offset_number offnum;         /* deleted tuple's offset */
    uint8_t infobits_set;     /* infomask bits */
    uint8_t flags;
-} xl_heap_delete;
+};
 
 #define SizeOfHeapDelete    (offsetof(xl_heap_delete, flags) + sizeof(uint8))
 
-typedef struct xl_heap_update
+struct xl_heap_update
 {
-   TransactionId old_xmax;         /* xmax of the old tuple */
+   transaction_id old_xmax;         /* xmax of the old tuple */
    offset_number old_offnum;     /* old tuple's offset */
    uint8_t old_infobits_set;     /* infomask bits to set on old tuple */
    uint8_t flags;
-   TransactionId new_xmax;         /* xmax of the new tuple */
+   transaction_id new_xmax;         /* xmax of the new tuple */
    offset_number new_offnum;     /* new tuple's offset */
 
    /*
     * If XLH_UPDATE_CONTAINS_OLD_TUPLE or XLH_UPDATE_CONTAINS_OLD_KEY flags
     * are set, xl_heap_header and tuple data for the old tuple follow.
     */
-} xl_heap_update;
+};
 
 #define SizeOfHeapUpdate    (offsetof(xl_heap_update, new_offnum) + sizeof(OffsetNumber))
 
-typedef struct xl_heap_truncate
+struct xl_heap_truncate
 {
    oid dbId;
    uint32_t nrelids;
    uint8_t flags;
    oid relids[FLEXIBLE_ARRAY_MEMBER];
-} xl_heap_truncate;
+};
 
 #define SizeOfHeapTruncate    (offsetof(xl_heap_truncate, relids))
 /*
@@ -99,10 +123,10 @@ typedef struct xl_heap_truncate
 #define XLH_TRUNCATE_RESTART_SEQS                (1 << 1)
 
 /* This is what we need to know about confirmation of speculative insertion */
-typedef struct xl_heap_confirm
+struct xl_heap_confirm
 {
    offset_number offnum;         /* confirmed tuple's offset on page */
-} xl_heap_confirm;
+};
 
 #define SizeOfHeapConfirm    (offsetof(xl_heap_confirm, offnum) + sizeof(OffsetNumber))
 
@@ -110,22 +134,22 @@ typedef struct xl_heap_confirm
 #define XLH_LOCK_ALL_FROZEN_CLEARED        0x01
 
 /* This is what we need to know about lock */
-typedef struct xl_heap_lock
+struct xl_heap_lock
 {
-   TransactionId locking_xid;     /* might be a MultiXactId not xid */
+   transaction_id locking_xid;     /* might be a multi_xact_id not xid */
    offset_number offnum;         /* locked tuple's offset on page */
    int8_t infobits_set;     /* infomask and infomask2 bits to set */
    uint8_t flags;             /* XLH_LOCK_* flag bits */
-} xl_heap_lock;
+};
 
 #define SizeOfHeapLock    (offsetof(xl_heap_lock, flags) + sizeof(int8))
 
 /* This is what we need to know about in-place update */
-typedef struct xl_heap_inplace
+struct xl_heap_inplace
 {
    offset_number offnum;         /* updated tuple's offset on page */
    /* TUPLE DATA FOLLOWS AT END OF STRUCT */
-} xl_heap_inplace;
+};
 
 #define SizeOfHeapInplace    (offsetof(xl_heap_inplace, offnum) + sizeof(OffsetNumber))
 
@@ -143,13 +167,13 @@ typedef struct xl_heap_inplace
  *
  * Requires a super-exclusive lock.
  */
-typedef struct xl_heap_prune
+struct xl_heap_prune
 {
-   TransactionId latestRemovedXid;
+   transaction_id latestRemovedXid;
    uint16_t nredirected;
    uint16_t ndead;
    /* OFFSET NUMBERS are in the block reference 0 */
-} xl_heap_prune;
+};
 
 #define SizeOfHeapPrune (offsetof(xl_heap_prune, ndead) + sizeof(uint16))
 
@@ -159,11 +183,11 @@ typedef struct xl_heap_prune
  *
  * Used by heap vacuuming only.  Does not require a super-exclusive lock.
  */
-typedef struct xl_heap_vacuum
+struct xl_heap_vacuum
 {
    uint16_t nunused;
    /* OFFSET NUMBERS are in the block reference 0 */
-} xl_heap_vacuum;
+};
 
 #define SizeOfHeapVacuum (offsetof(xl_heap_vacuum, nunused) + sizeof(uint16))
 
@@ -173,11 +197,11 @@ typedef struct xl_heap_vacuum
  * Backup block 0's data contains an array of xl_heap_freeze_tuple structs,
  * one for each tuple.
  */
-typedef struct xl_heap_freeze_page
+struct xl_heap_freeze_page
 {
-   TransactionId cutoff_xid;
+   transaction_id cutoff_xid;
    uint16_t ntuples;
-} xl_heap_freeze_page;
+};
 
 #define SizeOfHeapFreezePage (offsetof(xl_heap_freeze_page, ntuples) + sizeof(uint16))
 
@@ -187,34 +211,34 @@ typedef struct xl_heap_freeze_page
  * Backup blk 0: visibility map buffer
  * Backup blk 1: heap buffer
  */
-typedef struct xl_heap_visible
+struct xl_heap_visible
 {
-   TransactionId cutoff_xid;
+   transaction_id cutoff_xid;
    uint8_t flags;
-} xl_heap_visible;
+};
 
 #define SizeOfHeapVisible (offsetof(xl_heap_visible, flags) + sizeof(uint8))
 
-typedef uint32_t CommandId;
+typedef uint32_t command_id;
 
 
-typedef struct xl_heap_new_cid
+struct xl_heap_new_cid
 {
    /*
     * store toplevel xid so we don't have to merge cids from different
     * transactions
     */
-   TransactionId top_xid;
-   CommandId cmin;
-   CommandId cmax;
-   CommandId combocid;         /* just for debugging */
+   transaction_id top_xid;
+   command_id cmin;
+   command_id cmax;
+   command_id combocid;         /* just for debugging */
 
    /*
     * Store the relfilenode/ctid pair to facilitate lookups.
     */
    RelFileNode target_node;
    struct item_pointer_data target_tid;
-} xl_heap_new_cid;
+};
 
 /*
  * This is what we need to know about a multi-insert.
@@ -227,23 +251,23 @@ typedef struct xl_heap_new_cid
  * followed by the tuple data for each tuple. There is padding to align
  * each xl_multi_insert_tuple struct.
  */
-typedef struct xl_heap_multi_insert
+struct xl_heap_multi_insert
 {
    uint8_t flags;
    uint16_t ntuples;
    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
-} xl_heap_multi_insert;
+};
 
 #define SizeOfHeapMultiInsert    offsetof(xl_heap_multi_insert, offsets)
 
 /* This is what we need to know about locking an updated version of a row */
-typedef struct xl_heap_lock_updated
+struct xl_heap_lock_updated
 {
-   TransactionId xmax;
+   transaction_id xmax;
    offset_number offnum;
    uint8_t infobits_set;
    uint8_t flags;
-} xl_heap_lock_updated;
+};
 
 char*heap_desc(char* buf, struct decoded_xlog_record* record);
 

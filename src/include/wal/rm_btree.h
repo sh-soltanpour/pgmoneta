@@ -224,7 +224,7 @@ struct xl_btree_reuse_page
 {
    struct rel_file_locator locator;
    block_number block;
-   FullTransactionId snapshotConflictHorizon;
+   full_transaction_id snapshotConflictHorizon;
    bool isCatalogRel;    /* to handle recovery conflict during logical
                           * decoding on standby */
 };
@@ -275,7 +275,7 @@ struct xl_btree_vacuum
 
 struct xl_btree_delete
 {
-   TransactionId snapshotConflictHorizon;
+   transaction_id snapshotConflictHorizon;
    uint16_t ndeleted;
    uint16_t nupdated;
    bool isCatalogRel;    /* to handle recovery conflict during logical
@@ -349,7 +349,7 @@ struct xl_btree_unlink_page
    block_number leftsib;         /* target block's left sibling, if any */
    block_number rightsib;        /* target block's right sibling */
    uint32_t level;           /* target block's level */
-   FullTransactionId safexid;   /* target block's BTPageSetDeleted() XID */
+   full_transaction_id safexid;   /* target block's BTPageSetDeleted() XID */
 
    /*
     * Information needed to recreate a half-dead leaf page with correct

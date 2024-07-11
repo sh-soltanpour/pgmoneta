@@ -35,7 +35,7 @@ seq_desc(char* buf, struct decoded_xlog_record *record)
 {
     char	   *rec = XLogRecGetData(record);
     uint8_t		info = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
-    xl_seq_rec *xlrec = (xl_seq_rec *) rec;
+    struct xl_seq_rec *xlrec = (struct xl_seq_rec *) rec;
 
     if (info == XLOG_SEQ_LOG)
         buf = pgmoneta_format_and_append(buf, "rel %u/%u/%u",

@@ -189,7 +189,7 @@ struct gin_xlog_delete_page
 {
     offset_number parentOffset;
     block_number rightLink;
-    TransactionId deleteXid;	/* last Xid which could see this page in scan */
+    transaction_id deleteXid;	/* last Xid which could see this page in scan */
 };
 
 #define XLOG_GIN_UPDATE_META_PAGE 0x60

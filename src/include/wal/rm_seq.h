@@ -34,11 +34,11 @@
 /* XLOG stuff */
 #define XLOG_SEQ_LOG			0x00
 
-typedef struct xl_seq_rec
+struct xl_seq_rec
 {
     RelFileNode node;
     /* SEQUENCE TUPLE DATA FOLLOWS AT THE END */
-} xl_seq_rec;
+};
 
 char* seq_desc(char* buf, struct decoded_xlog_record *record);
 

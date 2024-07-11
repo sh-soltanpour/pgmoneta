@@ -49,7 +49,7 @@ struct item_pointer_data
     struct block_id_data ip_blkid;
     offset_number ip_posid;
 };
-typedef struct block_id_data *BlockId;	/* block identifier */
+typedef struct block_id_data *block_id;	/* block identifier */
 
 
 

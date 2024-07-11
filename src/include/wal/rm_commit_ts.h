@@ -18,7 +18,7 @@ struct xl_commit_ts_set
 {
     TimestampTz timestamp;
     rep_origin_id nodeid;
-    TransactionId mainxid;
+    transaction_id mainxid;
     /* subxact Xids follow */
 };
 
@@ -28,7 +28,7 @@ struct xl_commit_ts_set
 struct xl_commit_ts_truncate
 {
     int			pageno;
-    TransactionId oldestXid;
+    transaction_id oldestXid;
 };
 
 #define SizeOfCommitTsTruncate	(offsetof(xl_commit_ts_truncate, oldestXid) + \

@@ -33,21 +33,21 @@
 
 typedef signed char int8;       /* == 8 bits */
 
-typedef struct
+struct shared_inval_catcache_msg
 {
    int8 id;                     /* cache ID --- must be first */
    oid dbId;                    /* database ID, or 0 if a shared relation */
    uint32_t hashValue;            /* hash value of key for this catcache */
-} SharedInvalCatcacheMsg;
+} ;
 
 #define SHAREDINVALCATALOG_ID   (-1)
 
-typedef struct
+struct shared_inval_catalog_msg
 {
    int8 id;                     /* type field --- must be first */
    oid dbId;                    /* database ID, or 0 if a shared catalog */
    oid catId;                   /* ID of catalog whose contents are invalid */
-} SharedInvalCatalogMsg;
+} ;
 
 #define SHAREDINVALRELCACHE_ID  (-2)
 
@@ -89,8 +89,8 @@ typedef struct
 typedef union
 {
    int8 id;                     /* type field --- must be first */
-   SharedInvalCatcacheMsg cc;
-   SharedInvalCatalogMsg cat;
+   struct shared_inval_catcache_msg cc;
+   struct shared_inval_catalog_msg cat;
    SharedInvalRelcacheMsg rc;
    SharedInvalSmgrMsg sm;
    SharedInvalRelmapMsg rm;

@@ -38,11 +38,11 @@ tablespace_desc(char *buf, struct decoded_xlog_record *record) {
     uint8_t info = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
 
     if (info == XLOG_TBLSPC_CREATE) {
-        xl_tblspc_create_rec *xlrec = (xl_tblspc_create_rec *) rec;
+        struct xl_tblspc_create_rec *xlrec = (struct xl_tblspc_create_rec *) rec;
 
         buf = pgmoneta_format_and_append(buf, "%u \"%s\"", xlrec->ts_id, xlrec->ts_path);
     } else if (info == XLOG_TBLSPC_DROP) {
-        xl_tblspc_drop_rec *xlrec = (xl_tblspc_drop_rec *) rec;
+        struct xl_tblspc_drop_rec *xlrec = (struct xl_tblspc_drop_rec *) rec;
 
         buf = pgmoneta_format_and_append(buf, "%u", xlrec->ts_id);
     }

@@ -54,7 +54,7 @@ xlog_desc(char* buf,  struct decoded_xlog_record* record)
     if (info == XLOG_CHECKPOINT_SHUTDOWN ||
         info == XLOG_CHECKPOINT_ONLINE)
     {
-        CheckPoint *checkpoint = (CheckPoint *) rec;
+        struct check_point *checkpoint = (struct check_point *) rec;
 
         buf = pgmoneta_format_and_append(buf, "redo %X/%X; "
                               "tli %u; prev tli %u; fpw %s; xid %u:%u; oid %u; multi %u; offset %u; "
@@ -88,7 +88,7 @@ xlog_desc(char* buf,  struct decoded_xlog_record* record)
     }
     else if (info == XLOG_RESTORE_POINT)
     {
-        xl_restore_point *xlrec = (xl_restore_point *) rec;
+        struct xl_restore_point *xlrec = (struct xl_restore_point *) rec;
 
         buf = pgmoneta_format_and_append(buf, xlrec->rp_name);
     }
@@ -105,11 +105,11 @@ xlog_desc(char* buf,  struct decoded_xlog_record* record)
     }
     else if (info == XLOG_PARAMETER_CHANGE)
     {
-        xl_parameter_change xlrec;
+        struct xl_parameter_change xlrec;
         const char *wal_level_str;
         const struct config_enum_entry *entry;
 
-        memcpy(&xlrec, rec, sizeof(xl_parameter_change));
+        memcpy(&xlrec, rec, sizeof(struct xl_parameter_change));
 
         /* Find a string representation for wal_level */
         wal_level_str = "?";
@@ -144,18 +144,18 @@ xlog_desc(char* buf,  struct decoded_xlog_record* record)
     }
     else if (info == XLOG_END_OF_RECOVERY)
     {
-        xl_end_of_recovery xlrec;
+        struct xl_end_of_recovery xlrec;
 
-        memcpy(&xlrec, rec, sizeof(xl_end_of_recovery));
+        memcpy(&xlrec, rec, sizeof(struct xl_end_of_recovery));
         buf = pgmoneta_format_and_append(buf, "tli %u; prev tli %u; time %s",
                          xlrec.ThisTimeLineID, xlrec.PrevTimeLineID,
                          timestamptz_to_str(xlrec.end_time));
     }
     else if (info == XLOG_OVERWRITE_CONTRECORD)
     {
-        xl_overwrite_contrecord xlrec;
+        struct xl_overwrite_contrecord xlrec;
 
-        memcpy(&xlrec, rec, sizeof(xl_overwrite_contrecord));
+        memcpy(&xlrec, rec, sizeof(struct xl_overwrite_contrecord));
         buf = pgmoneta_format_and_append(buf, "lsn %X/%X; time %s",
                          LSN_FORMAT_ARGS(xlrec.overwritten_lsn),
                          timestamptz_to_str(xlrec.overwrite_time));

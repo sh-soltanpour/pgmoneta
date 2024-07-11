@@ -47,7 +47,7 @@ typedef int64_t TimestampTz;
  * Information logged when we detect a change in one of the parameters
  * important for Hot Standby.
  */
-typedef struct xl_parameter_change
+struct xl_parameter_change
 {
     int			MaxConnections;
     int			max_worker_processes;
@@ -57,29 +57,29 @@ typedef struct xl_parameter_change
     int			wal_level;
     bool		wal_log_hints;
     bool		track_commit_timestamp;
-} xl_parameter_change;
+};
 
 /* logs restore point */
-typedef struct xl_restore_point
+struct xl_restore_point
 {
     TimestampTz rp_time;
     char		rp_name[MAXFNAMELEN];
-} xl_restore_point;
+};
 
 /* Overwrite of prior contrecord */
-typedef struct xl_overwrite_contrecord
+struct xl_overwrite_contrecord
 {
     xlog_rec_ptr	overwritten_lsn;
     TimestampTz overwrite_time;
-} xl_overwrite_contrecord;
+};
 
 /* End of recovery mark, when we don't do an END_OF_RECOVERY checkpoint */
-typedef struct xl_end_of_recovery
+struct xl_end_of_recovery
 {
     TimestampTz end_time;
     timeline_id	ThisTimeLineID; /* new TLI */
     timeline_id	PrevTimeLineID; /* previous TLI we forked off from */
-} xl_end_of_recovery;
+};
 
 struct config_enum_entry
 {

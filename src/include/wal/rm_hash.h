@@ -264,7 +264,7 @@ struct xl_hash_init_bitmap_page
  */
 struct xl_hash_vacuum_one_page
 {
-    TransactionId latestRemovedXid;
+    transaction_id latestRemovedXid;
     int			ntuples;
 
     /* TARGET OFFSET NUMBERS FOLLOW AT THE END */

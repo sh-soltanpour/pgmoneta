@@ -30,7 +30,7 @@
 #include "utils.h"
 
 static char*
-standby_desc_running_xacts(char* buf, xl_running_xacts* xlrec)
+standby_desc_running_xacts(char* buf, struct xl_running_xacts* xlrec)
 {
    int i;
 
@@ -128,7 +128,7 @@ standby_desc(char* buf, struct decoded_xlog_record *record)
 
    if (info == XLOG_STANDBY_LOCK)
    {
-      xl_standby_locks* xlrec = (xl_standby_locks*) rec;
+       struct xl_standby_locks* xlrec = (struct xl_standby_locks*) rec;
       int i;
 
       for (i = 0; i < xlrec->nlocks; i++)
@@ -140,13 +140,13 @@ standby_desc(char* buf, struct decoded_xlog_record *record)
    }
    else if (info == XLOG_RUNNING_XACTS)
    {
-      xl_running_xacts* xlrec = (xl_running_xacts*) rec;
+       struct xl_running_xacts* xlrec = (struct xl_running_xacts*) rec;
 
       buf = standby_desc_running_xacts(buf, xlrec);
    }
    else if (info == XLOG_INVALIDATIONS)
    {
-      xl_invalidations* xlrec = (xl_invalidations*) rec;
+       struct xl_invalidations* xlrec = (struct xl_invalidations*) rec;
       buf = standby_desc_invalidations(buf, xlrec->nmsgs, xlrec->msgs,
                                  xlrec->dbId, xlrec->tsId,
                                  xlrec->relcacheInitFileInval);

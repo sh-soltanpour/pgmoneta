@@ -278,7 +278,7 @@ decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlo
       }
       else if (block_id == XLR_BLOCK_ID_TOPLEVEL_XID)
       {
-         COPY_HEADER_FIELD(&decoded->toplevel_xid, sizeof(TransactionId));
+         COPY_HEADER_FIELD(&decoded->toplevel_xid, sizeof(transaction_id));
       }
       else if (block_id <= XLR_MAX_BLOCK_ID)
       {

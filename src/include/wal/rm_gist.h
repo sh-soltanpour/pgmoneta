@@ -67,7 +67,7 @@ struct gist_xlog_page_update
  */
 struct gist_xlog_delete
 {
-    TransactionId latestRemovedXid;
+    transaction_id latestRemovedXid;
     uint16_t		ntodelete;		/* number of deleted offsets */
 
     /*
@@ -102,7 +102,7 @@ struct gist_xlog_page_split
  */
 struct gist_xlog_page_delete
 {
-    FullTransactionId deleteXid;	/* last Xid which could see page in scan */
+    full_transaction_id deleteXid;	/* last Xid which could see page in scan */
     offset_number downlinkOffset;	/* Offset of downlink referencing this
 									 * page */
 };
@@ -117,7 +117,7 @@ struct gist_xlog_page_reuse
 {
     RelFileNode node;
     block_number block;
-    FullTransactionId latestRemovedFullXid;
+    full_transaction_id latestRemovedFullXid;
 };
 
 #define SizeOfGistxlogPageReuse	(offsetof(gistxlogPageReuse, latestRemovedFullXid) + sizeof(FullTransactionId))

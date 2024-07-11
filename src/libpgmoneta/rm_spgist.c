@@ -40,7 +40,7 @@ spg_desc(char* buf, struct decoded_xlog_record *record)
     {
         case XLOG_SPGIST_ADD_LEAF:
         {
-            spgxlogAddLeaf *xlrec = (spgxlogAddLeaf *) rec;
+            struct spg_xlog_add_leaf *xlrec = (struct spg_xlog_add_leaf *) rec;
 
             buf = pgmoneta_format_and_append(buf, "off: %u, headoff: %u, parentoff: %u, nodeI: %u",
                              xlrec->offnumLeaf, xlrec->offnumHeadLeaf,
@@ -53,7 +53,7 @@ spg_desc(char* buf, struct decoded_xlog_record *record)
             break;
         case XLOG_SPGIST_MOVE_LEAFS:
         {
-            spgxlogMoveLeafs *xlrec = (spgxlogMoveLeafs *) rec;
+            struct spg_xlog_move_leafs *xlrec = (struct spg_xlog_move_leafs *) rec;
 
             buf = pgmoneta_format_and_append(buf, "nmoves: %u, parentoff: %u, nodeI: %u",
                              xlrec->nMoves,
@@ -68,7 +68,7 @@ spg_desc(char* buf, struct decoded_xlog_record *record)
             break;
         case XLOG_SPGIST_ADD_NODE:
         {
-            spgxlogAddNode *xlrec = (spgxlogAddNode *) rec;
+            struct spg_xlog_add_node *xlrec = (struct spg_xlog_add_node *) rec;
 
             buf = pgmoneta_format_and_append(buf, "off: %u, newoff: %u, parentBlk: %d, "
                                   "parentoff: %u, nodeI: %u",
@@ -83,7 +83,7 @@ spg_desc(char* buf, struct decoded_xlog_record *record)
             break;
         case XLOG_SPGIST_SPLIT_TUPLE:
         {
-            spgxlogSplitTuple *xlrec = (spgxlogSplitTuple *) rec;
+            struct spg_xlog_split_tuple *xlrec = (struct spg_xlog_split_tuple *) rec;
 
             buf = pgmoneta_format_and_append(buf, "prefixoff: %u, postfixoff: %u",
                              xlrec->offnumPrefix,
@@ -96,7 +96,7 @@ spg_desc(char* buf, struct decoded_xlog_record *record)
             break;
         case XLOG_SPGIST_PICKSPLIT:
         {
-            spgxlogPickSplit *xlrec = (spgxlogPickSplit *) rec;
+            struct spg_xlog_pick_split *xlrec = (struct spg_xlog_pick_split *) rec;
 
             buf = pgmoneta_format_and_append(buf, "ndelete: %u, ninsert: %u, inneroff: %u, "
                                   "parentoff: %u, nodeI: %u",
@@ -113,7 +113,7 @@ spg_desc(char* buf, struct decoded_xlog_record *record)
             break;
         case XLOG_SPGIST_VACUUM_LEAF:
         {
-            spgxlogVacuumLeaf *xlrec = (spgxlogVacuumLeaf *) rec;
+            struct spg_xlog_vacuum_leaf *xlrec = (struct spg_xlog_vacuum_leaf *) rec;
 
             buf = pgmoneta_format_and_append(buf, "ndead: %u, nplaceholder: %u, nmove: %u, nchain: %u",
                              xlrec->nDead, xlrec->nPlaceholder,
@@ -122,7 +122,7 @@ spg_desc(char* buf, struct decoded_xlog_record *record)
             break;
         case XLOG_SPGIST_VACUUM_ROOT:
         {
-            spgxlogVacuumRoot *xlrec = (spgxlogVacuumRoot *) rec;
+            struct spg_xlog_vacuum_root *xlrec = (struct spg_xlog_vacuum_root *) rec;
 
             buf = pgmoneta_format_and_append(buf, "ndelete: %u",
                              xlrec->nDelete);
@@ -130,7 +130,7 @@ spg_desc(char* buf, struct decoded_xlog_record *record)
             break;
         case XLOG_SPGIST_VACUUM_REDIRECT:
         {
-            spgxlogVacuumRedirect *xlrec = (spgxlogVacuumRedirect *) rec;
+            struct spg_xlog_vacuum_redirect *xlrec = (struct spg_xlog_vacuum_redirect *) rec;
 
             buf = pgmoneta_format_and_append(buf, "ntoplaceholder: %u, firstplaceholder: %u, newestredirectxid: %u",
                              xlrec->nToPlaceholder,

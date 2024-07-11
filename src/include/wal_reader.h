@@ -38,7 +38,7 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 #include "stdbool.h"
-#include "transaction.h"
+#include "wal/transaction.h"
 
 
 #define MAXIMUM_ALIGNOF 8 // TODO: double check this value
@@ -121,7 +121,7 @@ struct xlog_long_page_header_data
 struct xlog_record
 {
    uint32_t xl_tot_len;      /* total len of entire record */
-   TransactionId xl_xid;        /* xact id */
+   transaction_id xl_xid;        /* xact id */
    xlog_rec_ptr xl_prev;         /* ptr to previous record in log */
    uint8_t xl_info;         /* flag bits, see below */
    rmgr_id xl_rmid;         /* resource manager for this record */
@@ -213,7 +213,7 @@ struct decoded_xlog_record
    xlog_rec_ptr next_lsn;        /* location of next record */
    struct xlog_record header;          /* header */
    rep_origin_id record_origin;
-   TransactionId toplevel_xid;  /* XID of top-level transaction */
+   transaction_id toplevel_xid;  /* XID of top-level transaction */
    char* main_data;       /* record's main data portion */
    uint32_t main_data_len;   /* main data portion's length */
    int max_block_id;    /* highest block_id in use (-1 if none) */

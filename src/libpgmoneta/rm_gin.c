@@ -105,9 +105,9 @@ gin_desc(char *buf, struct decoded_xlog_record *record) {
                 block_number leftChildBlkno;
                 block_number rightChildBlkno;
 
-                leftChildBlkno = BlockIdGetBlockNumber((BlockId) payload);
+                leftChildBlkno = BlockIdGetBlockNumber((block_id) payload);
                 payload += sizeof(struct block_id_data);
-                rightChildBlkno = BlockIdGetBlockNumber((BlockId) payload);
+                rightChildBlkno = BlockIdGetBlockNumber((block_id) payload);
                 payload += sizeof(block_number);
                 buf = pgmoneta_format_and_append(buf, " children: %u/%u",
                                  leftChildBlkno, rightChildBlkno);

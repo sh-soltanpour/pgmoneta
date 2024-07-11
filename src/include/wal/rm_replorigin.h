@@ -7,17 +7,17 @@
 
 #include "wal_reader.h"
 
-typedef struct xl_replorigin_set
+struct xl_replorigin_set
 {
     xlog_rec_ptr	remote_lsn;
     rep_origin_id node_id;
     bool		force;
-} xl_replorigin_set;
+};
 
-typedef struct xl_replorigin_drop
+struct xl_replorigin_drop
 {
     rep_origin_id node_id;
-} xl_replorigin_drop;
+};
 
 #define XLOG_REPLORIGIN_SET		0x00
 #define XLOG_REPLORIGIN_DROP		0x10

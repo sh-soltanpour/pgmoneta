@@ -32,13 +32,13 @@
 #include "wal_reader.h"
 #define XLOG_RELMAP_UPDATE		0x00
 
-typedef struct xl_relmap_update
+struct xl_relmap_update
 {
     oid			dbid;			/* database ID, or 0 for shared map */
     oid			tsid;			/* database's tablespace, or pg_global */
     int32_t 		nbytes;			/* size of relmap data */
     char		data[FLEXIBLE_ARRAY_MEMBER];
-} xl_relmap_update;
+};
 
 #define MinSizeOfRelmapUpdate offsetof(xl_relmap_update, data)
 

@@ -30,35 +30,35 @@
 #ifndef PGMONETA_PG_CONTROL_H
 #define PGMONETA_PG_CONTROL_H
 #include "wal_reader.h"
-#include "transaction.h"
+#include "wal/transaction.h"
 
 typedef int64_t pg_time_t;
 
 /*
- * Body of CheckPoint XLOG records.  This is declared here because we keep
+ * Body of check_point XLOG records.  This is declared here because we keep
  * a copy of the latest one in pg_control for possible disaster recovery.
  * Changing this struct requires a PG_CONTROL_VERSION bump.
  */
-typedef struct CheckPoint
+struct check_point
 {
     xlog_rec_ptr	redo;			/* next RecPtr available when we began to
-								 * create CheckPoint (i.e. REDO start point) */
+								 * create check_point (i.e. REDO start point) */
     timeline_id	ThisTimeLineID; /* current TLI */
     timeline_id	PrevTimeLineID; /* previous TLI, if this record begins a new
 								 * timeline (equals ThisTimeLineID otherwise) */
     bool		fullPageWrites; /* current full_page_writes */
-    FullTransactionId nextXid;	/* next free transaction ID */
+    full_transaction_id nextXid;	/* next free transaction ID */
     oid			nextOid;		/* next free OID */
-    MultiXactId nextMulti;		/* next free MultiXactId */
-    MultiXactOffset nextMultiOffset;	/* next free MultiXact offset */
-    TransactionId oldestXid;	/* cluster-wide minimum datfrozenxid */
+    multi_xact_id nextMulti;		/* next free multi_xact_id */
+    multi_xact_offset nextMultiOffset;	/* next free MultiXact offset */
+    transaction_id oldestXid;	/* cluster-wide minimum datfrozenxid */
     oid			oldestXidDB;	/* database with minimum datfrozenxid */
-    MultiXactId oldestMulti;	/* cluster-wide minimum datminmxid */
+    multi_xact_id oldestMulti;	/* cluster-wide minimum datminmxid */
     oid			oldestMultiDB;	/* database with minimum datminmxid */
     pg_time_t	time;			/* time stamp of checkpoint */
-    TransactionId oldestCommitTsXid;	/* oldest Xid with valid commit
+    transaction_id oldestCommitTsXid;	/* oldest Xid with valid commit
 										 * timestamp */
-    TransactionId newestCommitTsXid;	/* newest Xid with valid commit
+    transaction_id newestCommitTsXid;	/* newest Xid with valid commit
 										 * timestamp */
 
     /*
@@ -67,8 +67,8 @@ typedef struct CheckPoint
      * online checkpoints and only when wal_level is replica. Otherwise it's
      * set to InvalidTransactionId.
      */
-    TransactionId oldestActiveXid;
-} CheckPoint;
+    transaction_id oldestActiveXid;
+};
 
 /* XLOG info values for XLOG rmgr */
 #define XLOG_CHECKPOINT_SHUTDOWN		0x00

@@ -38,38 +38,38 @@
 #define XLOG_RUNNING_XACTS          0x10
 #define XLOG_INVALIDATIONS          0x20
 
-typedef struct xl_standby_lock {
-    TransactionId xid;           /* xid of holder of AccessExclusiveLock */
+struct xl_standby_lock {
+    transaction_id xid;           /* xid of holder of AccessExclusiveLock */
     oid dbOid;           /* DB containing table */
     oid relOid;          /* OID of table */
-} xl_standby_lock;
+};
 
-typedef struct xl_standby_locks {
+struct xl_standby_locks {
     int nlocks;          /* number of entries in locks array */
-    xl_standby_lock locks[FLEXIBLE_ARRAY_MEMBER];
-} xl_standby_locks;
+    struct xl_standby_lock locks[FLEXIBLE_ARRAY_MEMBER];
+};
 
 /*
  * When we write running xact data to WAL, we use this structure.
  */
-typedef struct xl_running_xacts {
+struct xl_running_xacts {
     int xcnt;            /* # of xact ids in xids[] */
     int subxcnt;         /* # of subxact ids in xids[] */
     bool subxid_overflow;     /* snapshot overflowed, subxids missing */
-    TransactionId nextXid;       /* xid from TransamVariables->nextXid */
-    TransactionId oldestRunningXid;  /* *not* oldestXmin */
-    TransactionId latestCompletedXid;    /* so we can set xmax */
+    transaction_id nextXid;       /* xid from TransamVariables->nextXid */
+    transaction_id oldestRunningXid;  /* *not* oldestXmin */
+    transaction_id latestCompletedXid;    /* so we can set xmax */
 
-    TransactionId xids[FLEXIBLE_ARRAY_MEMBER];
-} xl_running_xacts;
+    transaction_id xids[FLEXIBLE_ARRAY_MEMBER];
+};
 
-typedef struct xl_invalidations {
+struct xl_invalidations {
     oid dbId;            /* MyDatabaseId */
     oid tsId;            /* MyDatabaseTableSpace */
     bool relcacheInitFileInval;   /* invalidate relcache init files */
     int nmsgs;           /* number of shared inval msgs */
     SharedInvalidationMessage msgs[FLEXIBLE_ARRAY_MEMBER];
-} xl_invalidations;
+};
 
 #define MinSizeOfInvalidations offsetof(xl_invalidations, msgs)
 

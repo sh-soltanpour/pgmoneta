@@ -35,16 +35,16 @@
 #define XLOG_TBLSPC_CREATE		0x00
 #define XLOG_TBLSPC_DROP		0x10
 
-typedef struct xl_tblspc_create_rec
+struct xl_tblspc_create_rec
 {
     oid			ts_id;
     char		ts_path[FLEXIBLE_ARRAY_MEMBER]; /* null-terminated string */
-} xl_tblspc_create_rec;
+};
 
-typedef struct xl_tblspc_drop_rec
+struct xl_tblspc_drop_rec
 {
     oid			ts_id;
-} xl_tblspc_drop_rec;
+};
 
 char* tablespace_desc(char* buf, struct decoded_xlog_record *record);
 

@@ -39,11 +39,11 @@
 #define XLOG_SMGR_CREATE	0x10
 #define XLOG_SMGR_TRUNCATE	0x20
 
-typedef struct xl_smgr_create
+struct xl_smgr_create
 {
     RelFileNode rnode;
     enum fork_number	forkNum;
-} xl_smgr_create;
+};
 
 /* flags for xl_smgr_truncate */
 #define SMGR_TRUNCATE_HEAP		0x0001
@@ -52,12 +52,12 @@ typedef struct xl_smgr_create
 #define SMGR_TRUNCATE_ALL		\
 	(SMGR_TRUNCATE_HEAP|SMGR_TRUNCATE_VM|SMGR_TRUNCATE_FSM)
 
-typedef struct xl_smgr_truncate
+struct xl_smgr_truncate
 {
     block_number blkno;
     RelFileNode rnode;
     int			flags;
-} xl_smgr_truncate;
+};
 
 char* storage_desc(char* buf, struct decoded_xlog_record *record);
 

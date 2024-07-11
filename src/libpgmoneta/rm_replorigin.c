@@ -17,9 +17,9 @@ replorigin_desc(char* buf, struct decoded_xlog_record *record)
     {
         case XLOG_REPLORIGIN_SET:
         {
-            xl_replorigin_set *xlrec;
+            struct xl_replorigin_set *xlrec;
 
-            xlrec = (xl_replorigin_set *) rec;
+            xlrec = (struct xl_replorigin_set *) rec;
 
             buf = pgmoneta_format_and_append(buf, "set %u; lsn %X/%X; force: %d",
                              xlrec->node_id,
@@ -29,9 +29,9 @@ replorigin_desc(char* buf, struct decoded_xlog_record *record)
         }
         case XLOG_REPLORIGIN_DROP:
         {
-            xl_replorigin_drop *xlrec;
+            struct xl_replorigin_drop *xlrec;
 
-            xlrec = (xl_replorigin_drop *) rec;
+            xlrec = (struct xl_replorigin_drop *) rec;
 
             buf = pgmoneta_format_and_append(buf, "drop %u", xlrec->node_id);
             break;

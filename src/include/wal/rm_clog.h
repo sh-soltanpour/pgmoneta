@@ -41,7 +41,7 @@ typedef int XidStatus;
 struct xl_clog_truncate
 {
     int			pageno;
-    TransactionId oldestXact;
+    transaction_id oldestXact;
     oid			oldestXactDb;
 };
 

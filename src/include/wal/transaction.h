@@ -32,18 +32,18 @@
 
 #include "stdint.h"
 
-typedef struct FullTransactionId
+typedef struct full_transaction_id
 {
     uint64_t value;
-} FullTransactionId;
+} full_transaction_id;
 
-typedef uint32_t TransactionId;
-typedef TransactionId MultiXactId;
-typedef uint32_t MultiXactOffset;
+typedef uint32_t transaction_id;
+typedef transaction_id multi_xact_id;
+typedef uint32_t multi_xact_offset;
 
 #define EpochFromFullTransactionId(x)   ((uint32_t) ((x).value >> 32))
 #define XidFromFullTransactionId(x)     ((uint32_t) (x).value)
-#define InvalidTransactionId        ((TransactionId) 0)
+#define InvalidTransactionId        ((transaction_id) 0)
 #define TransactionIdIsValid(xid)		((xid) != InvalidTransactionId)
 
 

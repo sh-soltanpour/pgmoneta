@@ -35,7 +35,7 @@
 
 
 /*
- * The first two MultiXactId values are reserved to store the truncation Xid
+ * The first two multi_xact_id values are reserved to store the truncation Xid
  * and epoch of the first segment, so we start assigning multixact values from
  * 2.
  */
@@ -75,11 +75,11 @@ typedef enum
 			((status) > MultiXactStatusForUpdate)
 
 
-typedef struct MultiXactMember
+struct multi_xact_member
 {
-    TransactionId xid;
+    transaction_id xid;
     MultiXactStatus status;
-} MultiXactMember;
+};
 
 
 /* ----------------
@@ -92,28 +92,28 @@ typedef struct MultiXactMember
 #define XLOG_MULTIXACT_CREATE_ID		0x20
 #define XLOG_MULTIXACT_TRUNCATE_ID		0x30
 
-typedef struct xl_multixact_create
+struct xl_multixact_create
 {
-    MultiXactId mid;			/* new MultiXact's ID */
-    MultiXactOffset moff;		/* its starting offset in members file */
+    multi_xact_id mid;			/* new MultiXact's ID */
+    multi_xact_offset moff;		/* its starting offset in members file */
     int32_t		nmembers;		/* number of member XIDs */
-    MultiXactMember members[FLEXIBLE_ARRAY_MEMBER];
-} xl_multixact_create;
+    struct multi_xact_member members[FLEXIBLE_ARRAY_MEMBER];
+};
 
 #define SizeOfMultiXactCreate (offsetof(xl_multixact_create, members))
 
-typedef struct xl_multixact_truncate
+struct xl_multixact_truncate
 {
     oid			oldestMultiDB;
 
     /* to-be-truncated range of multixact offsets */
-    MultiXactId startTruncOff;	/* just for completeness' sake */
-    MultiXactId endTruncOff;
+    multi_xact_id startTruncOff;	/* just for completeness' sake */
+    multi_xact_id endTruncOff;
 
     /* to-be-truncated range of multixact members */
-    MultiXactOffset startTruncMemb;
-    MultiXactOffset endTruncMemb;
-} xl_multixact_truncate;
+    multi_xact_offset startTruncMemb;
+    multi_xact_offset endTruncMemb;
+};
 
 #define SizeOfMultiXactTruncate (sizeof(xl_multixact_truncate))
 
