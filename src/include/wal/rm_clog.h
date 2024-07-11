@@ -33,21 +33,21 @@
 
 typedef int XidStatus;
 
-#define TRANSACTION_STATUS_IN_PROGRESS		0x00
-#define TRANSACTION_STATUS_COMMITTED		0x01
-#define TRANSACTION_STATUS_ABORTED			0x02
-#define TRANSACTION_STATUS_SUB_COMMITTED	0x03
+#define TRANSACTION_STATUS_IN_PROGRESS    0x00
+#define TRANSACTION_STATUS_COMMITTED      0x01
+#define TRANSACTION_STATUS_ABORTED        0x02
+#define TRANSACTION_STATUS_SUB_COMMITTED  0x03
 
 struct xl_clog_truncate
 {
-    int			pageno;
-    transaction_id oldestXact;
-    oid			oldestXactDb;
+   int pageno;
+   transaction_id oldestXact;
+   oid oldestXactDb;
 };
 
-#define CLOG_ZEROPAGE		0x00
-#define CLOG_TRUNCATE		0x10
+#define CLOG_ZEROPAGE      0x00
+#define CLOG_TRUNCATE      0x10
 
-char* clog_desc(char* buf, struct decoded_xlog_record *record);
+char* clog_desc(char* buf, struct decoded_xlog_record* record);
 
 #endif //PGMONETA_RM_CLOG_H

@@ -26,7 +26,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef PGMONETA_PG_CONTROL_H
 #define PGMONETA_PG_CONTROL_H
 #include "wal/wal_reader.h"
@@ -41,49 +40,49 @@ typedef int64_t pg_time_t;
  */
 struct check_point
 {
-    xlog_rec_ptr	redo;			/* next RecPtr available when we began to
-								 * create check_point (i.e. REDO start point) */
-    timeline_id	ThisTimeLineID; /* current TLI */
-    timeline_id	PrevTimeLineID; /* previous TLI, if this record begins a new
-								 * timeline (equals ThisTimeLineID otherwise) */
-    bool		fullPageWrites; /* current full_page_writes */
-    struct full_transaction_id nextXid;	/* next free transaction ID */
-    oid			nextOid;		/* next free OID */
-    multi_xact_id nextMulti;		/* next free multi_xact_id */
-    multi_xact_offset nextMultiOffset;	/* next free MultiXact offset */
-    transaction_id oldestXid;	/* cluster-wide minimum datfrozenxid */
-    oid			oldestXidDB;	/* database with minimum datfrozenxid */
-    multi_xact_id oldestMulti;	/* cluster-wide minimum datminmxid */
-    oid			oldestMultiDB;	/* database with minimum datminmxid */
-    pg_time_t	time;			/* time stamp of checkpoint */
-    transaction_id oldestCommitTsXid;	/* oldest Xid with valid commit
-										 * timestamp */
-    transaction_id newestCommitTsXid;	/* newest Xid with valid commit
-										 * timestamp */
+   xlog_rec_ptr redo;         /* next RecPtr available when we began to
+                               * create check_point (i.e. REDO start point) */
+   timeline_id ThisTimeLineID;    /* current TLI */
+   timeline_id PrevTimeLineID;    /* previous TLI, if this record begins a new
+                                   * timeline (equals ThisTimeLineID otherwise) */
+   bool fullPageWrites;     /* current full_page_writes */
+   struct full_transaction_id nextXid;    /* next free transaction ID */
+   oid nextOid;            /* next free OID */
+   multi_xact_id nextMulti;      /* next free multi_xact_id */
+   multi_xact_offset nextMultiOffset;  /* next free MultiXact offset */
+   transaction_id oldestXid;  /* cluster-wide minimum datfrozenxid */
+   oid oldestXidDB;           /* database with minimum datfrozenxid */
+   multi_xact_id oldestMulti;    /* cluster-wide minimum datminmxid */
+   oid oldestMultiDB;         /* database with minimum datminmxid */
+   pg_time_t time;         /* time stamp of checkpoint */
+   transaction_id oldestCommitTsXid;   /* oldest Xid with valid commit
+                                        * timestamp */
+   transaction_id newestCommitTsXid;   /* newest Xid with valid commit
+                                        * timestamp */
 
-    /*
-     * Oldest XID still running. This is only needed to initialize hot standby
-     * mode from an online checkpoint, so we only bother calculating this for
-     * online checkpoints and only when wal_level is replica. Otherwise it's
-     * set to InvalidTransactionId.
-     */
-    transaction_id oldestActiveXid;
+   /*
+    * Oldest XID still running. This is only needed to initialize hot standby
+    * mode from an online checkpoint, so we only bother calculating this for
+    * online checkpoints and only when wal_level is replica. Otherwise it's
+    * set to InvalidTransactionId.
+    */
+   transaction_id oldestActiveXid;
 };
 
 /* XLOG info values for XLOG rmgr */
-#define XLOG_CHECKPOINT_SHUTDOWN		0x00
-#define XLOG_CHECKPOINT_ONLINE			0x10
-#define XLOG_NOOP						0x20
-#define XLOG_NEXTOID					0x30
-#define XLOG_SWITCH						0x40
-#define XLOG_BACKUP_END					0x50
-#define XLOG_PARAMETER_CHANGE			0x60
-#define XLOG_RESTORE_POINT				0x70
-#define XLOG_FPW_CHANGE					0x80
-#define XLOG_END_OF_RECOVERY			0x90
-#define XLOG_FPI_FOR_HINT				0xA0
-#define XLOG_FPI						0xB0
+#define XLOG_CHECKPOINT_SHUTDOWN    0x00
+#define XLOG_CHECKPOINT_ONLINE         0x10
+#define XLOG_NOOP                0x20
+#define XLOG_NEXTOID             0x30
+#define XLOG_SWITCH                 0x40
+#define XLOG_BACKUP_END             0x50
+#define XLOG_PARAMETER_CHANGE       0x60
+#define XLOG_RESTORE_POINT          0x70
+#define XLOG_FPW_CHANGE             0x80
+#define XLOG_END_OF_RECOVERY        0x90
+#define XLOG_FPI_FOR_HINT           0xA0
+#define XLOG_FPI                 0xB0
 /* 0xC0 is used in Postgres 9.5-11 */
-#define XLOG_OVERWRITE_CONTRECORD		0xD0
+#define XLOG_OVERWRITE_CONTRECORD      0xD0
 
 #endif //PGMONETA_PG_CONTROL_H

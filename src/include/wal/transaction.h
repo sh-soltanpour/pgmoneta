@@ -26,7 +26,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef PGMONETA_TRANSACTION_H
 #define PGMONETA_TRANSACTION_H
 
@@ -34,7 +33,7 @@
 
 struct full_transaction_id
 {
-    uint64_t value;
+   uint64_t value;
 };
 
 typedef uint32_t transaction_id;
@@ -44,8 +43,6 @@ typedef uint32_t multi_xact_offset;
 #define EpochFromFullTransactionId(x)   ((uint32_t) ((x).value >> 32))
 #define XidFromFullTransactionId(x)     ((uint32_t) (x).value)
 #define InvalidTransactionId        ((transaction_id) 0)
-#define TransactionIdIsValid(xid)		((xid) != InvalidTransactionId)
-
-
+#define TransactionIdIsValid(xid)      ((xid) != InvalidTransactionId)
 
 #endif //PGMONETA_TRANSACTION_H

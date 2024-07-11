@@ -30,18 +30,18 @@
 #define PGMONETA_RM_RELMAP_H
 
 #include "wal_reader.h"
-#define XLOG_RELMAP_UPDATE		0x00
+#define XLOG_RELMAP_UPDATE    0x00
 
 struct xl_relmap_update
 {
-    oid			dbid;			/* database ID, or 0 for shared map */
-    oid			tsid;			/* database's tablespace, or pg_global */
-    int32_t 		nbytes;			/* size of relmap data */
-    char		data[FLEXIBLE_ARRAY_MEMBER];
+   oid dbid;               /* database ID, or 0 for shared map */
+   oid tsid;               /* database's tablespace, or pg_global */
+   int32_t nbytes;               /* size of relmap data */
+   char data[FLEXIBLE_ARRAY_MEMBER];
 };
 
 #define MinSizeOfRelmapUpdate offsetof(xl_relmap_update, data)
 
-char* relmap_desc(char* buf, struct decoded_xlog_record *record);
+char* relmap_desc(char* buf, struct decoded_xlog_record* record);
 
 #endif //PGMONETA_RM_RELMAP_H

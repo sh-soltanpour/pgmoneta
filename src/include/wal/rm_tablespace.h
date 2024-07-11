@@ -32,20 +32,20 @@
 #include "wal_reader.h"
 
 /* XLOG stuff */
-#define XLOG_TBLSPC_CREATE		0x00
-#define XLOG_TBLSPC_DROP		0x10
+#define XLOG_TBLSPC_CREATE    0x00
+#define XLOG_TBLSPC_DROP      0x10
 
 struct xl_tblspc_create_rec
 {
-    oid			ts_id;
-    char		ts_path[FLEXIBLE_ARRAY_MEMBER]; /* null-terminated string */
+   oid ts_id;
+   char ts_path[FLEXIBLE_ARRAY_MEMBER];     /* null-terminated string */
 };
 
 struct xl_tblspc_drop_rec
 {
-    oid			ts_id;
+   oid ts_id;
 };
 
-char* tablespace_desc(char* buf, struct decoded_xlog_record *record);
+char* tablespace_desc(char* buf, struct decoded_xlog_record* record);
 
 #endif //PGMONETA_RM_TABLESPACE_H

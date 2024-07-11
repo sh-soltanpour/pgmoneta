@@ -38,47 +38,50 @@
 #define XLOG_RUNNING_XACTS          0x10
 #define XLOG_INVALIDATIONS          0x20
 
-struct xl_standby_lock {
-    transaction_id xid;           /* xid of holder of AccessExclusiveLock */
-    oid dbOid;           /* DB containing table */
-    oid relOid;          /* OID of table */
+struct xl_standby_lock
+{
+   transaction_id xid;            /* xid of holder of AccessExclusiveLock */
+   oid dbOid;            /* DB containing table */
+   oid relOid;           /* OID of table */
 };
 
-struct xl_standby_locks {
-    int nlocks;          /* number of entries in locks array */
-    struct xl_standby_lock locks[FLEXIBLE_ARRAY_MEMBER];
+struct xl_standby_locks
+{
+   int nlocks;           /* number of entries in locks array */
+   struct xl_standby_lock locks[FLEXIBLE_ARRAY_MEMBER];
 };
 
 /*
  * When we write running xact data to WAL, we use this structure.
  */
-struct xl_running_xacts {
-    int xcnt;            /* # of xact ids in xids[] */
-    int subxcnt;         /* # of subxact ids in xids[] */
-    bool subxid_overflow;     /* snapshot overflowed, subxids missing */
-    transaction_id nextXid;       /* xid from TransamVariables->nextXid */
-    transaction_id oldestRunningXid;  /* *not* oldestXmin */
-    transaction_id latestCompletedXid;    /* so we can set xmax */
+struct xl_running_xacts
+{
+   int xcnt;             /* # of xact ids in xids[] */
+   int subxcnt;          /* # of subxact ids in xids[] */
+   bool subxid_overflow;      /* snapshot overflowed, subxids missing */
+   transaction_id nextXid;        /* xid from TransamVariables->nextXid */
+   transaction_id oldestRunningXid;   /* *not* oldestXmin */
+   transaction_id latestCompletedXid;     /* so we can set xmax */
 
-    transaction_id xids[FLEXIBLE_ARRAY_MEMBER];
+   transaction_id xids[FLEXIBLE_ARRAY_MEMBER];
 };
 
-struct xl_invalidations {
-    oid dbId;            /* MyDatabaseId */
-    oid tsId;            /* MyDatabaseTableSpace */
-    bool relcacheInitFileInval;   /* invalidate relcache init files */
-    int nmsgs;           /* number of shared inval msgs */
-    union shared_invalidation_message msgs[FLEXIBLE_ARRAY_MEMBER];
+struct xl_invalidations
+{
+   oid dbId;             /* MyDatabaseId */
+   oid tsId;             /* MyDatabaseTableSpace */
+   bool relcacheInitFileInval;    /* invalidate relcache init files */
+   int nmsgs;            /* number of shared inval msgs */
+   union shared_invalidation_message msgs[FLEXIBLE_ARRAY_MEMBER];
 };
 
 #define MinSizeOfInvalidations offsetof(xl_invalidations, msgs)
 
-char *
-standby_desc(char *buf, struct decoded_xlog_record *record);
+char*
+standby_desc(char* buf, struct decoded_xlog_record* record);
 
-char *
-standby_desc_invalidations(char *buf, int nmsgs, union shared_invalidation_message *msgs, oid dbId, oid tsId,
+char*
+standby_desc_invalidations(char* buf, int nmsgs, union shared_invalidation_message* msgs, oid dbId, oid tsId,
                            bool relcacheInitFileInval);
-
 
 #endif //PGMONETA_RM_STANDBY_H

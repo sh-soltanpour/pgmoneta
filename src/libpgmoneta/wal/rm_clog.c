@@ -32,25 +32,25 @@
 #include "wal/rm.h"
 
 char*
-clog_desc(char* buf,  struct decoded_xlog_record *record)
+clog_desc(char* buf, struct decoded_xlog_record* record)
 {
-    char	   *rec = XLogRecGetData(record);
-    uint8_t		info = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
+   char* rec = XLogRecGetData(record);
+   uint8_t info = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
 
-    if (info == CLOG_ZEROPAGE)
-    {
-        int			pageno;
+   if (info == CLOG_ZEROPAGE)
+   {
+      int pageno;
 
-        memcpy(&pageno, rec, sizeof(int));
-        buf = pgmoneta_format_and_append(buf, "page %d", pageno);
-    }
-    else if (info == CLOG_TRUNCATE)
-    {
-        struct xl_clog_truncate xlrec;
+      memcpy(&pageno, rec, sizeof(int));
+      buf = pgmoneta_format_and_append(buf, "page %d", pageno);
+   }
+   else if (info == CLOG_TRUNCATE)
+   {
+      struct xl_clog_truncate xlrec;
 
-        memcpy(&xlrec, rec, sizeof(struct xl_clog_truncate));
-        buf = pgmoneta_format_and_append(buf, "page %d; oldestXact %u",
-                         xlrec.pageno, xlrec.oldestXact);
-    }
-    return buf;
+      memcpy(&xlrec, rec, sizeof(struct xl_clog_truncate));
+      buf = pgmoneta_format_and_append(buf, "page %d; oldestXact %u",
+                                       xlrec.pageno, xlrec.oldestXact);
+   }
+   return buf;
 }

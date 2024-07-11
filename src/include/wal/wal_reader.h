@@ -40,7 +40,6 @@ extern "C" {
 #include "stdbool.h"
 #include "wal/transaction.h"
 
-
 #define MAXIMUM_ALIGNOF 8 // TODO: double check this value
 #define ALIGNOF_SHORT 2 // TODO: double check this value
 #define MAXALIGN(x) (((x) + (sizeof(void*) - 1)) & ~(sizeof(void*) - 1))
@@ -48,7 +47,7 @@ extern "C" {
 #define TYPEALIGN(ALIGNVAL, LEN)  \
         (((uintptr_t) (LEN) + ((ALIGNVAL) -1)) & ~((uintptr_t) ((ALIGNVAL) -1)))
 #define MAXALIGNTYPE(LEN) TYPEALIGN(MAXIMUM_ALIGNOF, (LEN))
-#define SHORTALIGN(LEN)			TYPEALIGN(ALIGNOF_SHORT, (LEN))
+#define SHORTALIGN(LEN)       TYPEALIGN(ALIGNOF_SHORT, (LEN))
 
 #define XLOG_PAGE_MAGIC 0xD10D  // WAL version indicator
 
@@ -69,10 +68,9 @@ typedef int buffer;
 typedef uint32_t block_number;
 typedef unsigned int oid;
 typedef oid rel_file_number;
-#define InvalidOid		((oid) 0)
+#define InvalidOid      ((oid) 0)
 
 #define FLEXIBLE_ARRAY_MEMBER   /* empty */
-
 
 enum fork_number {
    InvalidForkNumber = -1,
@@ -88,14 +86,12 @@ enum fork_number {
     */
 };
 
-
 enum wal_level
 {
-    WAL_LEVEL_MINIMAL = 0,
-    WAL_LEVEL_REPLICA,
-    WAL_LEVEL_LOGICAL
+   WAL_LEVEL_MINIMAL = 0,
+   WAL_LEVEL_REPLICA,
+   WAL_LEVEL_LOGICAL
 };
-
 
 #define InvalidRepOriginId   0
 
@@ -199,7 +195,7 @@ struct decoded_bkp_block
    char* data;
    uint16_t data_len;
    uint16_t data_bufsz;
-} ;
+};
 
 struct decoded_xlog_record
 {
@@ -220,12 +216,11 @@ struct decoded_xlog_record
    struct decoded_bkp_block blocks[FLEXIBLE_ARRAY_MEMBER];
 };
 
-
 struct rel_file_node
 {
-    oid spcNode;         /* tablespace */
-    oid dbNode;             /* database */
-    oid relNode;         /* relation */
+   oid spcNode;          /* tablespace */
+   oid dbNode;              /* database */
+   oid relNode;          /* relation */
 };
 
 #define XLogRecHasBlockRef(record, block_id)           \

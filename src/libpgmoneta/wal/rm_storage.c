@@ -26,34 +26,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "utils.h"
 #include "wal/rm_storage.h"
 #include "wal/rm.h"
 #include "wal/relpath.h"
 
 char*
-storage_desc(char* buf, struct decoded_xlog_record *record)
+storage_desc(char* buf, struct decoded_xlog_record* record)
 {
-    char	   *rec = XLogRecGetData(record);
-    uint8_t		info = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
+   char* rec = XLogRecGetData(record);
+   uint8_t info = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
 
-    if (info == XLOG_SMGR_CREATE)
-    {
-        struct xl_smgr_create *xlrec = (struct xl_smgr_create *) rec;
-        char	   *path = relpathperm(xlrec->rnode, xlrec->forkNum);
+   if (info == XLOG_SMGR_CREATE)
+   {
+      struct xl_smgr_create* xlrec = (struct xl_smgr_create*) rec;
+      char* path = relpathperm(xlrec->rnode, xlrec->forkNum);
 
-        buf = pgmoneta_format_and_append(buf, path);
-        free(path);
-    }
-    else if (info == XLOG_SMGR_TRUNCATE)
-    {
-        struct xl_smgr_truncate *xlrec = (struct xl_smgr_truncate *) rec;
-        char	   *path = relpathperm(xlrec->rnode, MAIN_FORKNUM);
+      buf = pgmoneta_format_and_append(buf, path);
+      free(path);
+   }
+   else if (info == XLOG_SMGR_TRUNCATE)
+   {
+      struct xl_smgr_truncate* xlrec = (struct xl_smgr_truncate*) rec;
+      char* path = relpathperm(xlrec->rnode, MAIN_FORKNUM);
 
-        buf = pgmoneta_format_and_append(buf, "%s to %u blocks flags %d", path,
-                         xlrec->blkno, xlrec->flags);
-        free(path);
-    }
-    return buf;
+      buf = pgmoneta_format_and_append(buf, "%s to %u blocks flags %d", path,
+                                       xlrec->blkno, xlrec->flags);
+      free(path);
+   }
+   return buf;
 }

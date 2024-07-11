@@ -32,34 +32,33 @@
 #include "wal_reader.h"
 
 /* XLOG gives us high 4 bits */
-#define XLOG_SMGR_CREATE	0x10
-#define XLOG_SMGR_TRUNCATE	0x20
+#define XLOG_SMGR_CREATE   0x10
+#define XLOG_SMGR_TRUNCATE 0x20
 
 /* XLOG gives us high 4 bits */
-#define XLOG_SMGR_CREATE	0x10
-#define XLOG_SMGR_TRUNCATE	0x20
+#define XLOG_SMGR_CREATE   0x10
+#define XLOG_SMGR_TRUNCATE 0x20
 
 struct xl_smgr_create
 {
-    struct rel_file_node rnode;
-    enum fork_number	forkNum;
+   struct rel_file_node rnode;
+   enum fork_number forkNum;
 };
 
 /* flags for xl_smgr_truncate */
-#define SMGR_TRUNCATE_HEAP		0x0001
-#define SMGR_TRUNCATE_VM		0x0002
-#define SMGR_TRUNCATE_FSM		0x0004
-#define SMGR_TRUNCATE_ALL		\
-	(SMGR_TRUNCATE_HEAP|SMGR_TRUNCATE_VM|SMGR_TRUNCATE_FSM)
+#define SMGR_TRUNCATE_HEAP    0x0001
+#define SMGR_TRUNCATE_VM      0x0002
+#define SMGR_TRUNCATE_FSM     0x0004
+#define SMGR_TRUNCATE_ALL     \
+        (SMGR_TRUNCATE_HEAP | SMGR_TRUNCATE_VM | SMGR_TRUNCATE_FSM)
 
 struct xl_smgr_truncate
 {
-    block_number blkno;
-    struct rel_file_node rnode;
-    int			flags;
+   block_number blkno;
+   struct rel_file_node rnode;
+   int flags;
 };
 
-char* storage_desc(char* buf, struct decoded_xlog_record *record);
-
+char* storage_desc(char* buf, struct decoded_xlog_record* record);
 
 #endif //PGMONETA_RM_STORAGE_H

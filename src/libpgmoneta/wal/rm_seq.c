@@ -31,15 +31,17 @@
 #include "utils.h"
 
 char*
-seq_desc(char* buf, struct decoded_xlog_record *record)
+seq_desc(char* buf, struct decoded_xlog_record* record)
 {
-    char	   *rec = XLogRecGetData(record);
-    uint8_t		info = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
-    struct xl_seq_rec *xlrec = (struct xl_seq_rec *) rec;
+   char* rec = XLogRecGetData(record);
+   uint8_t info = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
+   struct xl_seq_rec* xlrec = (struct xl_seq_rec*) rec;
 
-    if (info == XLOG_SEQ_LOG)
-        buf = pgmoneta_format_and_append(buf, "rel %u/%u/%u",
-                         xlrec->node.spcNode, xlrec->node.dbNode,
-                         xlrec->node.relNode);
-    return buf;
+   if (info == XLOG_SEQ_LOG)
+   {
+      buf = pgmoneta_format_and_append(buf, "rel %u/%u/%u",
+                                       xlrec->node.spcNode, xlrec->node.dbNode,
+                                       xlrec->node.relNode);
+   }
+   return buf;
 }

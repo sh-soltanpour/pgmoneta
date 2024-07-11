@@ -26,7 +26,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 /*
  * GetRelationPath - construct path to a relation's file
  *
@@ -41,82 +40,101 @@
 #include "assert.h"
 #include "utils.h"
 
-
-char *
+char*
 GetRelationPath(oid dbNode, oid spcNode, oid relNode,
                 int backendId, enum fork_number forkNumber)
 {
-    const char *const forkNames[] = {
-            "main",						/* MAIN_FORKNUM */
-            "fsm",						/* FSM_FORKNUM */
-            "vm",						/* VISIBILITYMAP_FORKNUM */
-            "init"						/* INIT_FORKNUM */
-    };
-    char	   *path;
-    path = NULL;
+   const char*const forkNames[] = {
+      "main",                       /* MAIN_FORKNUM */
+      "fsm",                        /* FSM_FORKNUM */
+      "vm",                      /* VISIBILITYMAP_FORKNUM */
+      "init"                        /* INIT_FORKNUM */
+   };
+   char* path;
+   path = NULL;
 
-    if (spcNode == GLOBALTABLESPACE_OID)
-    {
-        /* Shared system relations live in {datadir}/global */
-        assert(dbNode == 0);
-        assert(backendId == InvalidBackendId);
-        if (forkNumber != MAIN_FORKNUM)
-            path = pgmoneta_format_and_append(path,"global/%u_%s",
-                            relNode, forkNames[forkNumber]);
-        else
-            path = pgmoneta_format_and_append(path,"global/%u", relNode);
-    }
-    else if (spcNode == DEFAULTTABLESPACE_OID)
-    {
-        /* The default tablespace is {datadir}/base */
-        if (backendId == InvalidBackendId)
-        {
-            if (forkNumber != MAIN_FORKNUM)
-                path = pgmoneta_format_and_append(path,"base/%u/%u_%s",
-                                dbNode, relNode,
-                                forkNames[forkNumber]);
-            else
-                path = pgmoneta_format_and_append(path,"base/%u/%u",
-                                dbNode, relNode);
-        }
-        else
-        {
-            if (forkNumber != MAIN_FORKNUM)
-                path = pgmoneta_format_and_append(path,"base/%u/t%d_%u_%s",
-                                dbNode, backendId, relNode,
-                                forkNames[forkNumber]);
-            else
-                path = pgmoneta_format_and_append(path,"base/%u/t%d_%u",
-                                dbNode, backendId, relNode);
-        }
-    }
-    else
-    {
-        /* All other tablespaces are accessed via symlinks */
-        if (backendId == InvalidBackendId)
-        {
-            if (forkNumber != MAIN_FORKNUM)
-                path = pgmoneta_format_and_append(path,"pg_tblspc/%u/%s/%u/%u_%s",
-                                spcNode, TABLESPACE_VERSION_DIRECTORY,
-                                dbNode, relNode,
-                                forkNames[forkNumber]);
-            else
-                path = pgmoneta_format_and_append(path,"pg_tblspc/%u/%s/%u/%u",
-                                spcNode, TABLESPACE_VERSION_DIRECTORY,
-                                dbNode, relNode);
-        }
-        else
-        {
-            if (forkNumber != MAIN_FORKNUM)
-                path = pgmoneta_format_and_append(path,"pg_tblspc/%u/%s/%u/t%d_%u_%s",
-                                spcNode, TABLESPACE_VERSION_DIRECTORY,
-                                dbNode, backendId, relNode,
-                                forkNames[forkNumber]);
-            else
-                path = pgmoneta_format_and_append(path,"pg_tblspc/%u/%s/%u/t%d_%u",
-                                spcNode, TABLESPACE_VERSION_DIRECTORY,
-                                dbNode, backendId, relNode);
-        }
-    }
-    return path;
+   if (spcNode == GLOBALTABLESPACE_OID)
+   {
+      /* Shared system relations live in {datadir}/global */
+      assert(dbNode == 0);
+      assert(backendId == InvalidBackendId);
+      if (forkNumber != MAIN_FORKNUM)
+      {
+         path = pgmoneta_format_and_append(path, "global/%u_%s",
+                                           relNode, forkNames[forkNumber]);
+      }
+      else
+      {
+         path = pgmoneta_format_and_append(path, "global/%u", relNode);
+      }
+   }
+   else if (spcNode == DEFAULTTABLESPACE_OID)
+   {
+      /* The default tablespace is {datadir}/base */
+      if (backendId == InvalidBackendId)
+      {
+         if (forkNumber != MAIN_FORKNUM)
+         {
+            path = pgmoneta_format_and_append(path, "base/%u/%u_%s",
+                                              dbNode, relNode,
+                                              forkNames[forkNumber]);
+         }
+         else
+         {
+            path = pgmoneta_format_and_append(path, "base/%u/%u",
+                                              dbNode, relNode);
+         }
+      }
+      else
+      {
+         if (forkNumber != MAIN_FORKNUM)
+         {
+            path = pgmoneta_format_and_append(path, "base/%u/t%d_%u_%s",
+                                              dbNode, backendId, relNode,
+                                              forkNames[forkNumber]);
+         }
+         else
+         {
+            path = pgmoneta_format_and_append(path, "base/%u/t%d_%u",
+                                              dbNode, backendId, relNode);
+         }
+      }
+   }
+   else
+   {
+      /* All other tablespaces are accessed via symlinks */
+      if (backendId == InvalidBackendId)
+      {
+         if (forkNumber != MAIN_FORKNUM)
+         {
+            path = pgmoneta_format_and_append(path, "pg_tblspc/%u/%s/%u/%u_%s",
+                                              spcNode, TABLESPACE_VERSION_DIRECTORY,
+                                              dbNode, relNode,
+                                              forkNames[forkNumber]);
+         }
+         else
+         {
+            path = pgmoneta_format_and_append(path, "pg_tblspc/%u/%s/%u/%u",
+                                              spcNode, TABLESPACE_VERSION_DIRECTORY,
+                                              dbNode, relNode);
+         }
+      }
+      else
+      {
+         if (forkNumber != MAIN_FORKNUM)
+         {
+            path = pgmoneta_format_and_append(path, "pg_tblspc/%u/%s/%u/t%d_%u_%s",
+                                              spcNode, TABLESPACE_VERSION_DIRECTORY,
+                                              dbNode, backendId, relNode,
+                                              forkNames[forkNumber]);
+         }
+         else
+         {
+            path = pgmoneta_format_and_append(path, "pg_tblspc/%u/%s/%u/t%d_%u",
+                                              spcNode, TABLESPACE_VERSION_DIRECTORY,
+                                              dbNode, backendId, relNode);
+         }
+      }
+   }
+   return path;
 }

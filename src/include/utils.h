@@ -1125,7 +1125,6 @@ pgmoneta_token_bucket_consume(struct token_bucket* tb, unsigned long tokens);
 int
 pgmoneta_token_bucket_once(struct token_bucket* tb, unsigned long tokens);
 
-
 /**
  * Format a string and append it
  * @param buf original string

@@ -26,7 +26,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef PGMONETA_RMGR_H
 #define PGMONETA_RMGR_H
 
@@ -58,34 +57,33 @@
 
 struct rmgr_data
 {
-    char* name;
-    char* (*rm_desc)(char* buf, struct decoded_xlog_record *record);
+   char* name;
+   char* (*rm_desc)(char* buf, struct decoded_xlog_record* record);
 };
 
 struct rmgr_data RmgrTable[RM_MAX_ID + 1] = {
-        PG_RMGR(RM_XLOG_ID, "XLOG", xlog_desc)
-        PG_RMGR(RM_XACT_ID, "Transaction", xact_desc)
-        PG_RMGR(RM_SMGR_ID, "Storage", storage_desc)
-        PG_RMGR(RM_CLOG_ID, "CLOG", clog_desc)
-        PG_RMGR(RM_DBASE_ID, "Database", database_desc)
-        PG_RMGR(RM_TBLSPC_ID, "Tablespace", tablespace_desc)
-        PG_RMGR(RM_MULTIXACT_ID, "MultiXact", multixact_desc)
-        PG_RMGR(RM_RELMAP_ID, "RelMap", relmap_desc)
-        PG_RMGR(RM_STANDBY_ID, "Standby", standby_desc)
-        PG_RMGR(RM_HEAP2_ID, "Heap2", heap2_desc)
-        PG_RMGR(RM_HEAP_ID, "Heap", heap_desc)
-        PG_RMGR(RM_BTREE_ID, "Btree", btree_desc)
-        PG_RMGR(RM_HASH_ID, "Hash", hash_desc)
-        PG_RMGR(RM_GIN_ID, "Gin", gin_desc)
-        PG_RMGR(RM_GIST_ID, "Gist", gist_desc)
-        PG_RMGR(RM_SEQ_ID, "Sequence", seq_desc)
-        PG_RMGR(RM_SPGIST_ID, "SPGist", spg_desc)
-        PG_RMGR(RM_BRIN_ID, "BRIN", brin_desc)
-        PG_RMGR(RM_COMMIT_TS_ID, "CommitTs", commit_ts_desc)
-        PG_RMGR(RM_REPLORIGIN_ID, "ReplicationOrigin", replorigin_desc)
-        PG_RMGR(RM_GENERIC_ID, "Generic", generic_desc)
-        PG_RMGR(RM_LOGICALMSG_ID, "LogicalMessage", logicalmsg_desc)
+   PG_RMGR(RM_XLOG_ID, "XLOG", xlog_desc)
+   PG_RMGR(RM_XACT_ID, "Transaction", xact_desc)
+   PG_RMGR(RM_SMGR_ID, "Storage", storage_desc)
+   PG_RMGR(RM_CLOG_ID, "CLOG", clog_desc)
+   PG_RMGR(RM_DBASE_ID, "Database", database_desc)
+   PG_RMGR(RM_TBLSPC_ID, "Tablespace", tablespace_desc)
+   PG_RMGR(RM_MULTIXACT_ID, "MultiXact", multixact_desc)
+   PG_RMGR(RM_RELMAP_ID, "RelMap", relmap_desc)
+   PG_RMGR(RM_STANDBY_ID, "Standby", standby_desc)
+   PG_RMGR(RM_HEAP2_ID, "Heap2", heap2_desc)
+   PG_RMGR(RM_HEAP_ID, "Heap", heap_desc)
+   PG_RMGR(RM_BTREE_ID, "Btree", btree_desc)
+   PG_RMGR(RM_HASH_ID, "Hash", hash_desc)
+   PG_RMGR(RM_GIN_ID, "Gin", gin_desc)
+   PG_RMGR(RM_GIST_ID, "Gist", gist_desc)
+   PG_RMGR(RM_SEQ_ID, "Sequence", seq_desc)
+   PG_RMGR(RM_SPGIST_ID, "SPGist", spg_desc)
+   PG_RMGR(RM_BRIN_ID, "BRIN", brin_desc)
+   PG_RMGR(RM_COMMIT_TS_ID, "CommitTs", commit_ts_desc)
+   PG_RMGR(RM_REPLORIGIN_ID, "ReplicationOrigin", replorigin_desc)
+   PG_RMGR(RM_GENERIC_ID, "Generic", generic_desc)
+   PG_RMGR(RM_LOGICALMSG_ID, "LogicalMessage", logicalmsg_desc)
 };
-
 
 #endif // PGMONETA_RMGR_H

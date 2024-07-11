@@ -34,7 +34,6 @@
 #include "time.h"
 #include "utils.h"
 
-
 bool XLogRecGetBlockTagExtended(struct decoded_xlog_record* pRecord, int id, struct rel_file_locator* pLocator, enum fork_number* pNumber,
                                 block_number* pInt, buffer* pVoid);
 
@@ -76,10 +75,10 @@ print_record(struct xlog_record* record)
 void
 parse_wal_segment_headers(char* path)
 {
-    time_t		t;
-    time(&t);
-    struct tm  *ltime = localtime(&t);
-    printf("test2 %d\n", ltime->tm_mday);
+   time_t t;
+   time(&t);
+   struct tm* ltime = localtime(&t);
+   printf("test2 %d\n", ltime->tm_mday);
 
    struct xlog_record* record = NULL;
    struct xlog_long_page_header_data* long_header = NULL;
@@ -139,13 +138,13 @@ parse_wal_segment_headers(char* path)
       fseek(file, next_record, SEEK_SET);
       if (ftell(file) + SizeOfXLogRecord > long_header->xlp_xlog_blcksz * (page_number + 1))
       {
-          uint32_t end_of_page = (page_number + 1) * long_header->xlp_xlog_blcksz;
-          size_t bytes_read = fread(record, 1, end_of_page - ftell(file), file);
+         uint32_t end_of_page = (page_number + 1) * long_header->xlp_xlog_blcksz;
+         size_t bytes_read = fread(record, 1, end_of_page - ftell(file), file);
 
-          fseek(file, SizeOfXLogShortPHD, SEEK_CUR);
-          fread(record + bytes_read, 1, SizeOfXLogRecord - bytes_read, file);
-          print_record(record);
-          page_number++;
+         fseek(file, SizeOfXLogShortPHD, SEEK_CUR);
+         fread(record + bytes_read, 1, SizeOfXLogRecord - bytes_read, file);
+         print_record(record);
+         page_number++;
       }
       else if (fread(record, SizeOfXLogRecord, 1, file) != 1)
       {
@@ -191,9 +190,10 @@ parse_wal_segment_headers(char* path)
 
       struct decoded_xlog_record* decoded = malloc(sizeof(struct decoded_xlog_record));
       bool result = decode_xlog_record(buffer, decoded, record, long_header->xlp_xlog_blcksz);
-      if (!result){
-            pgmoneta_log_fatal("error in decoding\n");
-          continue;
+      if (!result)
+      {
+         pgmoneta_log_fatal("error in decoding\n");
+         continue;
       }
       display_decoded_record(decoded);
 
@@ -213,8 +213,8 @@ display_decoded_record(struct decoded_xlog_record* record)
    //if record is rmgr is standby
    char* buf = NULL;
    buf = RmgrTable[record->header.xl_rmid].rm_desc(buf, record);
-  printf("%s\n", buf);
-  free(buf);
+   printf("%s\n", buf);
+   free(buf);
 
    XLogRecGetBlockRefInfo(record, false, true, &fpi_len);
    printf("\n------------------------------\n");
@@ -469,11 +469,11 @@ decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlo
 
 shortdata_err:
    printf("shortdata_err\n");
-    return false;
+   return false;
 
 err:
    printf("err\n");
-    return false;
+   return false;
 }
 
 char*

@@ -37,21 +37,18 @@ typedef uint32_t block_number;
 // offset
 typedef uint16_t offset_number;
 
-
 struct block_id_data
 {
-    uint16_t bi_hi;
-    uint16_t bi_lo;
+   uint16_t bi_hi;
+   uint16_t bi_lo;
 };
 
 struct item_pointer_data
 {
-    struct block_id_data ip_blkid;
-    offset_number ip_posid;
+   struct block_id_data ip_blkid;
+   offset_number ip_posid;
 };
-typedef struct block_id_data *block_id;	/* block identifier */
-
-
+typedef struct block_id_data* block_id;   /* block identifier */
 
 #define ItemPointerGetOffsetNumberNoCheck(pointer) \
         ( \
@@ -91,9 +88,9 @@ typedef struct block_id_data *block_id;	/* block identifier */
         )
 
 #define PostingItemGetBlockNumber(pointer) \
-	BlockIdGetBlockNumber(&(pointer)->child_blkno)
+        BlockIdGetBlockNumber(&(pointer)->child_blkno)
 
 #define PostingItemSetBlockNumber(pointer, blockNumber) \
-	BlockIdSet(&((pointer)->child_blkno), (blockNumber))
+        BlockIdSet(&((pointer)->child_blkno), (blockNumber))
 
 #endif //PGMONETA_RM_H

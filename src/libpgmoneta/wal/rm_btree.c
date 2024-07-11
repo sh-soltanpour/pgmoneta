@@ -33,7 +33,7 @@
 #include "utils.h"
 
 char*
-array_desc(char*buf, void* array,
+array_desc(char* buf, void* array,
            size_t elem_size,
            int count
            )
@@ -76,10 +76,10 @@ delvacuum_desc(char* buf, char* block_data, uint16_t ndeleted, uint16_t nupdated
     */
    buf = pgmoneta_format_and_append(buf, ", updated: [");
    updatedoffsets = (offset_number*) (block_data + ndeleted *
-                                                   sizeof(offset_number));
+                                      sizeof(offset_number));
    updates = (struct xl_btree_update*) ((char*) updatedoffsets +
-                                 nupdated *
-                                 sizeof(offset_number));
+                                        nupdated *
+                                        sizeof(offset_number));
    for (int i = 0; i < nupdated; i++)
    {
       offset_number off = updatedoffsets[i];
@@ -93,7 +93,7 @@ delvacuum_desc(char* buf, char* block_data, uint16_t ndeleted, uint16_t nupdated
        * xl_btree_update describes a subset of the existing TIDs to delete.
        */
       buf = pgmoneta_format_and_append(buf, "{ off: %u, nptids: %u, ptids: [",
-             off, updates->ndeletedtids);
+                                       off, updates->ndeletedtids);
       for (int p = 0; p < updates->ndeletedtids; p++)
       {
          uint16_t* ptid;
@@ -133,96 +133,96 @@ btree_desc(char* buf, struct decoded_xlog_record* record)
       case XLOG_BTREE_INSERT_UPPER:
       case XLOG_BTREE_INSERT_META:
       case XLOG_BTREE_INSERT_POST: {
-          struct xl_btree_insert* xlrec = (struct xl_btree_insert*) rec;
+         struct xl_btree_insert* xlrec = (struct xl_btree_insert*) rec;
          buf = pgmoneta_format_and_append(buf, " off: %u", xlrec->offnum);
          break;
       }
       case XLOG_BTREE_SPLIT_L:
       case XLOG_BTREE_SPLIT_R: {
-          struct xl_btree_split* xlrec = (struct xl_btree_split*) rec;
+         struct xl_btree_split* xlrec = (struct xl_btree_split*) rec;
 
          buf = pgmoneta_format_and_append(buf, "level: %u, firstrightoff: %d, newitemoff: %d, postingoff: %d",
-                xlrec->level, xlrec->firstrightoff,
-                xlrec->newitemoff, xlrec->postingoff);
+                                          xlrec->level, xlrec->firstrightoff,
+                                          xlrec->newitemoff, xlrec->postingoff);
          break;
       }
       case XLOG_BTREE_DEDUP: {
-          struct xl_btree_dedup* xlrec = (struct xl_btree_dedup*) rec;
+         struct xl_btree_dedup* xlrec = (struct xl_btree_dedup*) rec;
 
          buf = pgmoneta_format_and_append(buf, "nintervals: %u", xlrec->nintervals);
          break;
       }
       case XLOG_BTREE_VACUUM: {
-          struct xl_btree_vacuum* xlrec = (struct xl_btree_vacuum*) rec;
+         struct xl_btree_vacuum* xlrec = (struct xl_btree_vacuum*) rec;
 
          buf = pgmoneta_format_and_append(buf, "ndeleted: %u, nupdated: %u",
-                xlrec->ndeleted, xlrec->nupdated);
+                                          xlrec->ndeleted, xlrec->nupdated);
 
          if (XLogRecHasBlockData(record, 0))
          {
             buf = delvacuum_desc(buf, XLogRecGetBlockData(record, 0, NULL),
-                           xlrec->ndeleted, xlrec->nupdated);
+                                 xlrec->ndeleted, xlrec->nupdated);
          }
          break;
       }
       case XLOG_BTREE_DELETE: {
-          struct xl_btree_delete* xlrec = (struct xl_btree_delete*) rec;
+         struct xl_btree_delete* xlrec = (struct xl_btree_delete*) rec;
 
          buf = pgmoneta_format_and_append(buf, "snapshotConflictHorizon: %u, ndeleted: %u, nupdated: %u, isCatalogRel: %c",
-                xlrec->snapshotConflictHorizon,
-                xlrec->ndeleted, xlrec->nupdated,
-                xlrec->isCatalogRel ? 'T' : 'F');
+                                          xlrec->snapshotConflictHorizon,
+                                          xlrec->ndeleted, xlrec->nupdated,
+                                          xlrec->isCatalogRel ? 'T' : 'F');
 
          if (XLogRecHasBlockData(record, 0))
          {
             buf = delvacuum_desc(buf, XLogRecGetBlockData(record, 0, NULL),
-                           xlrec->ndeleted, xlrec->nupdated);
+                                 xlrec->ndeleted, xlrec->nupdated);
          }
          break;
       }
       case XLOG_BTREE_MARK_PAGE_HALFDEAD: {
-          struct xl_btree_mark_page_halfdead* xlrec = (struct xl_btree_mark_page_halfdead*) rec;
+         struct xl_btree_mark_page_halfdead* xlrec = (struct xl_btree_mark_page_halfdead*) rec;
 
          buf = pgmoneta_format_and_append(buf, "topparent: %u, leaf: %u, left: %u, right: %u",
-                xlrec->topparent, xlrec->leafblk, xlrec->leftblk, xlrec->rightblk);
+                                          xlrec->topparent, xlrec->leafblk, xlrec->leftblk, xlrec->rightblk);
          break;
       }
       case XLOG_BTREE_UNLINK_PAGE_META:
       case XLOG_BTREE_UNLINK_PAGE: {
-          struct xl_btree_unlink_page* xlrec = (struct xl_btree_unlink_page*) rec;
+         struct xl_btree_unlink_page* xlrec = (struct xl_btree_unlink_page*) rec;
 
          buf = pgmoneta_format_and_append(buf, "left: %u, right: %u, level: %u, safexid: %u:%u, ",
-                xlrec->leftsib, xlrec->rightsib, xlrec->level,
-                EpochFromFullTransactionId(xlrec->safexid),
-                XidFromFullTransactionId(xlrec->safexid));
+                                          xlrec->leftsib, xlrec->rightsib, xlrec->level,
+                                          EpochFromFullTransactionId(xlrec->safexid),
+                                          XidFromFullTransactionId(xlrec->safexid));
          buf = pgmoneta_format_and_append(buf, "leafleft: %u, leafright: %u, leaftopparent: %u",
-                xlrec->leafleftsib, xlrec->leafrightsib,
-                xlrec->leaftopparent);
+                                          xlrec->leafleftsib, xlrec->leafrightsib,
+                                          xlrec->leaftopparent);
          break;
       }
       case XLOG_BTREE_NEWROOT: {
-          struct xl_btree_newroot* xlrec = (struct xl_btree_newroot*) rec;
+         struct xl_btree_newroot* xlrec = (struct xl_btree_newroot*) rec;
 
          buf = pgmoneta_format_and_append(buf, "level: %u", xlrec->level);
          break;
       }
       case XLOG_BTREE_REUSE_PAGE: {
-          struct xl_btree_reuse_page* xlrec = (struct xl_btree_reuse_page*) rec;
+         struct xl_btree_reuse_page* xlrec = (struct xl_btree_reuse_page*) rec;
 
          buf = pgmoneta_format_and_append(buf, "rel: %u/%u/%u, snapshotConflictHorizon: %u:%u, isCatalogRel: %c",
-                xlrec->locator.spcOid, xlrec->locator.dbOid,
-                xlrec->locator.relNumber,
-                EpochFromFullTransactionId(xlrec->snapshotConflictHorizon),
-                XidFromFullTransactionId(xlrec->snapshotConflictHorizon),
-                xlrec->isCatalogRel ? 'T' : 'F');
+                                          xlrec->locator.spcOid, xlrec->locator.dbOid,
+                                          xlrec->locator.relNumber,
+                                          EpochFromFullTransactionId(xlrec->snapshotConflictHorizon),
+                                          XidFromFullTransactionId(xlrec->snapshotConflictHorizon),
+                                          xlrec->isCatalogRel ? 'T' : 'F');
          break;
       }
       case XLOG_BTREE_META_CLEANUP: {
-          struct xl_btree_metadata* xlrec;
+         struct xl_btree_metadata* xlrec;
 
          xlrec = (struct xl_btree_metadata*) XLogRecGetBlockData(record, 0, NULL);
          buf = pgmoneta_format_and_append(buf, "last_cleanup_num_delpages: %u",
-                xlrec->last_cleanup_num_delpages);
+                                          xlrec->last_cleanup_num_delpages);
          break;
       }
    }

@@ -29,27 +29,24 @@
 #ifndef PGMONETA_RM_MXACT_H
 #define PGMONETA_RM_MXACT_H
 
-
 #include "wal_reader.h"
-
-
 
 /*
  * The first two multi_xact_id values are reserved to store the truncation Xid
  * and epoch of the first segment, so we start assigning multixact values from
  * 2.
  */
-#define InvalidMultiXactId	((MultiXactId) 0)
-#define FirstMultiXactId	((MultiXactId) 1)
-#define MaxMultiXactId		((MultiXactId) 0xFFFFFFFF)
+#define InvalidMultiXactId ((MultiXactId) 0)
+#define FirstMultiXactId   ((MultiXactId) 1)
+#define MaxMultiXactId     ((MultiXactId) 0xFFFFFFFF)
 
 #define MultiXactIdIsValid(multi) ((multi) != InvalidMultiXactId)
 
-#define MaxMultiXactOffset	((MultiXactOffset) 0xFFFFFFFF)
+#define MaxMultiXactOffset ((MultiXactOffset) 0xFFFFFFFF)
 
 /* Number of SLRU buffers to use for multixact */
-#define NUM_MULTIXACTOFFSET_BUFFERS		8
-#define NUM_MULTIXACTMEMBER_BUFFERS		16
+#define NUM_MULTIXACTOFFSET_BUFFERS    8
+#define NUM_MULTIXACTMEMBER_BUFFERS    16
 
 /*
  * Possible multixact lock modes ("status").  The first four modes are for
@@ -58,67 +55,63 @@
  */
 typedef enum
 {
-    MultiXactStatusForKeyShare = 0x00,
-    MultiXactStatusForShare = 0x01,
-    MultiXactStatusForNoKeyUpdate = 0x02,
-    MultiXactStatusForUpdate = 0x03,
-    /* an update that doesn't touch "key" columns */
-    MultiXactStatusNoKeyUpdate = 0x04,
-    /* other updates, and delete */
-    MultiXactStatusUpdate = 0x05
+   MultiXactStatusForKeyShare = 0x00,
+   MultiXactStatusForShare = 0x01,
+   MultiXactStatusForNoKeyUpdate = 0x02,
+   MultiXactStatusForUpdate = 0x03,
+   /* an update that doesn't touch "key" columns */
+   MultiXactStatusNoKeyUpdate = 0x04,
+   /* other updates, and delete */
+   MultiXactStatusUpdate = 0x05
 } MultiXactStatus;
 
 #define MaxMultiXactStatus MultiXactStatusUpdate
 
 /* does a status value correspond to a tuple update? */
 #define ISUPDATE_from_mxstatus(status) \
-			((status) > MultiXactStatusForUpdate)
-
+        ((status) > MultiXactStatusForUpdate)
 
 struct multi_xact_member
 {
-    transaction_id xid;
-    MultiXactStatus status;
+   transaction_id xid;
+   MultiXactStatus status;
 };
-
 
 /* ----------------
  *		multixact-related XLOG entries
  * ----------------
  */
 
-#define XLOG_MULTIXACT_ZERO_OFF_PAGE	0x00
-#define XLOG_MULTIXACT_ZERO_MEM_PAGE	0x10
-#define XLOG_MULTIXACT_CREATE_ID		0x20
-#define XLOG_MULTIXACT_TRUNCATE_ID		0x30
+#define XLOG_MULTIXACT_ZERO_OFF_PAGE   0x00
+#define XLOG_MULTIXACT_ZERO_MEM_PAGE   0x10
+#define XLOG_MULTIXACT_CREATE_ID    0x20
+#define XLOG_MULTIXACT_TRUNCATE_ID     0x30
 
 struct xl_multixact_create
 {
-    multi_xact_id mid;			/* new MultiXact's ID */
-    multi_xact_offset moff;		/* its starting offset in members file */
-    int32_t		nmembers;		/* number of member XIDs */
-    struct multi_xact_member members[FLEXIBLE_ARRAY_MEMBER];
+   multi_xact_id mid;         /* new MultiXact's ID */
+   multi_xact_offset moff;       /* its starting offset in members file */
+   int32_t nmembers;          /* number of member XIDs */
+   struct multi_xact_member members[FLEXIBLE_ARRAY_MEMBER];
 };
 
 #define SizeOfMultiXactCreate (offsetof(xl_multixact_create, members))
 
 struct xl_multixact_truncate
 {
-    oid			oldestMultiDB;
+   oid oldestMultiDB;
 
-    /* to-be-truncated range of multixact offsets */
-    multi_xact_id startTruncOff;	/* just for completeness' sake */
-    multi_xact_id endTruncOff;
+   /* to-be-truncated range of multixact offsets */
+   multi_xact_id startTruncOff;  /* just for completeness' sake */
+   multi_xact_id endTruncOff;
 
-    /* to-be-truncated range of multixact members */
-    multi_xact_offset startTruncMemb;
-    multi_xact_offset endTruncMemb;
+   /* to-be-truncated range of multixact members */
+   multi_xact_offset startTruncMemb;
+   multi_xact_offset endTruncMemb;
 };
 
 #define SizeOfMultiXactTruncate (sizeof(xl_multixact_truncate))
 
-
 char* multixact_desc(char* buf, struct decoded_xlog_record* record);
-
 
 #endif //PGMONETA_RM_MXACT_H

@@ -31,8 +31,8 @@
 
 #include "wal_reader.h"
 
-typedef char *pointer;
+typedef char* pointer;
 
-char* generic_desc(char* buf, struct decoded_xlog_record *record);
+char* generic_desc(char* buf, struct decoded_xlog_record* record);
 
 #endif //PGMONETA_RM_GENERIC_H

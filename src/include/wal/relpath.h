@@ -31,30 +31,26 @@
 
 #include "wal/wal_reader.h"
 
-typedef int BackendId;			/* unique currently active backend identifier */
+typedef int BackendId;        /* unique currently active backend identifier */
 
-#define InvalidBackendId		(-1)
-
+#define InvalidBackendId      (-1)
 
 #define DEFAULTTABLESPACE_OID 1663
 #define GLOBALTABLESPACE_OID 1664
 
-
 #define PG_MAJORVERSION "14"
-#define CATALOG_VERSION_NO	"202107181"
-#define TABLESPACE_VERSION_DIRECTORY	"PG_" PG_MAJORVERSION "_" CATALOG_VERSION_NO
-
-
+#define CATALOG_VERSION_NO "202107181"
+#define TABLESPACE_VERSION_DIRECTORY   "PG_" PG_MAJORVERSION "_" CATALOG_VERSION_NO
 
 #define relpathbackend(rnode, backend, forknum) \
-	GetRelationPath((rnode).dbNode, (rnode).spcNode, (rnode).relNode, \
-					backend, forknum)
+        GetRelationPath((rnode).dbNode, (rnode).spcNode, (rnode).relNode, \
+                        backend, forknum)
 
 /* First argument is a rel_file_node */
 #define relpathperm(rnode, forknum) \
-	relpathbackend(rnode, InvalidBackendId, forknum)
+        relpathbackend(rnode, InvalidBackendId, forknum)
 
-char *
+char*
 GetRelationPath(oid dbNode, oid spcNode, oid relNode, int backendId, enum fork_number forkNumber);
 
 #endif //PGMONETA_RELPATH_H

@@ -32,27 +32,26 @@
 #include "wal_reader.h"
 
 /* record types */
-#define XLOG_DBASE_CREATE		0x00
-#define XLOG_DBASE_DROP			0x10
+#define XLOG_DBASE_CREATE     0x00
+#define XLOG_DBASE_DROP       0x10
 
 struct xl_dbase_create_rec
 {
-    /* Records copying of a single subdirectory incl. contents */
-    oid			db_id;
-    oid			tablespace_id;
-    oid			src_db_id;
-    oid			src_tablespace_id;
+   /* Records copying of a single subdirectory incl. contents */
+   oid db_id;
+   oid tablespace_id;
+   oid src_db_id;
+   oid src_tablespace_id;
 };
 
 struct xl_dbase_drop_rec
 {
-    oid			db_id;
-    int			ntablespaces;	/* number of tablespace IDs */
-    oid			tablespace_ids[FLEXIBLE_ARRAY_MEMBER];
+   oid db_id;
+   int ntablespaces;          /* number of tablespace IDs */
+   oid tablespace_ids[FLEXIBLE_ARRAY_MEMBER];
 };
 #define MinSizeOfDbaseDropRec offsetof(xl_dbase_drop_rec, tablespace_ids)
 
-
-char* database_desc(char* buf, struct decoded_xlog_record *record);
+char* database_desc(char* buf, struct decoded_xlog_record* record);
 
 #endif //PGMONETA_RM_DATABASE_H

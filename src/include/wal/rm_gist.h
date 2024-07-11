@@ -34,17 +34,16 @@
 
 typedef xlog_rec_ptr gist_nsn;
 
-
-#define XLOG_GIST_PAGE_UPDATE		0x00
-#define XLOG_GIST_DELETE			0x10	/* delete leaf index tuples for a
-											 * page */
-#define XLOG_GIST_PAGE_REUSE		0x20	/* old page is about to be reused
-											 * from FSM */
-#define XLOG_GIST_PAGE_SPLIT		0x30
+#define XLOG_GIST_PAGE_UPDATE    0x00
+#define XLOG_GIST_DELETE         0x10  /* delete leaf index tuples for a
+                                        * page */
+#define XLOG_GIST_PAGE_REUSE     0x20  /* old page is about to be reused
+                                        * from FSM */
+#define XLOG_GIST_PAGE_SPLIT     0x30
 /* #define XLOG_GIST_INSERT_COMPLETE	 0x40 */	/* not used anymore */
 /* #define XLOG_GIST_CREATE_INDEX		 0x50 */	/* not used anymore */
-#define XLOG_GIST_PAGE_DELETE		0x60
-#define XLOG_GIST_ASSIGN_LSN		0x70	/* nop, assign new LSN */
+#define XLOG_GIST_PAGE_DELETE    0x60
+#define XLOG_GIST_ASSIGN_LSN     0x70  /* nop, assign new LSN */
 
 /*
  * Backup Blk 0: updated page.
@@ -53,13 +52,13 @@ typedef xlog_rec_ptr gist_nsn;
  */
 struct gist_xlog_page_update
 {
-    /* number of deleted offsets */
-    uint16_t		ntodelete;
-    uint16_t		ntoinsert;
+   /* number of deleted offsets */
+   uint16_t ntodelete;
+   uint16_t ntoinsert;
 
-    /*
-     * In payload of blk 0 : 1. todelete OffsetNumbers 2. tuples to insert
-     */
+   /*
+    * In payload of blk 0 : 1. todelete OffsetNumbers 2. tuples to insert
+    */
 };
 
 /*
@@ -67,15 +66,15 @@ struct gist_xlog_page_update
  */
 struct gist_xlog_delete
 {
-    transaction_id latestRemovedXid;
-    uint16_t		ntodelete;		/* number of deleted offsets */
+   transaction_id latestRemovedXid;
+   uint16_t ntodelete;           /* number of deleted offsets */
 
-    /*
-     * In payload of blk 0 : todelete OffsetNumbers
-     */
+   /*
+    * In payload of blk 0 : todelete OffsetNumbers
+    */
 };
 
-#define SizeOfGistxlogDelete	(offsetof(gist_xlog_delete, ntodelete) + sizeof(uint16_t))
+#define SizeOfGistxlogDelete  (offsetof(gist_xlog_delete, ntodelete) + sizeof(uint16_t))
 
 /*
  * Backup Blk 0: If this operation completes a page split, by inserting a
@@ -84,16 +83,16 @@ struct gist_xlog_delete
  */
 struct gist_xlog_page_split
 {
-    block_number origrlink;		/* rightlink of the page before split */
-    gist_nsn		orignsn;		/* NSN of the page before split */
-    bool		origleaf;		/* was splitted page a leaf page? */
+   block_number origrlink;       /* rightlink of the page before split */
+   gist_nsn orignsn;          /* NSN of the page before split */
+   bool origleaf;          /* was splitted page a leaf page? */
 
-    uint16_t		npage;			/* # of pages in the split */
-    bool		markfollowright;	/* set F_FOLLOW_RIGHT flags */
+   uint16_t npage;               /* # of pages in the split */
+   bool markfollowright;      /* set F_FOLLOW_RIGHT flags */
 
-    /*
-     * follow: 1. gistxlogPage and array of IndexTupleData per page
-     */
+   /*
+    * follow: 1. gistxlogPage and array of IndexTupleData per page
+    */
 };
 
 /*
@@ -102,27 +101,25 @@ struct gist_xlog_page_split
  */
 struct gist_xlog_page_delete
 {
-    struct full_transaction_id deleteXid;	/* last Xid which could see page in scan */
-    offset_number downlinkOffset;	/* Offset of downlink referencing this
-									 * page */
+   struct full_transaction_id deleteXid;  /* last Xid which could see page in scan */
+   offset_number downlinkOffset;    /* Offset of downlink referencing this
+                                     * page */
 };
 
-#define SizeOfGistxlogPageDelete	(offsetof(gistxlogPageDelete, downlinkOffset) + sizeof(OffsetNumber))
-
+#define SizeOfGistxlogPageDelete (offsetof(gistxlogPageDelete, downlinkOffset) + sizeof(OffsetNumber))
 
 /*
  * This is what we need to know about page reuse, for hot standby.
  */
 struct gist_xlog_page_reuse
 {
-    struct rel_file_node node;
-    block_number block;
-    struct full_transaction_id latestRemovedFullXid;
+   struct rel_file_node node;
+   block_number block;
+   struct full_transaction_id latestRemovedFullXid;
 };
 
-#define SizeOfGistxlogPageReuse	(offsetof(gistxlogPageReuse, latestRemovedFullXid) + sizeof(FullTransactionId))
+#define SizeOfGistxlogPageReuse  (offsetof(gistxlogPageReuse, latestRemovedFullXid) + sizeof(FullTransactionId))
 
-
-char* gist_desc(char* buf, struct decoded_xlog_record *record);
+char* gist_desc(char* buf, struct decoded_xlog_record* record);
 
 #endif //PGMONETA_RM_GIST_H

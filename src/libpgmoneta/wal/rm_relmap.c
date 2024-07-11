@@ -26,21 +26,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "wal/rm_relmap.h"
 #include "wal/rm.h"
 #include "utils.h"
 
-char *
-relmap_desc(char *buf, struct decoded_xlog_record *record) {
-    char *rec = XLogRecGetData(record);
-    uint8_t info = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
+char*
+relmap_desc(char* buf, struct decoded_xlog_record* record)
+{
+   char* rec = XLogRecGetData(record);
+   uint8_t info = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
 
-    if (info == XLOG_RELMAP_UPDATE) {
-        struct xl_relmap_update *xlrec = (struct xl_relmap_update *) rec;
+   if (info == XLOG_RELMAP_UPDATE)
+   {
+      struct xl_relmap_update* xlrec = (struct xl_relmap_update*) rec;
 
-        buf = pgmoneta_format_and_append(buf, "database %u tablespace %u size %u",
-                                         xlrec->dbid, xlrec->tsid, xlrec->nbytes);
-    }
-    return buf;
+      buf = pgmoneta_format_and_append(buf, "database %u tablespace %u size %u",
+                                       xlrec->dbid, xlrec->tsid, xlrec->nbytes);
+   }
+   return buf;
 }

@@ -79,7 +79,6 @@ struct item_id_data
 #define XLOG_BTREE_META_CLEANUP 0xE0    /* update cleanup-related data in the
                                          * metapage */
 
-
 /*
  * All that we need to regenerate the meta-data page
  */

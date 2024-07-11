@@ -34,13 +34,13 @@
 
 /* XLOG record types for SPGiST */
 /* #define XLOG_SPGIST_CREATE_INDEX       0x00 */	/* not used anymore */
-#define XLOG_SPGIST_ADD_LEAF		0x10
-#define XLOG_SPGIST_MOVE_LEAFS		0x20
-#define XLOG_SPGIST_ADD_NODE		0x30
-#define XLOG_SPGIST_SPLIT_TUPLE		0x40
-#define XLOG_SPGIST_PICKSPLIT		0x50
-#define XLOG_SPGIST_VACUUM_LEAF		0x60
-#define XLOG_SPGIST_VACUUM_ROOT		0x70
+#define XLOG_SPGIST_ADD_LEAF     0x10
+#define XLOG_SPGIST_MOVE_LEAFS      0x20
+#define XLOG_SPGIST_ADD_NODE     0x30
+#define XLOG_SPGIST_SPLIT_TUPLE     0x40
+#define XLOG_SPGIST_PICKSPLIT    0x50
+#define XLOG_SPGIST_VACUUM_LEAF     0x60
+#define XLOG_SPGIST_VACUUM_ROOT     0x70
 #define XLOG_SPGIST_VACUUM_REDIRECT 0x80
 
 /*
@@ -50,9 +50,9 @@
  */
 struct spg_xlog_state
 {
-    transaction_id myXid;
-    bool		isBuild;
-} ;
+   transaction_id myXid;
+   bool isBuild;
+};
 
 /*
  * Backup Blk 0: destination page for leaf tuple
@@ -60,15 +60,15 @@ struct spg_xlog_state
  */
 struct spg_xlog_add_leaf
 {
-    bool		newPage;		/* init dest page? */
-    bool		storesNulls;	/* page is in the nulls tree? */
-    offset_number offnumLeaf;	/* offset where leaf tuple gets placed */
-    offset_number offnumHeadLeaf;	/* offset of head tuple in chain, if any */
+   bool newPage;        /* init dest page? */
+   bool storesNulls;       /* page is in the nulls tree? */
+   offset_number offnumLeaf;  /* offset where leaf tuple gets placed */
+   offset_number offnumHeadLeaf;    /* offset of head tuple in chain, if any */
 
-    offset_number offnumParent;	/* where the parent downlink is, if any */
-    uint16_t		nodeI;
+   offset_number offnumParent;   /* where the parent downlink is, if any */
+   uint16_t nodeI;
 
-    /* new leaf tuple follows (unaligned!) */
+   /* new leaf tuple follows (unaligned!) */
 };
 
 /*
@@ -78,32 +78,32 @@ struct spg_xlog_add_leaf
  */
 struct spg_xlog_move_leafs
 {
-    uint16_t		nMoves;			/* number of tuples moved from source page */
-    bool		newPage;		/* init dest page? */
-    bool		replaceDead;	/* are we replacing a DEAD source tuple? */
-    bool		storesNulls;	/* pages are in the nulls tree? */
+   uint16_t nMoves;              /* number of tuples moved from source page */
+   bool newPage;        /* init dest page? */
+   bool replaceDead;       /* are we replacing a DEAD source tuple? */
+   bool storesNulls;       /* pages are in the nulls tree? */
 
-    /* where the parent downlink is */
-    offset_number offnumParent;
-    uint16_t		nodeI;
+   /* where the parent downlink is */
+   offset_number offnumParent;
+   uint16_t nodeI;
 
-    struct spg_xlog_state stateSrc;
+   struct spg_xlog_state stateSrc;
 
-    /*----------
-     * data follows:
-     *		array of deleted tuple numbers, length nMoves
-     *		array of inserted tuple numbers, length nMoves + 1 or 1
-     *		list of leaf tuples, length nMoves + 1 or 1 (unaligned!)
-     *
-     * Note: if replaceDead is true then there is only one inserted tuple
-     * number and only one leaf tuple in the data, because we are not copying
-     * the dead tuple from the source
-     *----------
-     */
-    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
+   /*----------
+    * data follows:
+    *		array of deleted tuple numbers, length nMoves
+    *		array of inserted tuple numbers, length nMoves + 1 or 1
+    *		list of leaf tuples, length nMoves + 1 or 1 (unaligned!)
+    *
+    * Note: if replaceDead is true then there is only one inserted tuple
+    * number and only one leaf tuple in the data, because we are not copying
+    * the dead tuple from the source
+    *----------
+    */
+   offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 };
 
-#define SizeOfSpgxlogMoveLeafs	offsetof(spg_xlog_move_leafs, offsets)
+#define SizeOfSpgxlogMoveLeafs   offsetof(spg_xlog_move_leafs, offsets)
 
 /*
  * Backup Blk 0: original page
@@ -113,40 +113,40 @@ struct spg_xlog_move_leafs
  */
 struct spg_xlog_add_node
 {
-    /*
-     * Offset of the original inner tuple, in the original page (on backup
-     * block 0).
-     */
-    offset_number offnum;
+   /*
+    * Offset of the original inner tuple, in the original page (on backup
+    * block 0).
+    */
+   offset_number offnum;
 
-    /*
-     * Offset of the new tuple, on the new page (on backup block 1). Invalid,
-     * if we overwrote the old tuple in the original page).
-     */
-    offset_number offnumNew;
-    bool		newPage;		/* init new page? */
+   /*
+    * Offset of the new tuple, on the new page (on backup block 1). Invalid,
+    * if we overwrote the old tuple in the original page).
+    */
+   offset_number offnumNew;
+   bool newPage;        /* init new page? */
 
-    /*----
-     * Where is the parent downlink? parentBlk indicates which page it's on,
-     * and offnumParent is the offset within the page. The possible values for
-     * parentBlk are:
-     *
-     * 0: parent == original page
-     * 1: parent == new page
-     * 2: parent == different page (blk ref 2)
-     * -1: parent not updated
-     *----
-     */
-    int8_t		parentBlk;
-    offset_number offnumParent;	/* offset within the parent page */
+   /*----
+    * Where is the parent downlink? parentBlk indicates which page it's on,
+    * and offnumParent is the offset within the page. The possible values for
+    * parentBlk are:
+    *
+    * 0: parent == original page
+    * 1: parent == new page
+    * 2: parent == different page (blk ref 2)
+    * -1: parent not updated
+    *----
+    */
+   int8_t parentBlk;
+   offset_number offnumParent;   /* offset within the parent page */
 
-    uint16_t		nodeI;
+   uint16_t nodeI;
 
-    struct spg_xlog_state stateSrc;
+   struct spg_xlog_state stateSrc;
 
-    /*
-     * updated inner tuple follows (unaligned!)
-     */
+   /*
+    * updated inner tuple follows (unaligned!)
+    */
 } spg_xlog_add_node;
 
 /*
@@ -155,20 +155,20 @@ struct spg_xlog_add_node
  */
 struct spg_xlog_split_tuple
 {
-    /* where the prefix tuple goes */
-    offset_number offnumPrefix;
+   /* where the prefix tuple goes */
+   offset_number offnumPrefix;
 
-    /* where the postfix tuple goes */
-    offset_number offnumPostfix;
-    bool		newPage;		/* need to init that page? */
-    bool		postfixBlkSame; /* was postfix tuple put on same page as
-								 * prefix? */
+   /* where the postfix tuple goes */
+   offset_number offnumPostfix;
+   bool newPage;        /* need to init that page? */
+   bool postfixBlkSame;     /* was postfix tuple put on same page as
+                             * prefix? */
 
-    /*
-     * new prefix inner tuple follows, then new postfix inner tuple (both are
-     * unaligned!)
-     */
-} ;
+   /*
+    * new prefix inner tuple follows, then new postfix inner tuple (both are
+    * unaligned!)
+    */
+};
 
 /*
  * buffer references in the rdata array are:
@@ -179,89 +179,89 @@ struct spg_xlog_split_tuple
  */
 struct  spg_xlog_pick_split
 {
-    bool		isRootSplit;
+   bool isRootSplit;
 
-    uint16_t		nDelete;		/* n to delete from Src */
-    uint16_t		nInsert;		/* n to insert on Src and/or Dest */
-    bool		initSrc;		/* re-init the Src page? */
-    bool		initDest;		/* re-init the Dest page? */
+   uint16_t nDelete;          /* n to delete from Src */
+   uint16_t nInsert;          /* n to insert on Src and/or Dest */
+   bool initSrc;        /* re-init the Src page? */
+   bool initDest;          /* re-init the Dest page? */
 
-    /* where to put new inner tuple */
-    offset_number offnumInner;
-    bool		initInner;		/* re-init the Inner page? */
+   /* where to put new inner tuple */
+   offset_number offnumInner;
+   bool initInner;         /* re-init the Inner page? */
 
-    bool		storesNulls;	/* pages are in the nulls tree? */
+   bool storesNulls;       /* pages are in the nulls tree? */
 
-    /* where the parent downlink is, if any */
-    bool		innerIsParent;	/* is parent the same as inner page? */
-    offset_number offnumParent;
-    uint16_t		nodeI;
+   /* where the parent downlink is, if any */
+   bool innerIsParent;     /* is parent the same as inner page? */
+   offset_number offnumParent;
+   uint16_t nodeI;
 
-    struct spg_xlog_state stateSrc;
+   struct spg_xlog_state stateSrc;
 
-    /*----------
-     * data follows:
-     *		array of deleted tuple numbers, length nDelete
-     *		array of inserted tuple numbers, length nInsert
-     *		array of page selector bytes for inserted tuples, length nInsert
-     *		new inner tuple (unaligned!)
-     *		list of leaf tuples, length nInsert (unaligned!)
-     *----------
-     */
-    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
+   /*----------
+    * data follows:
+    *		array of deleted tuple numbers, length nDelete
+    *		array of inserted tuple numbers, length nInsert
+    *		array of page selector bytes for inserted tuples, length nInsert
+    *		new inner tuple (unaligned!)
+    *		list of leaf tuples, length nInsert (unaligned!)
+    *----------
+    */
+   offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 };
 
 #define SizeOfSpgxlogPickSplit offsetof(spg_xlog_pick_split, offsets)
 
 struct  spg_xlog_vacuum_leaf
 {
-    uint16_t		nDead;			/* number of tuples to become DEAD */
-    uint16_t		nPlaceholder;	/* number of tuples to become PLACEHOLDER */
-    uint16_t		nMove;			/* number of tuples to move */
-    uint16_t		nChain;			/* number of tuples to re-chain */
+   uint16_t nDead;               /* number of tuples to become DEAD */
+   uint16_t nPlaceholder;        /* number of tuples to become PLACEHOLDER */
+   uint16_t nMove;               /* number of tuples to move */
+   uint16_t nChain;              /* number of tuples to re-chain */
 
-    struct spg_xlog_state stateSrc;
+   struct spg_xlog_state stateSrc;
 
-    /*----------
-     * data follows:
-     *		tuple numbers to become DEAD
-     *		tuple numbers to become PLACEHOLDER
-     *		tuple numbers to move from (and replace with PLACEHOLDER)
-     *		tuple numbers to move to (replacing what is there)
-     *		tuple numbers to update nextOffset links of
-     *		tuple numbers to insert in nextOffset links
-     *----------
-     */
-    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
+   /*----------
+    * data follows:
+    *		tuple numbers to become DEAD
+    *		tuple numbers to become PLACEHOLDER
+    *		tuple numbers to move from (and replace with PLACEHOLDER)
+    *		tuple numbers to move to (replacing what is there)
+    *		tuple numbers to update nextOffset links of
+    *		tuple numbers to insert in nextOffset links
+    *----------
+    */
+   offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 };
 
 #define SizeOfSpgxlogVacuumLeaf offsetof(spg_xlog_vacuum_leaf, offsets)
 
 struct  spg_xlog_vacuum_root
 {
-    /* vacuum a root page when it is also a leaf */
-    uint16_t		nDelete;		/* number of tuples to delete */
+   /* vacuum a root page when it is also a leaf */
+   uint16_t nDelete;          /* number of tuples to delete */
 
-    struct spg_xlog_state stateSrc;
+   struct spg_xlog_state stateSrc;
 
-    /* offsets of tuples to delete follow */
-    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
+   /* offsets of tuples to delete follow */
+   offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 };
 
 #define SizeOfSpgxlogVacuumRoot offsetof(spg_xlog_vacuum_root, offsets)
 
 struct  spg_xlog_vacuum_redirect
 {
-    uint16_t		nToPlaceholder; /* number of redirects to make placeholders */
-    offset_number firstPlaceholder;	/* first placeholder tuple to remove */
-    transaction_id newestRedirectXid;	/* newest XID of removed redirects */
+   uint16_t nToPlaceholder;       /* number of redirects to make placeholders */
+   offset_number firstPlaceholder;  /* first placeholder tuple to remove */
+   transaction_id newestRedirectXid;   /* newest XID of removed redirects */
 
-    /* offsets of redirect tuples to make placeholders follow */
-    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
+   /* offsets of redirect tuples to make placeholders follow */
+   offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 };
 
 #define SizeOfSpgxlogVacuumRedirect offsetof(spg_xlog_vacuum_redirect, offsets)
 
-char* spg_desc(char* buf, struct decoded_xlog_record *record);
+char* spg_desc(char* buf, struct decoded_xlog_record* record);
 
 #endif //PGMONETA_RM_SPGIST_H

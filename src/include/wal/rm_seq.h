@@ -32,14 +32,14 @@
 #include "wal_reader.h"
 
 /* XLOG stuff */
-#define XLOG_SEQ_LOG			0x00
+#define XLOG_SEQ_LOG       0x00
 
 struct xl_seq_rec
 {
-    struct rel_file_node node;
-    /* SEQUENCE TUPLE DATA FOLLOWS AT THE END */
+   struct rel_file_node node;
+   /* SEQUENCE TUPLE DATA FOLLOWS AT THE END */
 };
 
-char* seq_desc(char* buf, struct decoded_xlog_record *record);
+char* seq_desc(char* buf, struct decoded_xlog_record* record);
 
 #endif //PGMONETA_RM_SEQ_H

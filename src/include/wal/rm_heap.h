@@ -221,7 +221,6 @@ struct xl_heap_visible
 
 typedef uint32_t command_id;
 
-
 struct xl_heap_new_cid
 {
    /*
