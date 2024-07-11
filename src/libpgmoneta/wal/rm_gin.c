@@ -27,7 +27,7 @@
  */
 
 
-#include "wal_reader.h"
+#include "wal/wal_reader.h"
 #include "wal/rm.h"
 #include "wal/rm_gin.h"
 #include "utils.h"

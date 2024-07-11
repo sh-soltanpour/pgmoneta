@@ -27,7 +27,7 @@
  */
 
 #include "logging.h"
-#include "wal_reader.h"
+#include "wal/wal_reader.h"
 #include "wal/rmgr.h"
 #include "string.h"
 #include "assert.h"

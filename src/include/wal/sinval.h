@@ -29,7 +29,7 @@
 #ifndef PGMONETA_SINVAL_H
 #define PGMONETA_SINVAL_H
 
-#include "wal_reader.h"
+#include "wal/wal_reader.h"
 
 typedef signed char int8;       /* == 8 bits */
 

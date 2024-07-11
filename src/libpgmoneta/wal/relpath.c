@@ -37,7 +37,7 @@
  * the trouble considering BackendId is just int anyway.
  */
 
-#include "relpath.h"
+#include "wal/relpath.h"
 #include "assert.h"
 #include "utils.h"
 

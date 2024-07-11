@@ -30,7 +30,7 @@
 #include "wal/rm_xact.h"
 #include "utils.h"
 #include "wal/rm_standby.h"
-#include "relpath.h"
+#include "wal/relpath.h"
 
 
 static char *xact_desc_relations(char *buf, char *label, int nrels, struct rel_file_node *xnodes);

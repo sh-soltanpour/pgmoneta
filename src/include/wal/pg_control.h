@@ -29,7 +29,7 @@
 
 #ifndef PGMONETA_PG_CONTROL_H
 #define PGMONETA_PG_CONTROL_H
-#include "wal_reader.h"
+#include "wal/wal_reader.h"
 #include "wal/transaction.h"
 
 typedef int64_t pg_time_t;

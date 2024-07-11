@@ -26,9 +26,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "wal_reader.h"
+#include "wal/wal_reader.h"
 #include "wal/rm.h"
-#include "pg_control.h"
+#include "wal/pg_control.h"
 #include "utils.h"
 #include "wal/rm_xlog.h"
 #include "pgmoneta.h"

@@ -5,7 +5,7 @@
 #ifndef PGMONETA_RELPATH_H
 #define PGMONETA_RELPATH_H
 
-#include "wal_reader.h"
+#include "wal/wal_reader.h"
 
 typedef int BackendId;			/* unique currently active backend identifier */
 

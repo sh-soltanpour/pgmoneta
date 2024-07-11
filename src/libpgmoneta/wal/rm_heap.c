@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "wal_reader.h"
+#include "wal/wal_reader.h"
 #include "wal/rm_heap.h"
 #include "utils.h"
 

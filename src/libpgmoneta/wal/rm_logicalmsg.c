@@ -25,35 +25,37 @@
  * TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-
-#include "utils.h"
-#include "wal/rm_storage.h"
+#include "wal/wal_reader.h"
+#include "wal/rm_logicalmsg.h"
 #include "wal/rm.h"
-#include "relpath.h"
+#include "utils.h"
+#include "assert.h"
+
 
 char*
-storage_desc(char* buf, struct decoded_xlog_record *record)
+logicalmsg_desc(char* buf, struct decoded_xlog_record *record)
 {
     char	   *rec = XLogRecGetData(record);
     uint8_t		info = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
 
-    if (info == XLOG_SMGR_CREATE)
+    if (info == XLOG_LOGICAL_MESSAGE)
     {
-        struct xl_smgr_create *xlrec = (struct xl_smgr_create *) rec;
-        char	   *path = relpathperm(xlrec->rnode, xlrec->forkNum);
+        struct xl_logical_message *xlrec = (struct xl_logical_message *) rec;
+        char	   *prefix = xlrec->message;
+        char	   *message = xlrec->message + xlrec->prefix_size;
+        char	   *sep = "";
 
-        buf = pgmoneta_format_and_append(buf, path);
-        free(path);
-    }
-    else if (info == XLOG_SMGR_TRUNCATE)
-    {
-        struct xl_smgr_truncate *xlrec = (struct xl_smgr_truncate *) rec;
-        char	   *path = relpathperm(xlrec->rnode, MAIN_FORKNUM);
+        assert(prefix[xlrec->prefix_size - 1] == '\0');
 
-        buf = pgmoneta_format_and_append(buf, "%s to %u blocks flags %d", path,
-                         xlrec->blkno, xlrec->flags);
-        free(path);
+        buf = pgmoneta_format_and_append(buf, "%s, prefix \"%s\"; payload (%zu bytes): ",
+                         xlrec->transactional ? "transactional" : "non-transactional",
+                         prefix, xlrec->message_size);
+        /* Write message payload as a series of hex bytes */
+        for (int cnt = 0; cnt < xlrec->message_size; cnt++)
+        {
+            buf = pgmoneta_format_and_append(buf, "%s%02X", sep, (unsigned char) message[cnt]);
+            sep = " ";
+        }
     }
     return buf;
 }
