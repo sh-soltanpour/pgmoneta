@@ -270,33 +270,22 @@ void get_record_length(struct decoded_xlog_record* record, uint32_t* rec_len, ui
 
 void display_decoded_record(struct decoded_xlog_record* record);
 
-void XLogRecGetBlockRefInfo(struct decoded_xlog_record* record, bool pretty, bool detailed_format, uint32_t* fpi_len);
+char* get_record_block_ref_info(char* buf, struct decoded_xlog_record* record, bool pretty, bool detailed_format, uint32_t* fpi_len);
 
-char*XLogRecGetBlockData(struct decoded_xlog_record* record, uint8_t block_id, size_t* len);
+char* get_record_block_data(struct decoded_xlog_record* record, uint8_t block_id, size_t* len);
 
-#define SizeOfXLogLongPHD   MAXALIGN(sizeof(struct xlog_long_page_header_data))
-#define SizeOfXLogShortPHD   MAXALIGN(sizeof(struct xlog_page_header_data))
-#define SizeOfXLogRecord    (offsetof(struct xlog_record, xl_crc) + sizeof(pg_crc32c))
-#define XLogPageHeaderSize(hdr)    (((hdr)->xlp_info & XLP_LONG_HEADER) ? SizeOfXLogLongPHD : SizeOfXLogShortPHD)
-#define XLogSegNoOffsetToRecPtr(segno, offset, wal_segsz_bytes, dest)  (dest) = (segno) * (wal_segsz_bytes) + (offset)
-#define XLogSegmentsPerXLogId(wal_segsz_bytes)  (UINT64_C(0x100000000) / (wal_segsz_bytes))
-#define XLogRecPtrIsInvalid(r)  ((r) == InvalidXLogRecPtr)
-#define XLByteToSeg(xlrp, logSegNo, wal_segsz_bytes) \
-        logSegNo = (xlrp) / (wal_segsz_bytes)
+bool get_record_block_tag_extended(struct decoded_xlog_record* pRecord, int id, struct rel_file_locator* pLocator, enum fork_number* pNumber,
+                                   block_number* pInt, buffer* pVoid);
 
-#define XLByteToPrevSeg(xlrp, logSegNo, wal_segsz_bytes) \
-        logSegNo = ((xlrp) - 1) / (wal_segsz_bytes)
-
-
-#define XLogSegmentOffset(xlogptr, wal_segsz_bytes) \
-        ((xlogptr) & ((wal_segsz_bytes) - 1))
-
+#define SIZE_OF_XLOG_LONG_PHD   MAXALIGN(sizeof(struct xlog_long_page_header_data))
+#define SIZE_OF_XLOG_SHORT_PHD   MAXALIGN(sizeof(struct xlog_page_header_data))
+#define SIZE_OF_XLOG_RECORD    (offsetof(struct xlog_record, xl_crc) + sizeof(pg_crc32c))
 #define LSN_FORMAT_ARGS(lsn) ((uint32_t) ((lsn) >> 32)), ((uint32_t) (lsn))
-#define XLogRecGetData(record) ((record)->main_data)
-#define XLogRecGetInfo(record) ((record)->header.xl_info)
-#define XLogRecGetBlock(record, i) (&record->blocks[(i)])
-#define XLogRecBlockImageApply(record, block_id) (record->blocks[block_id].apply_image)
-#define XLogRecGetOrigin(record) (record->record_origin)
-#define XLogRecGetDataLen(record) (record->main_data_len)
+#define XLOG_REC_GET_DATA(record) ((record)->main_data)
+#define XLOG_REC_GET_INFO(record) ((record)->header.xl_info)
+#define XLOG_REC_GET_BLOCK(record, i) (&record->blocks[(i)])
+#define XLOG_REC_BLOCK_IMAGE_APPLY(record, block_id) (record->blocks[block_id].apply_image)
+#define XLOG_REC_GET_ORIGIN(record) (record->record_origin)
+#define XLOG_REC_GET_DATA_LEN(record) (record->main_data_len)
 
 #endif //PGMONETA_WAL_READER_H

@@ -34,8 +34,7 @@
 #include "time.h"
 #include "utils.h"
 
-bool XLogRecGetBlockTagExtended(struct decoded_xlog_record* pRecord, int id, struct rel_file_locator* pLocator, enum fork_number* pNumber,
-                                block_number* pInt, buffer* pVoid);
+
 
 void
 log_short_page_header(struct xlog_page_header_data* header)
@@ -91,11 +90,11 @@ parse_wal_segment_headers(char* path)
       pgmoneta_log_fatal("Error: Could not open file %s\n", path);
    }
 
-   long_header = malloc(SizeOfXLogLongPHD);
-   fread(long_header, SizeOfXLogLongPHD, 1, file);
+   long_header = malloc(SIZE_OF_XLOG_LONG_PHD);
+   fread(long_header, SIZE_OF_XLOG_LONG_PHD, 1, file);
 
 
-   record = malloc(SizeOfXLogRecord);
+   record = malloc(SIZE_OF_XLOG_RECORD);
 
 
    if (record == NULL)
@@ -107,7 +106,7 @@ parse_wal_segment_headers(char* path)
    }
 
    struct xlog_page_header_data* page_header = NULL;
-   page_header = malloc(SizeOfXLogShortPHD);
+   page_header = malloc(SIZE_OF_XLOG_SHORT_PHD);
    if (page_header == NULL)
    {
       pgmoneta_log_fatal("Error: Could not allocate memory for page header\n");
@@ -127,22 +126,22 @@ parse_wal_segment_headers(char* path)
       {
          page_number++;
          fseek(file, page_number * long_header->xlp_xlog_blcksz, SEEK_SET);
-         fread(page_header, SizeOfXLogShortPHD, 1, file);
+         fread(page_header, SIZE_OF_XLOG_SHORT_PHD, 1, file);
          next_record = MAXALIGN(ftell(file) + page_header->xlp_rem_len);
          continue;
       }
       fseek(file, next_record, SEEK_SET);
-      if (ftell(file) + SizeOfXLogRecord > long_header->xlp_xlog_blcksz * (page_number + 1))
+      if (ftell(file) + SIZE_OF_XLOG_RECORD > long_header->xlp_xlog_blcksz * (page_number + 1))
       {
          uint32_t end_of_page = (page_number + 1) * long_header->xlp_xlog_blcksz;
          size_t bytes_read = fread(record, 1, end_of_page - ftell(file), file);
 
-         fseek(file, SizeOfXLogShortPHD, SEEK_CUR);
-         fread(record + bytes_read, 1, SizeOfXLogRecord - bytes_read, file);
+         fseek(file, SIZE_OF_XLOG_SHORT_PHD, SEEK_CUR);
+         fread(record + bytes_read, 1, SIZE_OF_XLOG_RECORD - bytes_read, file);
          print_record(record);
          page_number++;
       }
-      else if (fread(record, SizeOfXLogRecord, 1, file) != 1)
+      else if (fread(record, SIZE_OF_XLOG_RECORD, 1, file) != 1)
       {
          pgmoneta_log_fatal("Error: Could not read second record\n");
          free(record);
@@ -155,8 +154,8 @@ parse_wal_segment_headers(char* path)
       {
          return;
       }
-      uint32_t data_length = record->xl_tot_len - SizeOfXLogRecord;
-      next_record = ftell(file) + MAXALIGN(record->xl_tot_len - SizeOfXLogRecord);
+      uint32_t data_length = record->xl_tot_len - SIZE_OF_XLOG_RECORD;
+      next_record = ftell(file) + MAXALIGN(record->xl_tot_len - SIZE_OF_XLOG_RECORD);
       uint32_t end_of_page = (page_number + 1) * long_header->xlp_xlog_blcksz;
 
       if (data_length + ftell(file) >= end_of_page)
@@ -169,9 +168,9 @@ parse_wal_segment_headers(char* path)
          remaining_data_length -= bytes_read;
          while (remaining_data_length != 0)
          {
-            fseek(file, SizeOfXLogShortPHD, SEEK_CUR);
+            fseek(file, SIZE_OF_XLOG_SHORT_PHD, SEEK_CUR);
             bytes_read = fread(buffer + total_bytes_read, 1,
-                               MIN(remaining_data_length, long_header->xlp_xlog_blcksz - SizeOfXLogShortPHD), file);
+                               MIN(remaining_data_length, long_header->xlp_xlog_blcksz - SIZE_OF_XLOG_SHORT_PHD), file);
             remaining_data_length -= bytes_read;
             total_bytes_read += bytes_read;
          }
@@ -209,10 +208,10 @@ display_decoded_record(struct decoded_xlog_record* record)
    //if record is rmgr is standby
    char* buf = NULL;
    buf = RmgrTable[record->header.xl_rmid].rm_desc(buf, record);
+
+   buf = get_record_block_ref_info(buf, record, false, true, &fpi_len);
    printf("%s\n", buf);
    free(buf);
-
-   XLogRecGetBlockRefInfo(record, false, true, &fpi_len);
    printf("\n------------------------------\n");
 }
 
@@ -245,7 +244,7 @@ decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlo
    struct rel_file_locator* rlocator = NULL;
    uint8_t block_id;
 
-   remaining = record->xl_tot_len - SizeOfXLogRecord;
+   remaining = record->xl_tot_len - SIZE_OF_XLOG_RECORD;
    ptr = (char*) buffer;
 
    while (remaining > datatotal)
@@ -473,7 +472,7 @@ err:
 }
 
 char*
-XLogRecGetBlockData(struct decoded_xlog_record* record, uint8_t block_id, size_t* len)
+get_record_block_data(struct decoded_xlog_record* record, uint8_t block_id, size_t* len)
 {
    {
       struct decoded_bkp_block* bkpb;
@@ -531,8 +530,8 @@ get_record_length(struct decoded_xlog_record* record, uint32_t* rec_len, uint32_
    *rec_len = record->header.xl_tot_len - *fpi_len;
 }
 
-void
-XLogRecGetBlockRefInfo(struct decoded_xlog_record* record, bool pretty, bool detailed_format, uint32_t* fpi_len
+char*
+get_record_block_ref_info(char* buf, struct decoded_xlog_record* record, bool pretty, bool detailed_format, uint32_t* fpi_len
                        )
 {
    int block_id;
@@ -541,7 +540,7 @@ XLogRecGetBlockRefInfo(struct decoded_xlog_record* record, bool pretty, bool det
 
    if (detailed_format && pretty)
    {
-      printf("\n");
+      buf = pgmoneta_format_and_append(buf, "\n");
    }
 
    for (block_id = 0; block_id <= record->max_block_id; block_id++)
@@ -550,7 +549,7 @@ XLogRecGetBlockRefInfo(struct decoded_xlog_record* record, bool pretty, bool det
       enum fork_number forknum;
       block_number blk;
 
-      if (!XLogRecGetBlockTagExtended(record, block_id, &rlocator, &forknum, &blk, NULL))
+      if (!get_record_block_tag_extended(record, block_id, &rlocator, &forknum, &blk, NULL))
       {
          continue;
       }
@@ -561,14 +560,14 @@ XLogRecGetBlockRefInfo(struct decoded_xlog_record* record, bool pretty, bool det
 
          if (pretty)
          {
-            printf("\t");
+            buf = pgmoneta_format_and_append(buf, "\t");
          }
          else if (block_id > 0)
          {
-            printf(" ");
+            buf = pgmoneta_format_and_append(buf, " ");
          }
 
-         printf("blkref #%d: rel %u/%u/%u forknum %d blk %u",
+         buf = pgmoneta_format_and_append(buf, "blkref #%d: rel %u/%u/%u forknum %d blk %u",
                 block_id,
                 rlocator.spcOid, rlocator.dbOid, rlocator.relNumber,
                 forknum,
@@ -605,7 +604,7 @@ XLogRecGetBlockRefInfo(struct decoded_xlog_record* record, bool pretty, bool det
                   method = "unknown";
                }
 
-               printf(
+               buf = pgmoneta_format_and_append(buf,
                   " (FPW%s); hole: offset: %u, length: %u, "
                   "compression saved: %u, method: %s",
                   record->blocks[block_id].apply_image ?
@@ -619,18 +618,18 @@ XLogRecGetBlockRefInfo(struct decoded_xlog_record* record, bool pretty, bool det
             }
             else
             {
-               printf(
-                  " (FPW%s); hole: offset: %u, length: %u",
-                  XLogRecBlockImageApply(record, block_id) ?
-                  "" : " for WAL verification",
-                  XLogRecGetBlock(record, block_id)->hole_offset,
-                  XLogRecGetBlock(record, block_id)->hole_length);
+               buf = pgmoneta_format_and_append(buf,
+                       " (FPW%s); hole: offset: %u, length: %u",
+                       XLOG_REC_BLOCK_IMAGE_APPLY(record, block_id) ?
+                       "" : " for WAL verification",
+                       XLOG_REC_GET_BLOCK(record, block_id)->hole_offset,
+                       XLOG_REC_GET_BLOCK(record, block_id)->hole_length);
             }
          }
 
          if (pretty)
          {
-            printf("\n");
+            buf = pgmoneta_format_and_append(buf, "\n");
          }
       }
       else
@@ -639,7 +638,7 @@ XLogRecGetBlockRefInfo(struct decoded_xlog_record* record, bool pretty, bool det
 
          if (forknum != MAIN_FORKNUM)
          {
-            printf(
+            buf = pgmoneta_format_and_append(buf,
                ", blkref #%d: rel %u/%u/%u fork %d blk %u",
                block_id,
                rlocator.spcOid, rlocator.dbOid, rlocator.relNumber,
@@ -648,7 +647,7 @@ XLogRecGetBlockRefInfo(struct decoded_xlog_record* record, bool pretty, bool det
          }
          else
          {
-            printf(
+            buf = pgmoneta_format_and_append(buf,
                ", blkref #%d: rel %u/%u/%u blk %u",
                block_id,
                rlocator.spcOid, rlocator.dbOid, rlocator.relNumber,
@@ -660,16 +659,16 @@ XLogRecGetBlockRefInfo(struct decoded_xlog_record* record, bool pretty, bool det
             /* Calculate the amount of FPI data in the record. */
             if (fpi_len)
             {
-               *fpi_len += XLogRecGetBlock(record, block_id)->bimg_len;
+               *fpi_len += XLOG_REC_GET_BLOCK(record, block_id)->bimg_len;
             }
 
-            if (XLogRecBlockImageApply(record, block_id))
+            if (XLOG_REC_BLOCK_IMAGE_APPLY(record, block_id))
             {
-               printf(" FPW");
+               buf = pgmoneta_format_and_append(buf, " FPW");
             }
             else
             {
-               printf(" FPW for WAL verification");
+               buf = pgmoneta_format_and_append(buf, " FPW for WAL verification");
             }
          }
       }
@@ -677,38 +676,39 @@ XLogRecGetBlockRefInfo(struct decoded_xlog_record* record, bool pretty, bool det
 
    if (!detailed_format && pretty)
    {
-      printf("\n");
+      buf = pgmoneta_format_and_append(buf, "\n");
    }
+    return buf;
 
 }
 
 bool
-XLogRecGetBlockTagExtended(struct decoded_xlog_record* record, int block_id, struct rel_file_locator* rlocator, enum fork_number* forknum,
-                           block_number* blknum, buffer* prefetch_buffer)
+get_record_block_tag_extended(struct decoded_xlog_record* pRecord, int id, struct rel_file_locator* pLocator, enum fork_number* pNumber,
+                              block_number* pInt, buffer* pVoid)
 {
    struct decoded_bkp_block* bkpb;
 
-   if (!XLogRecHasBlockRef(record, block_id))
+   if (!XLogRecHasBlockRef(pRecord, id))
    {
       return false;
    }
 
-   bkpb = XLogRecGetBlock(record, block_id);
-   if (rlocator)
+   bkpb = XLOG_REC_GET_BLOCK(pRecord, id);
+   if (pLocator)
    {
-      *rlocator = bkpb->rlocator;
+      *pLocator = bkpb->rlocator;
    }
-   if (forknum)
+   if (pNumber)
    {
-      *forknum = bkpb->forknum;
+      *pNumber = bkpb->forknum;
    }
-   if (blknum)
+   if (pInt)
    {
-      *blknum = bkpb->blkno;
+      *pInt = bkpb->blkno;
    }
-   if (prefetch_buffer)
+   if (pVoid)
    {
-      *prefetch_buffer = bkpb->prefetch_buffer;
+      *pVoid = bkpb->prefetch_buffer;
    }
    return true;
 }

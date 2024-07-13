@@ -171,27 +171,27 @@ xact_desc_subxacts(char* buf, int nsubxacts, transaction_id* subxacts)
 char*
 xact_desc(char* buf, struct decoded_xlog_record* record)
 {
-   char* rec = XLogRecGetData(record);
-   uint8_t info = XLogRecGetInfo(record) & XLOG_XACT_OPMASK;
+   char* rec = XLOG_REC_GET_DATA(record);
+   uint8_t info = XLOG_REC_GET_INFO(record) & XLOG_XACT_OPMASK;
 
    if (info == XLOG_XACT_COMMIT || info == XLOG_XACT_COMMIT_PREPARED)
    {
       struct xl_xact_commit* xlrec = (struct xl_xact_commit*) rec;
 
-      buf = xact_desc_commit(buf, XLogRecGetInfo(record), xlrec,
-                             XLogRecGetOrigin(record));
+      buf = xact_desc_commit(buf, XLOG_REC_GET_INFO(record), xlrec,
+                             XLOG_REC_GET_ORIGIN(record));
    }
    else if (info == XLOG_XACT_ABORT || info == XLOG_XACT_ABORT_PREPARED)
    {
       struct xl_xact_abort* xlrec = (struct xl_xact_abort*) rec;
 
-      buf = xact_desc_abort(buf, XLogRecGetInfo(record), xlrec);
+      buf = xact_desc_abort(buf, XLOG_REC_GET_INFO(record), xlrec);
    }
    else if (info == XLOG_XACT_PREPARE)
    {
       struct xl_xact_prepare* xlrec = (struct xl_xact_prepare*) rec;
 
-      buf = xact_desc_prepare(buf, XLogRecGetInfo(record), xlrec);
+      buf = xact_desc_prepare(buf, XLOG_REC_GET_INFO(record), xlrec);
    }
    else if (info == XLOG_XACT_ASSIGNMENT)
    {

@@ -32,8 +32,8 @@
 char*
 brin_desc(char* buf, struct decoded_xlog_record* record)
 {
-   char* rec = XLogRecGetData(record);
-   uint8_t info = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
+   char* rec = XLOG_REC_GET_DATA(record);
+   uint8_t info = XLOG_REC_GET_INFO(record) & ~XLR_INFO_MASK;
 
    info &= XLOG_BRIN_OPMASK;
    if (info == XLOG_BRIN_CREATE_INDEX)

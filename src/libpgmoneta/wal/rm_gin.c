@@ -115,7 +115,7 @@ gin_desc(char* buf, struct decoded_xlog_record* record)
          }
          if (XLogRecHasBlockImage(record, 0))
          {
-            if (XLogRecBlockImageApply(record, 0))
+            if (XLOG_REC_BLOCK_IMAGE_APPLY(record, 0))
             {
                buf = pgmoneta_format_and_append(buf, " (full page image)");
             }
@@ -126,7 +126,7 @@ gin_desc(char* buf, struct decoded_xlog_record* record)
          }
          else
          {
-            char* payload = XLogRecGetBlockData(record, 0, NULL);
+            char* payload = get_record_block_data(record, 0, NULL);
 
             if (!(xlrec->flags & GIN_INSERT_ISDATA))
             {
@@ -166,7 +166,7 @@ gin_desc(char* buf, struct decoded_xlog_record* record)
       case XLOG_GIN_VACUUM_DATA_LEAF_PAGE: {
          if (XLogRecHasBlockImage(record, 0))
          {
-            if (XLogRecBlockImageApply(record, 0))
+            if (XLOG_REC_BLOCK_IMAGE_APPLY(record, 0))
             {
                buf = pgmoneta_format_and_append(buf, " (full page image)");
             }
@@ -178,7 +178,7 @@ gin_desc(char* buf, struct decoded_xlog_record* record)
          else
          {
             struct gin_xlog_vacuum_data_leaf_page* xlrec =
-               (struct gin_xlog_vacuum_data_leaf_page*) XLogRecGetBlockData(record, 0, NULL);
+               (struct gin_xlog_vacuum_data_leaf_page*) get_record_block_data(record, 0, NULL);
 
             buf = desc_recompress_leaf(buf, &xlrec->data);
          }

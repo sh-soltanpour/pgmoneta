@@ -160,7 +160,7 @@ btree_desc(char* buf, struct decoded_xlog_record* record)
 
          if (XLogRecHasBlockData(record, 0))
          {
-            buf = delvacuum_desc(buf, XLogRecGetBlockData(record, 0, NULL),
+            buf = delvacuum_desc(buf, get_record_block_data(record, 0, NULL),
                                  xlrec->ndeleted, xlrec->nupdated);
          }
          break;
@@ -175,7 +175,7 @@ btree_desc(char* buf, struct decoded_xlog_record* record)
 
          if (XLogRecHasBlockData(record, 0))
          {
-            buf = delvacuum_desc(buf, XLogRecGetBlockData(record, 0, NULL),
+            buf = delvacuum_desc(buf, get_record_block_data(record, 0, NULL),
                                  xlrec->ndeleted, xlrec->nupdated);
          }
          break;
@@ -220,7 +220,7 @@ btree_desc(char* buf, struct decoded_xlog_record* record)
       case XLOG_BTREE_META_CLEANUP: {
          struct xl_btree_metadata* xlrec;
 
-         xlrec = (struct xl_btree_metadata*) XLogRecGetBlockData(record, 0, NULL);
+         xlrec = (struct xl_btree_metadata*) get_record_block_data(record, 0, NULL);
          buf = pgmoneta_format_and_append(buf, "last_cleanup_num_delpages: %u",
                                           xlrec->last_cleanup_num_delpages);
          break;

@@ -34,8 +34,8 @@
 char*
 generic_desc(char* buf, struct decoded_xlog_record* record)
 {
-   pointer ptr = XLogRecGetData(record),
-           end = ptr + XLogRecGetDataLen(record);
+   pointer ptr = XLOG_REC_GET_DATA(record),
+           end = ptr + XLOG_REC_GET_DATA_LEN(record);
 
    while (ptr < end)
    {
