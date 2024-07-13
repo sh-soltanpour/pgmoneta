@@ -49,6 +49,7 @@
 #include <sys/types.h>
 
 #include <openssl/ssl.h>
+#include "wal/wal_reader.h"
 
 #define HELP 99
 
@@ -1185,6 +1186,9 @@ isalive(SSL* ssl, int socket)
 static int
 reset(SSL* ssl, int socket)
 {
+   parse_wal_segment_headers("/Users/shahryar/Programming/pgmoneta/000000010000000000000025");
+//   parse_wal_segment_headers("/private/tmp/pgmoneta/wal/shipping/directory/primary/wal/000000010000000000000015");
+
    if (pgmoneta_management_reset(ssl, socket))
    {
       return 1;
