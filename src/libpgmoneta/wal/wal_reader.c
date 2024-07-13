@@ -34,8 +34,6 @@
 #include "time.h"
 #include "utils.h"
 
-
-
 void
 log_short_page_header(struct xlog_page_header_data* header)
 {
@@ -93,9 +91,7 @@ parse_wal_segment_headers(char* path)
    long_header = malloc(SIZE_OF_XLOG_LONG_PHD);
    fread(long_header, SIZE_OF_XLOG_LONG_PHD, 1, file);
 
-
    record = malloc(SIZE_OF_XLOG_RECORD);
-
 
    if (record == NULL)
    {
@@ -191,7 +187,9 @@ parse_wal_segment_headers(char* path)
          continue;
       }
       else
-        display_decoded_record(decoded);
+      {
+         display_decoded_record(decoded);
+      }
    }
 }
 
@@ -532,7 +530,7 @@ get_record_length(struct decoded_xlog_record* record, uint32_t* rec_len, uint32_
 
 char*
 get_record_block_ref_info(char* buf, struct decoded_xlog_record* record, bool pretty, bool detailed_format, uint32_t* fpi_len
-                       )
+                          )
 {
    int block_id;
 
@@ -568,10 +566,10 @@ get_record_block_ref_info(char* buf, struct decoded_xlog_record* record, bool pr
          }
 
          buf = pgmoneta_format_and_append(buf, "blkref #%d: rel %u/%u/%u forknum %d blk %u",
-                block_id,
-                rlocator.spcOid, rlocator.dbOid, rlocator.relNumber,
-                forknum,
-                blk);
+                                          block_id,
+                                          rlocator.spcOid, rlocator.dbOid, rlocator.relNumber,
+                                          forknum,
+                                          blk);
 
          if (XLogRecHasBlockImage(record, block_id))
          {
@@ -605,25 +603,25 @@ get_record_block_ref_info(char* buf, struct decoded_xlog_record* record, bool pr
                }
 
                buf = pgmoneta_format_and_append(buf,
-                  " (FPW%s); hole: offset: %u, length: %u, "
-                  "compression saved: %u, method: %s",
-                  record->blocks[block_id].apply_image ?
-                  "" : " for WAL verification",
-                  record->blocks[block_id].hole_offset,
-                  record->blocks[block_id].hole_length,
-                  8192 -
-                  record->blocks[block_id].hole_length -
-                  record->blocks[block_id].bimg_len,
-                  method);
+                                                " (FPW%s); hole: offset: %u, length: %u, "
+                                                "compression saved: %u, method: %s",
+                                                record->blocks[block_id].apply_image ?
+                                                "" : " for WAL verification",
+                                                record->blocks[block_id].hole_offset,
+                                                record->blocks[block_id].hole_length,
+                                                8192 -
+                                                record->blocks[block_id].hole_length -
+                                                record->blocks[block_id].bimg_len,
+                                                method);
             }
             else
             {
                buf = pgmoneta_format_and_append(buf,
-                       " (FPW%s); hole: offset: %u, length: %u",
-                       XLOG_REC_BLOCK_IMAGE_APPLY(record, block_id) ?
-                       "" : " for WAL verification",
-                       XLOG_REC_GET_BLOCK(record, block_id)->hole_offset,
-                       XLOG_REC_GET_BLOCK(record, block_id)->hole_length);
+                                                " (FPW%s); hole: offset: %u, length: %u",
+                                                XLOG_REC_BLOCK_IMAGE_APPLY(record, block_id) ?
+                                                "" : " for WAL verification",
+                                                XLOG_REC_GET_BLOCK(record, block_id)->hole_offset,
+                                                XLOG_REC_GET_BLOCK(record, block_id)->hole_length);
             }
          }
 
@@ -639,19 +637,19 @@ get_record_block_ref_info(char* buf, struct decoded_xlog_record* record, bool pr
          if (forknum != MAIN_FORKNUM)
          {
             buf = pgmoneta_format_and_append(buf,
-               ", blkref #%d: rel %u/%u/%u fork %d blk %u",
-               block_id,
-               rlocator.spcOid, rlocator.dbOid, rlocator.relNumber,
-               forknum,
-               blk);
+                                             ", blkref #%d: rel %u/%u/%u fork %d blk %u",
+                                             block_id,
+                                             rlocator.spcOid, rlocator.dbOid, rlocator.relNumber,
+                                             forknum,
+                                             blk);
          }
          else
          {
             buf = pgmoneta_format_and_append(buf,
-               ", blkref #%d: rel %u/%u/%u blk %u",
-               block_id,
-               rlocator.spcOid, rlocator.dbOid, rlocator.relNumber,
-               blk);
+                                             ", blkref #%d: rel %u/%u/%u blk %u",
+                                             block_id,
+                                             rlocator.spcOid, rlocator.dbOid, rlocator.relNumber,
+                                             blk);
          }
 
          if (XLogRecHasBlockImage(record, block_id))
@@ -678,7 +676,7 @@ get_record_block_ref_info(char* buf, struct decoded_xlog_record* record, bool pr
    {
       buf = pgmoneta_format_and_append(buf, "\n");
    }
-    return buf;
+   return buf;
 
 }
 
