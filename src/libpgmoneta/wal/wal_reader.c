@@ -50,7 +50,7 @@ log_short_page_header(struct xlog_page_header_data* header)
 }
 
 void
-log_long_page_header(struct xlog_long_page_header_data* header)
+print_long_page_header(struct xlog_long_page_header_data* header)
 {
    printf("Long Page Header:\n");
    log_short_page_header(&header->std);
@@ -69,7 +69,6 @@ print_record(struct xlog_record* record)
    printf("xl_info: %u\n", record->xl_info);
    printf("xl_prev: %llu\n", (unsigned long long) record->xl_prev);
    printf("xl_rmid: %u\n", record->xl_rmid);
-//    printf("-----------------\n");
 }
 
 void
@@ -95,12 +94,10 @@ parse_wal_segment_headers(char* path)
    long_header = malloc(SizeOfXLogLongPHD);
    fread(long_header, SizeOfXLogLongPHD, 1, file);
 
-   if (long_header->std.xlp_info & XLP_FIRST_IS_CONTRECORD)
-   {
-      printf("IS CONT RECORD");
-   }
 
    record = malloc(SizeOfXLogRecord);
+
+
    if (record == NULL)
    {
       pgmoneta_log_fatal("Error: Could not allocate memory for record\n");
@@ -119,7 +116,6 @@ parse_wal_segment_headers(char* path)
       fclose(file);
       exit(EXIT_FAILURE);
    }
-   ;
 
    uint32_t next_record = ftell(file);
    int page_number = 0;
@@ -189,14 +185,14 @@ parse_wal_segment_headers(char* path)
       }
 
       struct decoded_xlog_record* decoded = malloc(sizeof(struct decoded_xlog_record));
-      bool result = decode_xlog_record(buffer, decoded, record, long_header->xlp_xlog_blcksz);
-      if (!result)
+
+      if (!decode_xlog_record(buffer, decoded, record, long_header->xlp_xlog_blcksz))
       {
          pgmoneta_log_fatal("error in decoding\n");
          continue;
       }
-      display_decoded_record(decoded);
-
+      else
+        display_decoded_record(decoded);
    }
 }
 

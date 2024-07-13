@@ -274,10 +274,6 @@ void XLogRecGetBlockRefInfo(struct decoded_xlog_record* record, bool pretty, boo
 
 char*XLogRecGetBlockData(struct decoded_xlog_record* record, uint8_t block_id, size_t* len);
 
-void find_next_record(FILE* file, struct xlog_record* record, xlog_rec_ptr RecPtr, struct xlog_long_page_header_data* pData);
-
-void parse_page(char* page);
-
 #define SizeOfXLogLongPHD   MAXALIGN(sizeof(struct xlog_long_page_header_data))
 #define SizeOfXLogShortPHD   MAXALIGN(sizeof(struct xlog_page_header_data))
 #define SizeOfXLogRecord    (offsetof(struct xlog_record, xl_crc) + sizeof(pg_crc32c))
@@ -291,15 +287,6 @@ void parse_page(char* page);
 #define XLByteToPrevSeg(xlrp, logSegNo, wal_segsz_bytes) \
         logSegNo = ((xlrp) - 1) / (wal_segsz_bytes)
 
-#define MAX(a, b) \
-        ({ __typeof__ (a) _a = (a); \
-           __typeof__ (b) _b = (b); \
-           _a > _b ? _a : _b; })
-
-#define MIN(a, b) \
-        ({ __typeof__ (a) _a = (a); \
-           __typeof__ (b) _b = (b); \
-           _a < _b ? _a : _b; })
 
 #define XLogSegmentOffset(xlogptr, wal_segsz_bytes) \
         ((xlogptr) & ((wal_segsz_bytes) - 1))
@@ -311,15 +298,5 @@ void parse_page(char* page);
 #define XLogRecBlockImageApply(record, block_id) (record->blocks[block_id].apply_image)
 #define XLogRecGetOrigin(record) (record->record_origin)
 #define XLogRecGetDataLen(record) (record->main_data_len)
-
-static inline void
-XLogFromFileName(const char* fname, timeline_id* tli, xlog_seg_no* logSegNo, int wal_segsz_bytes)
-{
-   uint32_t log;
-   uint32_t seg;
-
-   sscanf(fname, "%08X%08X%08X", tli, &log, &seg);
-   *logSegNo = (uint64_t) log * XLogSegmentsPerXLogId(wal_segsz_bytes) + seg;
-}
 
 #endif //PGMONETA_WAL_READER_H
