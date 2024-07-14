@@ -147,8 +147,7 @@ struct spg_xlog_add_node
    /*
     * updated inner tuple follows (unaligned!)
     */
-} spg_xlog_add_node;
-
+};
 /*
  * Backup Blk 0: where the prefix tuple goes
  * Backup Blk 1: where the postfix tuple goes (if different page)

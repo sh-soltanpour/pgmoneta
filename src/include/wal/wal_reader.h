@@ -104,8 +104,6 @@ struct xlog_page_header_data
    uint32_t xlp_rem_len;       /* total len of remaining data for record */
 };
 
-struct xlog_page_header_data* XLogPageHeader;
-
 struct xlog_long_page_header_data
 {
    struct xlog_page_header_data std;        /* standard header fields */
@@ -128,42 +126,21 @@ struct xlog_record
 
 };
 
-struct xlog_record_bloch_header
-{
-   uint8_t id;              /* block reference ID */
-   uint8_t fork_flags;      /* fork within the relation, and flags */
-   uint16_t data_length;     /* number of payload bytes (not including page
-                              * image) */
-
-   /* If BKPBLOCK_HAS_IMAGE, an XLogRecordBlockImageHeader struct follows */
-   /* If BKPBLOCK_SAME_REL is not set, a rel_file_locator follows */
-   /* block_number follows */
-};
-
-#define SizeOfXLogRecordBlockHeader (offsetof(xlog_record_bloch_header, data_length) + sizeof(uint16_t))
-
-struct xlog_record_data_header_short
-{
-   uint8_t id;              /* XLR_BLOCK_ID_DATA_SHORT */
-   uint8_t data_length;     /* number of payload bytes */
-} XLogRecordDataHeaderShort;
-
-#define SizeOfXLogRecordDataHeaderShort (sizeof(uint8_t) * 2)
-
-struct xlog_record_data_header_long
-{
-   uint8_t id;              /* XLR_BLOCK_ID_DATA_LONG */
-   /* followed by uint32 data_length, unaligned */
-} XLogRecordDataHeaderLong;
-
-#define SizeOfXLogRecordDataHeaderLong (sizeof(uint8_t) + sizeof(uint32))
-
 struct rel_file_locator
 {
    oid spcOid;          /* tablespace */
    oid dbOid;           /* database */
    rel_file_number relNumber;     /* relation */
 };
+
+
+#define XLR_MAX_BLOCK_ID            32
+
+#define XLR_BLOCK_ID_DATA_SHORT     255
+#define XLR_BLOCK_ID_DATA_LONG      254
+#define XLR_BLOCK_ID_ORIGIN         253
+#define XLR_BLOCK_ID_TOPLEVEL_XID   252
+
 
 struct decoded_bkp_block
 {
@@ -213,7 +190,7 @@ struct decoded_xlog_record
    char* main_data;       /* record's main data portion */
    uint32_t main_data_len;   /* main data portion's length */
    int max_block_id;    /* highest block_id in use (-1 if none) */
-   struct decoded_bkp_block blocks[FLEXIBLE_ARRAY_MEMBER];
+   struct decoded_bkp_block blocks[XLR_MAX_BLOCK_ID + 1];
 };
 
 struct rel_file_node
@@ -233,12 +210,6 @@ struct rel_file_node
 #define XLogRecHasBlockData(record, block_id)      \
         (record->blocks[block_id].has_data)
 
-#define XLR_MAX_BLOCK_ID            32
-
-#define XLR_BLOCK_ID_DATA_SHORT     255
-#define XLR_BLOCK_ID_DATA_LONG      254
-#define XLR_BLOCK_ID_ORIGIN         253
-#define XLR_BLOCK_ID_TOPLEVEL_XID   252
 
 #define BKPBLOCK_FORK_MASK  0x0F
 #define BKPBLOCK_FLAG_MASK  0xF0

@@ -79,8 +79,8 @@ parse_wal_segment_headers(char* path)
    struct xlog_record* record = NULL;
    struct xlog_long_page_header_data* long_header = NULL;
    char* buffer = NULL;
+   struct decoded_xlog_record* decoded = NULL;
 
-   buffer = malloc(16000);
 
    FILE* file = fopen(path, "rb");
    if (file == NULL)
@@ -154,6 +154,13 @@ parse_wal_segment_headers(char* path)
       next_record = ftell(file) + MAXALIGN(record->xl_tot_len - SIZE_OF_XLOG_RECORD);
       uint32_t end_of_page = (page_number + 1) * long_header->xlp_xlog_blcksz;
 
+       buffer = malloc(data_length);
+       if (buffer == NULL)
+       {
+           pgmoneta_log_fatal("Error: Could not allocate memory for buffer\n");
+           break;
+       }
+
       if (data_length + ftell(file) >= end_of_page)
       {
          size_t bytes_read = 0;
@@ -179,7 +186,7 @@ parse_wal_segment_headers(char* path)
          assert(bytes_read == data_length);
       }
 
-      struct decoded_xlog_record* decoded = malloc(sizeof(struct decoded_xlog_record));
+      decoded = malloc(sizeof(struct decoded_xlog_record));
 
       if (!decode_xlog_record(buffer, decoded, record, long_header->xlp_xlog_blcksz))
       {
@@ -191,11 +198,13 @@ parse_wal_segment_headers(char* path)
          display_decoded_record(decoded);
       }
    }
+    fclose(file);
 }
 
 void
 display_decoded_record(struct decoded_xlog_record* record)
 {
+
    uint32_t rec_len;
    uint32_t fpi_len;
 
@@ -205,9 +214,11 @@ display_decoded_record(struct decoded_xlog_record* record)
 
    //if record is rmgr is standby
    char* buf = NULL;
+   printf("before desc\n");
    buf = RmgrTable[record->header.xl_rmid].rm_desc(buf, record);
-
+    printf("before block ref info\n");
    buf = get_record_block_ref_info(buf, record, false, true, &fpi_len);
+   printf("after block ref info\n");
    printf("%s\n", buf);
    free(buf);
    printf("\n------------------------------\n");

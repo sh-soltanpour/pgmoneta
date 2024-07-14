@@ -278,7 +278,7 @@ struct xl_xact_parsed_abort
 
    xlog_rec_ptr origin_lsn;
    TimestampTz origin_timestamp;
-} xl_xact_parsed_abort;
+};
 
 char*xact_desc(char* buf, struct decoded_xlog_record* record);
 
