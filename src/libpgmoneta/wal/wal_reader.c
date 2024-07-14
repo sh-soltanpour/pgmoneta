@@ -35,7 +35,7 @@
 #include "utils.h"
 
 void
-log_short_page_header(struct xlog_page_header_data* header)
+print_short_page_header(struct xlog_page_header_data* header)
 {
    printf("Page Header:\n");
    printf("  xlp_magic: %u\n", header->xlp_magic);
@@ -50,7 +50,7 @@ void
 print_long_page_header(struct xlog_long_page_header_data* header)
 {
    printf("Long Page Header:\n");
-   log_short_page_header(&header->std);
+   print_short_page_header(&header->std);
    printf("  xlp_sysid: %llu\n", (unsigned long long) header->xlp_sysid);
    printf("  xlp_seg_size: %u\n", header->xlp_seg_size);
    printf("  xlp_xlog_blcksz: %u\n", header->xlp_xlog_blcksz);
@@ -80,7 +80,6 @@ parse_wal_segment_headers(char* path)
    struct xlog_long_page_header_data* long_header = NULL;
    char* buffer = NULL;
    struct decoded_xlog_record* decoded = NULL;
-
 
    FILE* file = fopen(path, "rb");
    if (file == NULL)
@@ -154,12 +153,12 @@ parse_wal_segment_headers(char* path)
       next_record = ftell(file) + MAXALIGN(record->xl_tot_len - SIZE_OF_XLOG_RECORD);
       uint32_t end_of_page = (page_number + 1) * long_header->xlp_xlog_blcksz;
 
-       buffer = malloc(data_length);
-       if (buffer == NULL)
-       {
-           pgmoneta_log_fatal("Error: Could not allocate memory for buffer\n");
-           break;
-       }
+      buffer = malloc(data_length);
+      if (buffer == NULL)
+      {
+         pgmoneta_log_fatal("Error: Could not allocate memory for buffer\n");
+         break;
+      }
 
       if (data_length + ftell(file) >= end_of_page)
       {
@@ -198,7 +197,7 @@ parse_wal_segment_headers(char* path)
          display_decoded_record(decoded);
       }
    }
-    fclose(file);
+   fclose(file);
 }
 
 void
@@ -216,7 +215,7 @@ display_decoded_record(struct decoded_xlog_record* record)
    char* buf = NULL;
    printf("before desc\n");
    buf = RmgrTable[record->header.xl_rmid].rm_desc(buf, record);
-    printf("before block ref info\n");
+   printf("before block ref info\n");
    buf = get_record_block_ref_info(buf, record, false, true, &fpi_len);
    printf("after block ref info\n");
    printf("%s\n", buf);

@@ -132,7 +132,7 @@ struct xl_brin_revmap_extend
 };
 
 #define SIZE_OF_BRIN_REVMAP_EXTEND   (offsetof(xl_brin_revmap_extend, targetBlk) + \
-                                  sizeof(BlockNumber))
+                                      sizeof(BlockNumber))
 
 /*
  * This is what we need to know about a range de-summarization
@@ -150,7 +150,7 @@ struct xl_brin_desummarize
 };
 
 #define SIZE_OF_BRIN_DESUMMARIZE (offsetof(xl_brin_desummarize, regOffset) + \
-                               sizeof(OffsetNumber))
+                                  sizeof(OffsetNumber))
 
 char*
 brin_desc(char* buf, struct decoded_xlog_record* record);

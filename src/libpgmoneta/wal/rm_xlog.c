@@ -184,15 +184,14 @@ timestamptz_to_str(TimestampTz dt)
    strftime(zone, sizeof(zone), "%Z", ltime);
 
    int written = snprintf(buf, sizeof(buf), "%s.%06d %s",
-            ts, (int) (dt % USECS_PER_SEC), zone);
+                          ts, (int) (dt % USECS_PER_SEC), zone);
 
-    if (written < 0 || written >= sizeof(buf)) {
-        // Handle the truncation or error
-        fprintf(stderr, "Buffer overflow or encoding error in timestamptz_to_str\n");
-        buf[0] = '\0'; // Ensure buffer is null-terminated
-    }
-
-
+   if (written < 0 || written >= sizeof(buf))
+   {
+      // Handle the truncation or error
+      fprintf(stderr, "Buffer overflow or encoding error in timestamptz_to_str\n");
+      buf[0] = '\0';   // Ensure buffer is null-terminated
+   }
 
    return buf;
 }

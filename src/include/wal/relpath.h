@@ -44,7 +44,7 @@ typedef int BackendId;        /* unique currently active backend identifier */
 
 #define RELPATHBACKEND(rnode, backend, forknum) \
         get_relation_path((rnode).dbNode, (rnode).spcNode, (rnode).relNode, \
-                        backend, forknum)
+                          backend, forknum)
 
 /* First argument is a rel_file_node */
 #define RELPATHPERM(rnode, forknum) \

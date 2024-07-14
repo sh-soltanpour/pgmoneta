@@ -133,14 +133,12 @@ struct rel_file_locator
    rel_file_number relNumber;     /* relation */
 };
 
-
 #define XLR_MAX_BLOCK_ID            32
 
 #define XLR_BLOCK_ID_DATA_SHORT     255
 #define XLR_BLOCK_ID_DATA_LONG      254
 #define XLR_BLOCK_ID_ORIGIN         253
 #define XLR_BLOCK_ID_TOPLEVEL_XID   252
-
 
 struct decoded_bkp_block
 {
@@ -209,7 +207,6 @@ struct rel_file_node
 
 #define XLogRecHasBlockData(record, block_id)      \
         (record->blocks[block_id].has_data)
-
 
 #define BKPBLOCK_FORK_MASK  0x0F
 #define BKPBLOCK_FLAG_MASK  0xF0
