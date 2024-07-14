@@ -27,7 +27,7 @@
  */
 
 /*
- * GetRelationPath - construct path to a relation's file
+ * get_relation_path - construct path to a relation's file
  *
  * Result is a palloc'd string.
  *
@@ -41,8 +41,8 @@
 #include "utils.h"
 
 char*
-GetRelationPath(oid dbNode, oid spcNode, oid relNode,
-                int backendId, enum fork_number forkNumber)
+get_relation_path(oid dbNode, oid spcNode, oid relNode,
+                  int backendId, enum fork_number forkNumber)
 {
    const char*const forkNames[] = {
       "main",                       /* MAIN_FORKNUM */

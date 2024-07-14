@@ -43,7 +43,7 @@ struct xl_logical_message
    char message[FLEXIBLE_ARRAY_MEMBER];
 };
 
-#define SizeOfLogicalMessage  (offsetof(xl_logical_message, message))
+#define SIZE_OF_LOGICAL_MESSAGE  (offsetof(xl_logical_message, message))
 
 char* logicalmsg_desc(char* buf, struct decoded_xlog_record* record);
 

@@ -78,7 +78,7 @@ struct xl_hash_insert
    offset_number offnum;
 };
 
-#define SizeOfHashInsert   (offsetof(xl_hash_insert, offnum) + sizeof(OffsetNumber))
+#define SIZE_OF_HASH_INSERT   (offsetof(xl_hash_insert, offnum) + sizeof(OffsetNumber))
 
 /*
  * This is what we need to know about addition of overflow page.
@@ -97,8 +97,7 @@ struct xl_hash_add_ovfl_page
    bool bmpage_found;
 };
 
-#define SizeOfHashAddOvflPage \
-        (offsetof(xl_hash_add_ovfl_page, bmpage_found) + sizeof(bool))
+#define SIZE_OF_HASH_ADD_OVFL_PAGE (offsetof(xl_hash_add_ovfl_page, bmpage_found) + sizeof(bool))
 
 /*
  * This is what we need to know about allocating a page for split.
@@ -117,8 +116,7 @@ struct xl_hash_split_allocate_page
    uint8_t flags;
 };
 
-#define SizeOfHashSplitAllocPage \
-        (offsetof(xl_hash_split_allocate_page, flags) + sizeof(uint8_t))
+#define SIZE_OF_HASH_SPLIT_ALLOC_PAGE (offsetof(xl_hash_split_allocate_page, flags) + sizeof(uint8_t))
 
 /*
  * This is what we need to know about completing the split operation.
@@ -134,8 +132,7 @@ struct xl_hash_split_complete
    uint16_t new_bucket_flag;
 };
 
-#define SizeOfHashSplitComplete \
-        (offsetof(xl_hash_split_complete, new_bucket_flag) + sizeof(uint16_t))
+#define SIZE_OF_HASH_SPLIT_COMPLETE (offsetof(xl_hash_split_complete, new_bucket_flag) + sizeof(uint16_t))
 
 /*
  * This is what we need to know about move page contents required during
@@ -155,8 +152,7 @@ struct xl_hash_move_page_contents
                                         * primary bucket page */
 };
 
-#define SizeOfHashMovePageContents  \
-        (offsetof(xl_hash_move_page_contents, is_prim_bucket_same_wrt) + sizeof(bool))
+#define SIZE_OF_HASH_MOVE_PAGE_CONTENTS  (offsetof(xl_hash_move_page_contents, is_prim_bucket_same_wrt) + sizeof(bool))
 
 /*
  * This is what we need to know about the squeeze page operation.
@@ -184,8 +180,7 @@ struct xl_hash_squeeze_page
                                         * page */
 };
 
-#define SizeOfHashSqueezePage \
-        (offsetof(xl_hash_squeeze_page, is_prev_bucket_same_wrt) + sizeof(bool))
+#define SIZE_OF_HASH_SQUEEZE_PAGE (offsetof(xl_hash_squeeze_page, is_prev_bucket_same_wrt) + sizeof(bool))
 
 /*
  * This is what we need to know about the deletion of index tuples from a page.
@@ -203,7 +198,7 @@ struct xl_hash_delete
                                      * primary bucket page */
 };
 
-#define SizeOfHashDelete   (offsetof(xl_hash_delete, is_primary_bucket_page) + sizeof(bool))
+#define SIZE_OF_HASH_DELETE   (offsetof(xl_hash_delete, is_primary_bucket_page) + sizeof(bool))
 
 /*
  * This is what we need for metapage update operation.
@@ -217,8 +212,7 @@ struct xl_hash_update_meta_page
    double ntuples;
 };
 
-#define SizeOfHashUpdateMetaPage \
-        (offsetof(xl_hash_update_meta_page, ntuples) + sizeof(double))
+#define SIZE_OF_HASH_UPDATE_META_PAGE (offsetof(xl_hash_update_meta_page, ntuples) + sizeof(double))
 
 /*
  * This is what we need to initialize metapage.
@@ -234,8 +228,7 @@ struct xl_hash_init_meta_page
    uint16_t ffactor;
 };
 
-#define SizeOfHashInitMetaPage      \
-        (offsetof(xl_hash_init_meta_page, ffactor) + sizeof(uint16_t))
+#define SIZE_OF_HASH_INIT_META_PAGE  (offsetof(xl_hash_init_meta_page, ffactor) + sizeof(uint16_t))
 
 /*
  * This is what we need to initialize bitmap page.
@@ -250,8 +243,7 @@ struct xl_hash_init_bitmap_page
    uint16_t bmsize;
 };
 
-#define SizeOfHashInitBitmapPage \
-        (offsetof(xl_hash_init_bitmap_page, bmsize) + sizeof(uint16_t))
+#define SIZE_OF_HASH_INIT_BITMAP_PAGE (offsetof(xl_hash_init_bitmap_page, bmsize) + sizeof(uint16_t))
 
 /*
  * This is what we need for index tuple deletion and to
@@ -270,8 +262,7 @@ struct xl_hash_vacuum_one_page
    /* TARGET OFFSET NUMBERS FOLLOW AT THE END */
 };
 
-#define SizeOfHashVacuumOnePage \
-        (offsetof(xl_hash_vacuum_one_page, ntuples) + sizeof(int))
+#define SIZE_OF_HASH_VACUUM_ONE_PAGE (offsetof(xl_hash_vacuum_one_page, ntuples) + sizeof(int))
 
 char* hash_desc(char* buf, struct decoded_xlog_record* record);
 

@@ -42,8 +42,8 @@ out_gistxlogPageReuse(char* buf, struct gist_xlog_page_reuse* xlrec)
    buf = pgmoneta_format_and_append(buf, "rel %u/%u/%u; blk %u; latestRemovedXid %u:%u",
                                     xlrec->node.spcNode, xlrec->node.dbNode,
                                     xlrec->node.relNode, xlrec->block,
-                                    EpochFromFullTransactionId(xlrec->latestRemovedFullXid),
-                                    XidFromFullTransactionId(xlrec->latestRemovedFullXid));
+                                    EPOCH_FROM_FULL_TRANSACTION_ID(xlrec->latestRemovedFullXid),
+                                    XID_FROM_FULL_TRANSACTION_ID(xlrec->latestRemovedFullXid));
    return buf;
 }
 
@@ -68,8 +68,8 @@ static char*
 out_gistxlogPageDelete(char* buf, struct gist_xlog_page_delete* xlrec)
 {
    buf = pgmoneta_format_and_append(buf, "deleteXid %u:%u; downlink %u",
-                                    EpochFromFullTransactionId(xlrec->deleteXid),
-                                    XidFromFullTransactionId(xlrec->deleteXid),
+                                    EPOCH_FROM_FULL_TRANSACTION_ID(xlrec->deleteXid),
+                                    XID_FROM_FULL_TRANSACTION_ID(xlrec->deleteXid),
                                     xlrec->downlinkOffset);
    return buf;
 }

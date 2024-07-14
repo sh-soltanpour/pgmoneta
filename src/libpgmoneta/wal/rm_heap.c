@@ -205,8 +205,8 @@ heap2_desc(char* buf, struct decoded_xlog_record* record)
                                        xlrec->target_node.spcNode,
                                        xlrec->target_node.dbNode,
                                        xlrec->target_node.relNode,
-                                       ItemPointerGetBlockNumber(&(xlrec->target_tid)),
-                                       ItemPointerGetOffsetNumber(&(xlrec->target_tid)));
+                                       ITEM_POINTER_GET_BLOCK_NUMBER(&(xlrec->target_tid)),
+                                       ITEM_POINTER_GET_OFFSET_NUMBER(&(xlrec->target_tid)));
       buf = pgmoneta_format_and_append(buf, "; cmin: %u, cmax: %u, combo: %u",
                                        xlrec->cmin, xlrec->cmax, xlrec->combocid);
    }

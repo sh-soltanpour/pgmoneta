@@ -42,15 +42,15 @@ typedef int BackendId;        /* unique currently active backend identifier */
 #define CATALOG_VERSION_NO "202107181"
 #define TABLESPACE_VERSION_DIRECTORY   "PG_" PG_MAJORVERSION "_" CATALOG_VERSION_NO
 
-#define relpathbackend(rnode, backend, forknum) \
-        GetRelationPath((rnode).dbNode, (rnode).spcNode, (rnode).relNode, \
+#define RELPATHBACKEND(rnode, backend, forknum) \
+        get_relation_path((rnode).dbNode, (rnode).spcNode, (rnode).relNode, \
                         backend, forknum)
 
 /* First argument is a rel_file_node */
-#define relpathperm(rnode, forknum) \
-        relpathbackend(rnode, InvalidBackendId, forknum)
+#define RELPATHPERM(rnode, forknum) \
+        RELPATHBACKEND(rnode, InvalidBackendId, forknum)
 
 char*
-GetRelationPath(oid dbNode, oid spcNode, oid relNode, int backendId, enum fork_number forkNumber);
+get_relation_path(oid dbNode, oid spcNode, oid relNode, int backendId, enum fork_number forkNumber);
 
 #endif //PGMONETA_RELPATH_H

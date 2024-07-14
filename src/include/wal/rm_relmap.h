@@ -40,7 +40,7 @@ struct xl_relmap_update
    char data[FLEXIBLE_ARRAY_MEMBER];
 };
 
-#define MinSizeOfRelmapUpdate offsetof(xl_relmap_update, data)
+#define MIN_SIZE_OF_RELMAP_UPDATE offsetof(xl_relmap_update, data)
 
 char* relmap_desc(char* buf, struct decoded_xlog_record* record);
 

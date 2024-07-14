@@ -49,7 +49,7 @@ desc_recompress_leaf(char* buf, struct gin_xlog_recompress_data_leaf* insertData
       if (a_action == GIN_SEGMENT_INSERT ||
           a_action == GIN_SEGMENT_REPLACE)
       {
-         newsegsize = SizeOfGinPostingList((struct gin_posting_list*) walbuf);
+         newsegsize = SIZE_OF_GIN_POSTING_LIST((struct gin_posting_list*) walbuf);
          walbuf += SHORTALIGN(newsegsize);
       }
 
@@ -106,9 +106,9 @@ gin_desc(char* buf, struct decoded_xlog_record* record)
             block_number leftChildBlkno;
             block_number rightChildBlkno;
 
-            leftChildBlkno = BlockIdGetBlockNumber((block_id) payload);
+            leftChildBlkno = BLOCK_ID_GET_BLOCK_NUMBER((block_id) payload);
             payload += sizeof(struct block_id_data);
-            rightChildBlkno = BlockIdGetBlockNumber((block_id) payload);
+            rightChildBlkno = BLOCK_ID_GET_BLOCK_NUMBER((block_id) payload);
             payload += sizeof(block_number);
             buf = pgmoneta_format_and_append(buf, " children: %u/%u",
                                              leftChildBlkno, rightChildBlkno);
@@ -143,9 +143,9 @@ gin_desc(char* buf, struct decoded_xlog_record* record)
                   (struct gin_xlog_insert_data_internal*) payload;
 
                buf = pgmoneta_format_and_append(buf, " pitem: %u-%u/%u",
-                                                PostingItemGetBlockNumber(&insertData->newitem),
-                                                ItemPointerGetBlockNumber(&insertData->newitem.key),
-                                                ItemPointerGetOffsetNumber(&insertData->newitem.key));
+                                                POSTING_ITEM_GET_BLOCK_NUMBER(&insertData->newitem),
+                                                ITEM_POINTER_GET_BLOCK_NUMBER(&insertData->newitem.key),
+                                                ITEM_POINTER_GET_OFFSET_NUMBER(&insertData->newitem.key));
             }
          }
       }

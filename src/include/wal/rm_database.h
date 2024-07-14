@@ -50,7 +50,7 @@ struct xl_dbase_drop_rec
    int ntablespaces;          /* number of tablespace IDs */
    oid tablespace_ids[FLEXIBLE_ARRAY_MEMBER];
 };
-#define MinSizeOfDbaseDropRec offsetof(xl_dbase_drop_rec, tablespace_ids)
+#define MIN_SIZE_OF_DBASE_DROP_REC offsetof(xl_dbase_drop_rec, tablespace_ids)
 
 char* database_desc(char* buf, struct decoded_xlog_record* record);
 

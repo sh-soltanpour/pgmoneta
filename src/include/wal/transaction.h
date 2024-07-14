@@ -40,9 +40,9 @@ typedef uint32_t transaction_id;
 typedef transaction_id multi_xact_id;
 typedef uint32_t multi_xact_offset;
 
-#define EpochFromFullTransactionId(x)   ((uint32_t) ((x).value >> 32))
-#define XidFromFullTransactionId(x)     ((uint32_t) (x).value)
-#define InvalidTransactionId        ((transaction_id) 0)
-#define TransactionIdIsValid(xid)      ((xid) != InvalidTransactionId)
+#define EPOCH_FROM_FULL_TRANSACTION_ID(x)   ((uint32_t) ((x).value >> 32))
+#define XID_FROM_FULL_TRANSACTION_ID(x)     ((uint32_t) (x).value)
+#define INVALID_TRANSACTION_ID        ((transaction_id) 0)
+#define TRANSACTION_ID_IS_VALID(xid)      ((xid) != INVALID_TRANSACTION_ID)
 
 #endif //PGMONETA_TRANSACTION_H

@@ -50,45 +50,45 @@ struct item_pointer_data
 };
 typedef struct block_id_data* block_id;   /* block identifier */
 
-#define ItemPointerGetOffsetNumberNoCheck(pointer) \
+#define ITEM_POINTER_GET_OFFSET_NUMBER_NO_CHECK(pointer) \
         ( \
            (pointer)->ip_posid \
         )
 
 /*
- * ItemPointerGetOffsetNumber
+ * ITEM_POINTER_GET_OFFSET_NUMBER
  *		As above, but verifies that the item pointer looks valid.
  */
-#define ItemPointerGetOffsetNumber(pointer) \
+#define ITEM_POINTER_GET_OFFSET_NUMBER(pointer) \
         ( \
-           ItemPointerGetOffsetNumberNoCheck(pointer) \
+           ITEM_POINTER_GET_OFFSET_NUMBER_NO_CHECK(pointer) \
         )
 
 /*
- * ItemPointerGetBlockNumberNoCheck
+ * ITEM_POINTER_GET_BLOCK_NUMBER_NO_CHECK
  *		Returns the block number of a disk item pointer.
  */
-#define ItemPointerGetBlockNumberNoCheck(pointer) \
+#define ITEM_POINTER_GET_BLOCK_NUMBER_NO_CHECK(pointer) \
         ( \
-           BlockIdGetBlockNumber(&(pointer)->ip_blkid) \
+           BLOCK_ID_GET_BLOCK_NUMBER(&(pointer)->ip_blkid) \
         )
 
 /*
- * ItemPointerGetBlockNumber
+ * ITEM_POINTER_GET_BLOCK_NUMBER
  *		As above, but verifies that the item pointer looks valid.
  */
-#define ItemPointerGetBlockNumber(pointer) \
+#define ITEM_POINTER_GET_BLOCK_NUMBER(pointer) \
         ( \
-           ItemPointerGetBlockNumberNoCheck(pointer) \
+           ITEM_POINTER_GET_BLOCK_NUMBER_NO_CHECK(pointer) \
         )
 
-#define BlockIdGetBlockNumber(blockId) \
+#define BLOCK_ID_GET_BLOCK_NUMBER(blockId) \
         ( \
            ((((block_number) (blockId)->bi_hi) << 16) | ((block_number) (blockId)->bi_lo)) \
         )
 
-#define PostingItemGetBlockNumber(pointer) \
-        BlockIdGetBlockNumber(&(pointer)->child_blkno)
+#define POSTING_ITEM_GET_BLOCK_NUMBER(pointer) \
+        BLOCK_ID_GET_BLOCK_NUMBER(&(pointer)->child_blkno)
 
 #define PostingItemSetBlockNumber(pointer, blockNumber) \
         BlockIdSet(&((pointer)->child_blkno), (blockNumber))

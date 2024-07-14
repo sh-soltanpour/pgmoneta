@@ -239,8 +239,8 @@ decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlo
    decoded->header = *record;
 //    decoded->lsn = lsn;
    decoded->next = NULL;
-   decoded->record_origin = InvalidRepOriginId;
-   decoded->toplevel_xid = InvalidTransactionId;
+   decoded->record_origin = INVALID_REP_ORIGIN_ID;
+   decoded->toplevel_xid = INVALID_TRANSACTION_ID;
    decoded->main_data = NULL;
    decoded->main_data_len = 0;
    decoded->max_block_id = -1;

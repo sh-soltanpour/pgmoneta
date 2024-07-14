@@ -77,7 +77,7 @@ struct xl_heap_insert
    /* xl_heap_header & TUPLE DATA in backup block 0 */
 };
 
-#define SizeOfHeapInsert    (offsetof(xl_heap_insert, flags) + sizeof(uint8))
+#define SIZE_OF_HEAP_INSERT    (offsetof(xl_heap_insert, flags) + sizeof(uint8))
 
 /* This is what we need to know about delete */
 struct xl_heap_delete
@@ -88,7 +88,7 @@ struct xl_heap_delete
    uint8_t flags;
 };
 
-#define SizeOfHeapDelete    (offsetof(xl_heap_delete, flags) + sizeof(uint8))
+#define SIZE_OF_HEAP_DELETE    (offsetof(xl_heap_delete, flags) + sizeof(uint8))
 
 struct xl_heap_update
 {
@@ -105,7 +105,7 @@ struct xl_heap_update
     */
 };
 
-#define SizeOfHeapUpdate    (offsetof(xl_heap_update, new_offnum) + sizeof(OffsetNumber))
+#define SIZE_OF_HEAP_UPDATE    (offsetof(xl_heap_update, new_offnum) + sizeof(OffsetNumber))
 
 struct xl_heap_truncate
 {
@@ -115,7 +115,7 @@ struct xl_heap_truncate
    oid relids[FLEXIBLE_ARRAY_MEMBER];
 };
 
-#define SizeOfHeapTruncate    (offsetof(xl_heap_truncate, relids))
+#define SIZE_OF_HEAP_TRUNCATE    (offsetof(xl_heap_truncate, relids))
 /*
  * xl_heap_truncate flag values, 8 bits are available.
  */
@@ -128,7 +128,7 @@ struct xl_heap_confirm
    offset_number offnum;         /* confirmed tuple's offset on page */
 };
 
-#define SizeOfHeapConfirm    (offsetof(xl_heap_confirm, offnum) + sizeof(OffsetNumber))
+#define SIZE_OF_HEAP_CONFIRM    (offsetof(xl_heap_confirm, offnum) + sizeof(OffsetNumber))
 
 /* flag bits for xl_heap_lock / xl_heap_lock_updated's flag field */
 #define XLH_LOCK_ALL_FROZEN_CLEARED        0x01
@@ -142,7 +142,7 @@ struct xl_heap_lock
    uint8_t flags;             /* XLH_LOCK_* flag bits */
 };
 
-#define SizeOfHeapLock    (offsetof(xl_heap_lock, flags) + sizeof(int8))
+#define SIZE_OF_HEAP_LOCK    (offsetof(xl_heap_lock, flags) + sizeof(int8))
 
 /* This is what we need to know about in-place update */
 struct xl_heap_inplace
@@ -151,7 +151,7 @@ struct xl_heap_inplace
    /* TUPLE DATA FOLLOWS AT END OF STRUCT */
 };
 
-#define SizeOfHeapInplace    (offsetof(xl_heap_inplace, offnum) + sizeof(OffsetNumber))
+#define SIZE_OF_HEAP_INPLACE    (offsetof(xl_heap_inplace, offnum) + sizeof(OffsetNumber))
 
 /*
  * This is what we need to know about page pruning (both during VACUUM and
@@ -175,7 +175,7 @@ struct xl_heap_prune
    /* OFFSET NUMBERS are in the block reference 0 */
 };
 
-#define SizeOfHeapPrune (offsetof(xl_heap_prune, ndead) + sizeof(uint16))
+#define SIZE_OF_HEAP_PRUNE (offsetof(xl_heap_prune, ndead) + sizeof(uint16))
 
 /*
  * The vacuum page record is similar to the prune record, but can only mark
@@ -189,7 +189,7 @@ struct xl_heap_vacuum
    /* OFFSET NUMBERS are in the block reference 0 */
 };
 
-#define SizeOfHeapVacuum (offsetof(xl_heap_vacuum, nunused) + sizeof(uint16))
+#define SIZE_OF_HEAP_VACUUM (offsetof(xl_heap_vacuum, nunused) + sizeof(uint16))
 
 /*
  * This is what we need to know about a block being frozen during vacuum
@@ -203,7 +203,7 @@ struct xl_heap_freeze_page
    uint16_t ntuples;
 };
 
-#define SizeOfHeapFreezePage (offsetof(xl_heap_freeze_page, ntuples) + sizeof(uint16))
+#define SIZE_OF_HEAP_FREEZE_PAGE (offsetof(xl_heap_freeze_page, ntuples) + sizeof(uint16))
 
 /*
  * This is what we need to know about setting a visibility map bit
@@ -217,7 +217,7 @@ struct xl_heap_visible
    uint8_t flags;
 };
 
-#define SizeOfHeapVisible (offsetof(xl_heap_visible, flags) + sizeof(uint8))
+#define SIZE_OF_HEAP_VISIBLE (offsetof(xl_heap_visible, flags) + sizeof(uint8))
 
 typedef uint32_t command_id;
 
@@ -257,7 +257,7 @@ struct xl_heap_multi_insert
    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 };
 
-#define SizeOfHeapMultiInsert    offsetof(xl_heap_multi_insert, offsets)
+#define SIZE_OF_HEAP_MULTI_INSERT    offsetof(xl_heap_multi_insert, offsets)
 
 /* This is what we need to know about locking an updated version of a row */
 struct xl_heap_lock_updated

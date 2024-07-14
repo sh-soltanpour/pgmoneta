@@ -46,8 +46,8 @@ struct xl_replorigin_drop
 #define XLOG_REPLORIGIN_SET      0x00
 #define XLOG_REPLORIGIN_DROP     0x10
 
-#define InvalidRepOriginId 0
-#define DoNotReplicateId PG_UINT16_MAX
+#define INVALID_REP_ORIGIN_ID 0
+#define DO_NOT_REPLICATE_ID PG_UINT16_MAX
 
 char* replorigin_desc(char* buf, struct decoded_xlog_record* record);
 

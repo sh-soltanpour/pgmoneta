@@ -62,7 +62,7 @@ struct xl_brin_createidx
    block_number pagesPerRange;
    uint16_t version;
 };
-#define SizeOfBrinCreateIdx (offsetof(xl_brin_createidx, version) + sizeof(uint16))
+#define SIZE_OF_BRIN_CREATE_IDX (offsetof(xl_brin_createidx, version) + sizeof(uint16))
 
 /*
  * This is what we need to know about a BRIN tuple insert
@@ -81,7 +81,7 @@ struct xl_brin_insert
    offset_number offnum;
 };
 
-#define SizeOfBrinInsert   (offsetof(xl_brin_insert, offnum) + sizeof(OffsetNumber))
+#define SIZE_OF_BRIN_INSERT   (offsetof(xl_brin_insert, offnum) + sizeof(OffsetNumber))
 
 /*
  * A cross-page update is the same as an insert, but also stores information
@@ -102,7 +102,7 @@ struct xl_brin_update
    struct xl_brin_insert insert;
 };
 
-#define SizeOfBrinUpdate   (offsetof(xl_brin_update, insert) + SizeOfBrinInsert)
+#define SIZE_OF_BRIN_UPDATE   (offsetof(xl_brin_update, insert) + SIZE_OF_BRIN_INSERT)
 
 /*
  * This is what we need to know about a BRIN tuple samepage update
@@ -114,7 +114,7 @@ struct xl_brin_samepage_update
    offset_number offnum;
 };
 
-#define SizeOfBrinSamepageUpdate    (sizeof(OffsetNumber))
+#define SIZE_OF_BRIN_SAMEPAGE_UPDATE    (sizeof(OffsetNumber))
 
 /*
  * This is what we need to know about a revmap extension
@@ -131,7 +131,7 @@ struct xl_brin_revmap_extend
    block_number targetBlk;
 };
 
-#define SizeOfBrinRevmapExtend   (offsetof(xl_brin_revmap_extend, targetBlk) + \
+#define SIZE_OF_BRIN_REVMAP_EXTEND   (offsetof(xl_brin_revmap_extend, targetBlk) + \
                                   sizeof(BlockNumber))
 
 /*
@@ -149,7 +149,7 @@ struct xl_brin_desummarize
    offset_number regOffset;
 };
 
-#define SizeOfBrinDesummarize (offsetof(xl_brin_desummarize, regOffset) + \
+#define SIZE_OF_BRIN_DESUMMARIZE (offsetof(xl_brin_desummarize, regOffset) + \
                                sizeof(OffsetNumber))
 
 char*

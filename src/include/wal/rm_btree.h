@@ -43,9 +43,9 @@ struct item_id_data
             lp_len: 15; /* byte length of tuple */
 };
 
-#define InvalidOffsetNumber     ((offset_number) 0)
-#define FirstOffsetNumber       ((offset_number) 1)
-#define MaxOffsetNumber         ((offset_number) (8192 / sizeof(struct item_id_data))) // TODO: Replace 8192 with block size from pg_control
+#define INVALID_OFFSET_NUMBER     ((offset_number) 0)
+#define FIRST_OFFSET_NUMBER       ((offset_number) 1)
+#define MAX_OFFSET_NUMBER         ((offset_number) (8192 / sizeof(struct item_id_data))) // TODO: Replace 8192 with block size from pg_control
 
 /* ----------------
  *      support macros
@@ -53,12 +53,12 @@ struct item_id_data
  */
 
 /*
- * OffsetNumberIsValid
+ * OFFSET_NUMBER_IS_VALID
  *      True iff the offset number is valid.
  */
-#define OffsetNumberIsValid(offsetNumber) \
-        ((bool) ((offsetNumber != InvalidOffsetNumber) && \
-                 (offsetNumber <= MaxOffsetNumber)))
+#define OFFSET_NUMBER_IS_VALID(offsetNumber) \
+        ((bool) ((offsetNumber != INVALID_OFFSET_NUMBER) && \
+                 (offsetNumber <= MAX_OFFSET_NUMBER)))
 
 #define XLOG_BTREE_INSERT_LEAF  0x00    /* add index tuple without split */
 #define XLOG_BTREE_INSERT_UPPER 0x10    /* same, on a non-leaf page */
@@ -210,7 +210,7 @@ struct xl_btree_dedup
    /* DEDUPLICATION INTERVALS FOLLOW */
 };
 
-#define SizeOfBtreeDedup    (offsetof(xl_btree_dedup, nintervals) + sizeof(uint16_t))
+#define SIZE_OF_BTREE_DEDUP    (offsetof(xl_btree_dedup, nintervals) + sizeof(uint16_t))
 
 /*
  * This is what we need to know about page reuse within btree.  This record
@@ -228,7 +228,7 @@ struct xl_btree_reuse_page
                           * decoding on standby */
 };
 
-#define SizeOfBtreeReusePage    (offsetof(xl_btree_reuse_page, isCatalogRel) + sizeof(bool))
+#define SIZE_OF_BTREE_REUSE_PAGE    (offsetof(xl_btree_reuse_page, isCatalogRel) + sizeof(bool))
 
 /*
  * xl_btree_vacuum and xl_btree_delete records describe deletion of index
@@ -270,7 +270,7 @@ struct xl_btree_vacuum
     */
 };
 
-#define SizeOfBtreeVacuum   (offsetof(xl_btree_vacuum, nupdated) + sizeof(uint16_t))
+#define SIZE_OF_BTREE_VACUUM   (offsetof(xl_btree_vacuum, nupdated) + sizeof(uint16_t))
 
 struct xl_btree_delete
 {
@@ -289,7 +289,7 @@ struct xl_btree_delete
     */
 };
 
-#define SizeOfBtreeDelete   (offsetof(xl_btree_delete, isCatalogRel) + sizeof(bool))
+#define SIZE_OF_BTREE_DELETE   (offsetof(xl_btree_delete, isCatalogRel) + sizeof(bool))
 
 /*
  * The offsets that appear in xl_btree_update metadata are offsets into the
@@ -304,7 +304,7 @@ struct xl_btree_update
    /* POSTING LIST uint16_t OFFSETS TO A DELETED TID FOLLOW */
 };
 
-#define SizeOfBtreeUpdate   (offsetof(struct xl_btree_update, ndeletedtids) + sizeof(uint16_t))
+#define SIZE_OF_BTREE_UPDATE   (offsetof(struct xl_btree_update, ndeletedtids) + sizeof(uint16_t))
 
 /*
  * This is what we need to know about marking an empty subtree for deletion.
@@ -364,7 +364,7 @@ struct xl_btree_unlink_page
    /* xl_btree_metadata FOLLOWS IF XLOG_BTREE_UNLINK_PAGE_META */
 };
 
-#define SizeOfBtreeUnlinkPage   (offsetof(xl_btree_unlink_page, leaftopparent) + sizeof(BlockNumber))
+#define SIZE_OF_BTREE_UNLINK_PAGE   (offsetof(xl_btree_unlink_page, leaftopparent) + sizeof(BlockNumber))
 
 /*
  * New root log record.  There are zero tuples if this is to establish an
@@ -383,6 +383,6 @@ struct xl_btree_newroot
    uint32_t level;           /* its tree level */
 };
 
-#define SizeOfBtreeNewroot  (offsetof(xl_btree_newroot, level) + sizeof(uint32_t))
+#define SIZE_OF_BTREE_NEWROOT  (offsetof(xl_btree_newroot, level) + sizeof(uint32_t))
 
 #endif //PGMONETA_RM_BTREE_H

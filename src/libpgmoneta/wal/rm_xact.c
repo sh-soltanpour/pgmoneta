@@ -52,7 +52,7 @@ xact_desc_relations(char* buf, char* label, int nrels,
       buf = pgmoneta_format_and_append(buf, "; %s:", label);
       for (i = 0; i < nrels; i++)
       {
-         char* path = relpathperm(xnodes[i], MAIN_FORKNUM);
+         char* path = RELPATHPERM(xnodes[i], MAIN_FORKNUM);
 
          buf = pgmoneta_format_and_append(buf, " %s", path);
          free(path);
@@ -68,7 +68,7 @@ xact_desc_commit(char* buf, uint8_t info, struct xl_xact_commit* xlrec, rep_orig
    ParseCommitRecord(info, xlrec, &parsed);
 
    /* If this is a prepared xact, show the xid of the original xact */
-   if (TransactionIdIsValid(parsed.twophase_xid))
+   if (TRANSACTION_ID_IS_VALID(parsed.twophase_xid))
    {
       buf = pgmoneta_format_and_append(buf, "%u: ", parsed.twophase_xid);
    }
@@ -80,9 +80,9 @@ xact_desc_commit(char* buf, uint8_t info, struct xl_xact_commit* xlrec, rep_orig
 
    buf = standby_desc_invalidations(buf, parsed.nmsgs, parsed.msgs, parsed.dbId,
                                     parsed.tsId,
-                                    XactCompletionRelcacheInitFileInval(parsed.xinfo));
+                                    XACT_COMPLETION_RELCACHE_INIT_FILE_INVAL(parsed.xinfo));
 
-   if (XactCompletionForceSyncCommit(parsed.xinfo))
+   if (XACT_COMPLETION_FORCE_SYNC_COMMIT(parsed.xinfo))
    {
       buf = pgmoneta_format_and_append(buf, "; sync");
    }
@@ -105,7 +105,7 @@ xact_desc_abort(char* buf, uint8_t info, struct xl_xact_abort* xlrec)
    ParseAbortRecord(info, xlrec, &parsed);
 
    /* If this is a prepared xact, show the xid of the original xact */
-   if (TransactionIdIsValid(parsed.twophase_xid))
+   if (TRANSACTION_ID_IS_VALID(parsed.twophase_xid))
    {
       buf = pgmoneta_format_and_append(buf, "%u: ", parsed.twophase_xid);
    }

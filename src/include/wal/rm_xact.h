@@ -92,17 +92,17 @@
  * EOXact... routines which run at the end of the original transaction
  * completion.
  */
-#define XACT_COMPLETION_APPLY_FEEDBACK            (1U << 29)
-#define XACT_COMPLETION_UPDATE_RELCACHE_FILE    (1U << 30)
-#define XACT_COMPLETION_FORCE_SYNC_COMMIT        (1U << 31)
+#define XACT_COMPLETION_APPLY_FEEDBACK_FLAG            (1U << 29)
+#define XACT_COMPLETION_UPDATE_RELCACHE_FILE_FLAG    (1U << 30)
+#define XACT_COMPLETION_FORCE_SYNC_COMMIT_FLAG        (1U << 31)
 
 /* Access macros for above flags */
-#define XactCompletionApplyFeedback(xinfo) \
-        ((xinfo & XACT_COMPLETION_APPLY_FEEDBACK) != 0)
-#define XactCompletionRelcacheInitFileInval(xinfo) \
-        ((xinfo & XACT_COMPLETION_UPDATE_RELCACHE_FILE) != 0)
-#define XactCompletionForceSyncCommit(xinfo) \
-        ((xinfo & XACT_COMPLETION_FORCE_SYNC_COMMIT) != 0)
+#define XACT_COMPLETION_APPLY_FEEDBACK(xinfo) \
+        ((xinfo & XACT_COMPLETION_APPLY_FEEDBACK_FLAG) != 0)
+#define XACT_COMPLETION_RELCACHE_INIT_FILE_INVAL(xinfo) \
+        ((xinfo & XACT_COMPLETION_UPDATE_RELCACHE_FILE_FLAG) != 0)
+#define XACT_COMPLETION_FORCE_SYNC_COMMIT(xinfo) \
+        ((xinfo & XACT_COMPLETION_FORCE_SYNC_COMMIT_FLAG) != 0)
 
 struct xl_xact_assignment
 {
@@ -111,7 +111,7 @@ struct xl_xact_assignment
    transaction_id xsub[FLEXIBLE_ARRAY_MEMBER];     /* assigned subxids */
 };
 
-#define MinSizeOfXactAssignment offsetof(xl_xact_assignment, xsub)
+#define MIN_SIZE_OF_XACT_ASSIGNMENT offsetof(xl_xact_assignment, xsub)
 
 /*
  * Commit and abort records can contain a lot of information. But a large

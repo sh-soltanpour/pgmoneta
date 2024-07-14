@@ -36,13 +36,13 @@
  * and epoch of the first segment, so we start assigning multixact values from
  * 2.
  */
-#define InvalidMultiXactId ((MultiXactId) 0)
-#define FirstMultiXactId   ((MultiXactId) 1)
-#define MaxMultiXactId     ((MultiXactId) 0xFFFFFFFF)
+#define INVALID_MULTI_XACT_ID ((MultiXactId) 0)
+#define FIRST_MULTI_XACT_ID   ((MultiXactId) 1)
+#define MAX_MULTI_XACT_ID     ((MultiXactId) 0xFFFFFFFF)
 
-#define MultiXactIdIsValid(multi) ((multi) != InvalidMultiXactId)
+#define MULTI_XACT_ID_IS_VALID(multi) ((multi) != INVALID_MULTI_XACT_ID)
 
-#define MaxMultiXactOffset ((MultiXactOffset) 0xFFFFFFFF)
+#define MAX_MULTI_XACT_OFFSET ((MultiXactOffset) 0xFFFFFFFF)
 
 /* Number of SLRU buffers to use for multixact */
 #define NUM_MULTIXACTOFFSET_BUFFERS    8
@@ -53,7 +53,7 @@
  * tuple locks (FOR KEY SHARE, FOR SHARE, FOR NO KEY UPDATE, FOR UPDATE); the
  * next two are used for update and delete modes.
  */
-typedef enum
+enum MULTI_XACT_STATUS
 {
    MultiXactStatusForKeyShare = 0x00,
    MultiXactStatusForShare = 0x01,
@@ -63,7 +63,7 @@ typedef enum
    MultiXactStatusNoKeyUpdate = 0x04,
    /* other updates, and delete */
    MultiXactStatusUpdate = 0x05
-} MultiXactStatus;
+};
 
 #define MaxMultiXactStatus MultiXactStatusUpdate
 
@@ -74,7 +74,7 @@ typedef enum
 struct multi_xact_member
 {
    transaction_id xid;
-   MultiXactStatus status;
+   enum MULTI_XACT_STATUS status;
 };
 
 /* ----------------
@@ -95,7 +95,7 @@ struct xl_multixact_create
    struct multi_xact_member members[FLEXIBLE_ARRAY_MEMBER];
 };
 
-#define SizeOfMultiXactCreate (offsetof(xl_multixact_create, members))
+#define SIZE_OF_MULTI_XACT_CREATE (offsetof(xl_multixact_create, members))
 
 struct xl_multixact_truncate
 {
@@ -110,7 +110,7 @@ struct xl_multixact_truncate
    multi_xact_offset endTruncMemb;
 };
 
-#define SizeOfMultiXactTruncate (sizeof(xl_multixact_truncate))
+#define SIZE_OF_MULTI_XACT_TRUNCATE (sizeof(xl_multixact_truncate))
 
 char* multixact_desc(char* buf, struct decoded_xlog_record* record);
 

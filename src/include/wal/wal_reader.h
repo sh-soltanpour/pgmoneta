@@ -93,7 +93,7 @@ enum wal_level
    WAL_LEVEL_LOGICAL
 };
 
-#define InvalidRepOriginId   0
+#define INVALID_REP_ORIGIN_ID   0
 
 struct xlog_page_header_data
 {

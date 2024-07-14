@@ -291,7 +291,7 @@ struct gin_posting_list
 #define GIN_SEGMENT_REPLACE      3  /* a segment is replaced */
 #define GIN_SEGMENT_ADDITEMS  4  /* items are added to existing segment */
 
-#define SizeOfGinPostingList(plist) (offsetof(struct gin_posting_list, bytes) + SHORTALIGN((plist)->nbytes))
+#define SIZE_OF_GIN_POSTING_LIST(plist) (offsetof(struct gin_posting_list, bytes) + SHORTALIGN((plist)->nbytes))
 
 char* gin_desc(char* buf, struct decoded_xlog_record* record);
 

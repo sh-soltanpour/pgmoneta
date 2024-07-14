@@ -84,7 +84,7 @@ delvacuum_desc(char* buf, char* block_data, uint16_t ndeleted, uint16_t nupdated
    {
       offset_number off = updatedoffsets[i];
 
-      assert(OffsetNumberIsValid(off));
+      assert(OFFSET_NUMBER_IS_VALID(off));
       assert(updates->ndeletedtids > 0);
 
       /*
@@ -98,7 +98,7 @@ delvacuum_desc(char* buf, char* block_data, uint16_t ndeleted, uint16_t nupdated
       {
          uint16_t* ptid;
 
-         ptid = (uint16_t*) ((char*) updates + SizeOfBtreeUpdate) + p;
+         ptid = (uint16_t*) ((char*) updates + SIZE_OF_BTREE_UPDATE) + p;
          buf = pgmoneta_format_and_append(buf, "%u", *ptid);
 
          if (p < updates->ndeletedtids - 1)
@@ -113,7 +113,7 @@ delvacuum_desc(char* buf, char* block_data, uint16_t ndeleted, uint16_t nupdated
       }
 
       updates = (struct xl_btree_update*)
-                ((char*) updates + SizeOfBtreeUpdate +
+                ((char*) updates + SIZE_OF_BTREE_UPDATE +
                  updates->ndeletedtids * sizeof(uint16_t));
    }
    buf = pgmoneta_format_and_append(buf, "]");
@@ -193,8 +193,8 @@ btree_desc(char* buf, struct decoded_xlog_record* record)
 
          buf = pgmoneta_format_and_append(buf, "left: %u, right: %u, level: %u, safexid: %u:%u, ",
                                           xlrec->leftsib, xlrec->rightsib, xlrec->level,
-                                          EpochFromFullTransactionId(xlrec->safexid),
-                                          XidFromFullTransactionId(xlrec->safexid));
+                                          EPOCH_FROM_FULL_TRANSACTION_ID(xlrec->safexid),
+                                          XID_FROM_FULL_TRANSACTION_ID(xlrec->safexid));
          buf = pgmoneta_format_and_append(buf, "leafleft: %u, leafright: %u, leaftopparent: %u",
                                           xlrec->leafleftsib, xlrec->leafrightsib,
                                           xlrec->leaftopparent);
@@ -212,8 +212,8 @@ btree_desc(char* buf, struct decoded_xlog_record* record)
          buf = pgmoneta_format_and_append(buf, "rel: %u/%u/%u, snapshotConflictHorizon: %u:%u, isCatalogRel: %c",
                                           xlrec->locator.spcOid, xlrec->locator.dbOid,
                                           xlrec->locator.relNumber,
-                                          EpochFromFullTransactionId(xlrec->snapshotConflictHorizon),
-                                          XidFromFullTransactionId(xlrec->snapshotConflictHorizon),
+                                          EPOCH_FROM_FULL_TRANSACTION_ID(xlrec->snapshotConflictHorizon),
+                                          XID_FROM_FULL_TRANSACTION_ID(xlrec->snapshotConflictHorizon),
                                           xlrec->isCatalogRel ? 'T' : 'F');
          break;
       }

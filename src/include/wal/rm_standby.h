@@ -75,7 +75,7 @@ struct xl_invalidations
    union shared_invalidation_message msgs[FLEXIBLE_ARRAY_MEMBER];
 };
 
-#define MinSizeOfInvalidations offsetof(xl_invalidations, msgs)
+#define MIN_SIZE_OF_INVALIDATIONS offsetof(xl_invalidations, msgs)
 
 char*
 standby_desc(char* buf, struct decoded_xlog_record* record);

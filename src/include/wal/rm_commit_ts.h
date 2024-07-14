@@ -45,7 +45,7 @@ struct xl_commit_ts_set
    /* subxact Xids follow */
 };
 
-#define SizeOfCommitTsSet  (offsetof(xl_commit_ts_set, mainxid) + \
+#define SIZE_OF_COMMIT_TS_SET  (offsetof(xl_commit_ts_set, mainxid) + \
                             sizeof(TransactionId))
 
 struct xl_commit_ts_truncate
@@ -54,7 +54,7 @@ struct xl_commit_ts_truncate
    transaction_id oldestXid;
 };
 
-#define SizeOfCommitTsTruncate   (offsetof(xl_commit_ts_truncate, oldestXid) + \
+#define SIZE_OF_COMMIT_TS_TRUNCATE   (offsetof(xl_commit_ts_truncate, oldestXid) + \
                                   sizeof(TransactionId))
 
 char* commit_ts_desc(char* buf, struct decoded_xlog_record* record);

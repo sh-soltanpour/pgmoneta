@@ -103,7 +103,7 @@ struct spg_xlog_move_leafs
    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 };
 
-#define SizeOfSpgxlogMoveLeafs   offsetof(spg_xlog_move_leafs, offsets)
+#define SIZE_OF_SPGXLOG_MOVE_LEAFS   offsetof(spg_xlog_move_leafs, offsets)
 
 /*
  * Backup Blk 0: original page
@@ -210,7 +210,7 @@ struct  spg_xlog_pick_split
    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 };
 
-#define SizeOfSpgxlogPickSplit offsetof(spg_xlog_pick_split, offsets)
+#define SIZE_OF_SPGXLOG_PICK_SPLIT offsetof(spg_xlog_pick_split, offsets)
 
 struct  spg_xlog_vacuum_leaf
 {
@@ -234,7 +234,7 @@ struct  spg_xlog_vacuum_leaf
    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 };
 
-#define SizeOfSpgxlogVacuumLeaf offsetof(spg_xlog_vacuum_leaf, offsets)
+#define SIZE_OF_SPGXLOG_VACUUM_LEAF offsetof(spg_xlog_vacuum_leaf, offsets)
 
 struct  spg_xlog_vacuum_root
 {
@@ -247,7 +247,7 @@ struct  spg_xlog_vacuum_root
    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 };
 
-#define SizeOfSpgxlogVacuumRoot offsetof(spg_xlog_vacuum_root, offsets)
+#define SIZE_OF_SPGXLOG_VACUUM_ROOT offsetof(spg_xlog_vacuum_root, offsets)
 
 struct  spg_xlog_vacuum_redirect
 {
@@ -259,7 +259,7 @@ struct  spg_xlog_vacuum_redirect
    offset_number offsets[FLEXIBLE_ARRAY_MEMBER];
 };
 
-#define SizeOfSpgxlogVacuumRedirect offsetof(spg_xlog_vacuum_redirect, offsets)
+#define SIZE_OF_SPGXLOG_VACUUM_REDIRECT offsetof(spg_xlog_vacuum_redirect, offsets)
 
 char* spg_desc(char* buf, struct decoded_xlog_record* record);
 
