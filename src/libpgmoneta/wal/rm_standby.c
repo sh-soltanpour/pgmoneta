@@ -133,9 +133,9 @@ standby_desc(char* buf, struct decoded_xlog_record* record)
 
       for (i = 0; i < xlrec->nlocks; i++)
       {
-         pgmoneta_format_and_append(buf, "xid %u db %u rel %u ",
-                                    xlrec->locks[i].xid, xlrec->locks[i].dbOid,
-                                    xlrec->locks[i].relOid);
+         buf = pgmoneta_format_and_append(buf, "xid %u db %u rel %u ",
+                                          xlrec->locks[i].xid, xlrec->locks[i].dbOid,
+                                          xlrec->locks[i].relOid);
       }
    }
    else if (info == XLOG_RUNNING_XACTS)

@@ -71,15 +71,11 @@ print_record(struct xlog_record* record)
 void
 parse_wal_segment_headers(char* path)
 {
-   time_t t;
-   time(&t);
-   struct tm* ltime = localtime(&t);
-   printf("test2 %d\n", ltime->tm_mday);
-
    struct xlog_record* record = NULL;
    struct xlog_long_page_header_data* long_header = NULL;
    char* buffer = NULL;
    struct decoded_xlog_record* decoded = NULL;
+   struct xlog_page_header_data* page_header = NULL;
 
    FILE* file = fopen(path, "rb");
    if (file == NULL)
@@ -89,27 +85,6 @@ parse_wal_segment_headers(char* path)
 
    long_header = malloc(SIZE_OF_XLOG_LONG_PHD);
    fread(long_header, SIZE_OF_XLOG_LONG_PHD, 1, file);
-
-   record = malloc(SIZE_OF_XLOG_RECORD);
-
-   if (record == NULL)
-   {
-      pgmoneta_log_fatal("Error: Could not allocate memory for record\n");
-      free(long_header);
-      fclose(file);
-      exit(EXIT_FAILURE);
-   }
-
-   struct xlog_page_header_data* page_header = NULL;
-   page_header = malloc(SIZE_OF_XLOG_SHORT_PHD);
-   if (page_header == NULL)
-   {
-      pgmoneta_log_fatal("Error: Could not allocate memory for page header\n");
-      free(record);
-      free(long_header);
-      fclose(file);
-      exit(EXIT_FAILURE);
-   }
 
    uint32_t next_record = ftell(file);
    int page_number = 0;
@@ -121,32 +96,38 @@ parse_wal_segment_headers(char* path)
       {
          page_number++;
          fseek(file, page_number * long_header->xlp_xlog_blcksz, SEEK_SET);
+         page_header = malloc(SIZE_OF_XLOG_SHORT_PHD);
          fread(page_header, SIZE_OF_XLOG_SHORT_PHD, 1, file);
          next_record = MAXALIGN(ftell(file) + page_header->xlp_rem_len);
+         free(page_header);
          continue;
       }
       fseek(file, next_record, SEEK_SET);
+
       if (ftell(file) + SIZE_OF_XLOG_RECORD > long_header->xlp_xlog_blcksz * (page_number + 1))
       {
+         char* temp_buffer = malloc(SIZE_OF_XLOG_RECORD);
          uint32_t end_of_page = (page_number + 1) * long_header->xlp_xlog_blcksz;
-         size_t bytes_read = fread(record, 1, end_of_page - ftell(file), file);
+         size_t bytes_read = fread(temp_buffer, 1, end_of_page - ftell(file), file);
 
          fseek(file, SIZE_OF_XLOG_SHORT_PHD, SEEK_CUR);
-         fread(record + bytes_read, 1, SIZE_OF_XLOG_RECORD - bytes_read, file);
-         print_record(record);
+         bytes_read += fread(temp_buffer + bytes_read, 1, SIZE_OF_XLOG_RECORD - bytes_read, file);
+
+         assert(bytes_read == SIZE_OF_XLOG_RECORD);
+         record = (struct xlog_record*) temp_buffer;
          page_number++;
       }
-      else if (fread(record, SIZE_OF_XLOG_RECORD, 1, file) != 1)
+      else
       {
-         pgmoneta_log_fatal("Error: Could not read second record\n");
-         free(record);
-         free(long_header);
-         fclose(file);
-         exit(EXIT_FAILURE);
+         record = malloc(SIZE_OF_XLOG_RECORD);
+         fread(record, SIZE_OF_XLOG_RECORD, 1, file);
       }
 
       if (record->xl_tot_len == 0)
       {
+         free(record);
+         free(long_header);
+         fclose(file);
          return;
       }
       uint32_t data_length = record->xl_tot_len - SIZE_OF_XLOG_RECORD;
@@ -185,9 +166,10 @@ parse_wal_segment_headers(char* path)
          assert(bytes_read == data_length);
       }
 
-      decoded = malloc(sizeof(struct decoded_xlog_record));
+      decoded = calloc(1, sizeof(struct decoded_xlog_record));
 
-      if (!decode_xlog_record(buffer, decoded, record, long_header->xlp_xlog_blcksz))
+      bool decode_success = decode_xlog_record(buffer, decoded, record, long_header->xlp_xlog_blcksz);
+      if (!decode_success)
       {
          pgmoneta_log_fatal("error in decoding\n");
          continue;
@@ -196,8 +178,23 @@ parse_wal_segment_headers(char* path)
       {
          display_decoded_record(decoded);
       }
+
+      free(buffer);
+      if (decoded->main_data != NULL)
+      {
+         free(decoded->main_data);
+      }
+      for (int i = 0; i <= decoded->max_block_id; i++)
+      {
+         if (decoded->blocks[i].has_data)
+         {
+            free(decoded->blocks[i].data);
+         }
+      }
+      free(decoded);
+      free(record);
+
    }
-   fclose(file);
 }
 
 void
@@ -211,16 +208,15 @@ display_decoded_record(struct decoded_xlog_record* record)
    get_record_length(record, &rec_len, &fpi_len);
    printf("rec/tot_len: %u/%u\t", rec_len, record->header.xl_tot_len);
 
-   //if record is rmgr is standby
    char* buf = NULL;
-   printf("before desc\n");
    buf = RmgrTable[record->header.xl_rmid].rm_desc(buf, record);
-   printf("before block ref info\n");
    buf = get_record_block_ref_info(buf, record, false, true, &fpi_len);
-   printf("after block ref info\n");
-   printf("%s\n", buf);
-   free(buf);
-   printf("\n------------------------------\n");
+   if (buf)
+   {
+      printf("%s\n", buf);
+      free(buf);
+   }
+   printf("------------------------------\n");
 }
 
 bool
@@ -248,12 +244,12 @@ decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlo
    int remaining = 0;
    uint32_t datatotal = 0;
    char* ptr = NULL;
-   char* out = NULL;
+//   char* out = NULL;
    struct rel_file_locator* rlocator = NULL;
    uint8_t block_id;
 
    remaining = record->xl_tot_len - SIZE_OF_XLOG_RECORD;
-   ptr = (char*) buffer;
+   ptr = buffer;
 
    while (remaining > datatotal)
    {
@@ -424,10 +420,6 @@ decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlo
    }
    assert(remaining == datatotal);
 
-   out = ((char*) decoded) +
-         offsetof(struct decoded_xlog_record, blocks) +
-         sizeof(decoded->blocks[0]) * (decoded->max_block_id + 1);
-   /* block data first */
    for (block_id = 0; block_id <= decoded->max_block_id; block_id++)
    {
       struct decoded_bkp_block* blk = &decoded->blocks[block_id];
@@ -442,18 +434,14 @@ decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlo
       if (blk->has_image)
       {
          /* no need to align image */
-         blk->bkp_image = out;
-         memcpy(out, ptr, blk->bimg_len);
+         blk->bkp_image = ptr;
          ptr += blk->bimg_len;
-         out += blk->bimg_len;
       }
       if (blk->has_data)
       {
-         out = (char*) MAXALIGNTYPE(out);
-         blk->data = out;
+         blk->data = malloc(blk->data_len);
          memcpy(blk->data, ptr, blk->data_len);
          ptr += blk->data_len;
-         out += blk->data_len;
       }
    }
 
@@ -466,6 +454,7 @@ decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlo
          shortdata_err;
       }
       memcpy(decoded->main_data, ptr, decoded->main_data_len);
+      ptr += decoded->main_data_len;
    }
 
    return true;
