@@ -162,7 +162,7 @@ xlog_desc(char* buf, struct decoded_xlog_record* record)
 }
 
 pg_time_t
-timestamptz_to_time_t(TimestampTz t)
+timestamptz_to_time_t(timestamp_tz t)
 {
    pg_time_t result;
 
@@ -172,7 +172,7 @@ timestamptz_to_time_t(TimestampTz t)
 }
 
 const char*
-timestamptz_to_str(TimestampTz dt)
+timestamptz_to_str(timestamp_tz dt)
 {
    static char buf[MAXDATELEN + 1];
    char ts[MAXDATELEN + 1];

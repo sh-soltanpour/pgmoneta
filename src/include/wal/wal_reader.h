@@ -63,6 +63,7 @@ typedef uint32_t pg_crc32c;
 typedef uint8_t rmgr_id;
 typedef uint64_t xlog_seg_no;
 typedef uint16_t rep_origin_id;
+typedef int64_t timestamp_tz;
 
 typedef int buffer;
 typedef uint32_t block_number;

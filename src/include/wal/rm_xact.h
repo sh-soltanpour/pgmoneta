@@ -175,12 +175,12 @@ struct xl_xact_twophase
 struct xl_xact_origin
 {
    xlog_rec_ptr origin_lsn;
-   TimestampTz origin_timestamp;
+   timestamp_tz origin_timestamp;
 };
 
 struct xl_xact_commit
 {
-   TimestampTz xact_time;         /* time of commit */
+   timestamp_tz xact_time;         /* time of commit */
 
    /* xl_xact_xinfo follows if XLOG_XACT_HAS_INFO */
    /* xl_xact_dbinfo follows if XINFO_HAS_DBINFO */
@@ -191,11 +191,11 @@ struct xl_xact_commit
    /* twophase_gid follows if XINFO_HAS_GID. As a null-terminated string. */
    /* xl_xact_origin follows if XINFO_HAS_ORIGIN, stored unaligned! */
 };
-#define MinSizeOfXactCommit (offsetof(struct xl_xact_commit, xact_time) + sizeof(TimestampTz))
+#define MinSizeOfXactCommit (offsetof(struct xl_xact_commit, xact_time) + sizeof(timestamp_tz))
 
 struct xl_xact_abort
 {
-   TimestampTz xact_time;         /* time of abort */
+   timestamp_tz xact_time;         /* time of abort */
 
    /* xl_xact_xinfo follows if XLOG_XACT_HAS_INFO */
    /* xl_xact_dbinfo follows if XINFO_HAS_DBINFO */
@@ -214,7 +214,7 @@ struct xl_xact_prepare
    uint32_t total_len;         /* actual file length */
    transaction_id xid;             /* original transaction XID */
    oid database;         /* OID of database it was in */
-   TimestampTz prepared_at;     /* time of preparation */
+   timestamp_tz prepared_at;     /* time of preparation */
    oid owner;             /* user running the transaction */
    int32_t nsubxacts;         /* number of following subxact XIDs */
    int32_t ncommitrels;     /* number of delete-on-commit rels */
@@ -223,7 +223,7 @@ struct xl_xact_prepare
    bool initfileinval;     /* does relcache init file need invalidation? */
    uint16_t gidlen;             /* length of the GID - GID follows the header */
    xlog_rec_ptr origin_lsn;         /* lsn of this record at origin node */
-   TimestampTz origin_timestamp;     /* time of prepare at origin node */
+   timestamp_tz origin_timestamp;     /* time of prepare at origin node */
 };
 
 /*
@@ -233,7 +233,7 @@ struct xl_xact_prepare
  */
 struct xl_xact_parsed_commit
 {
-   TimestampTz xact_time;
+   timestamp_tz xact_time;
    uint32_t xinfo;
 
    oid dbId;             /* MyDatabaseId */
@@ -254,14 +254,14 @@ struct xl_xact_parsed_commit
    struct rel_file_node* abortnodes;     /* only for 2PC */
 
    xlog_rec_ptr origin_lsn;
-   TimestampTz origin_timestamp;
+   timestamp_tz origin_timestamp;
 };
 
 typedef struct xl_xact_parsed_commit xl_xact_parsed_prepare;
 
 struct xl_xact_parsed_abort
 {
-   TimestampTz xact_time;
+   timestamp_tz xact_time;
    uint32_t xinfo;
 
    oid dbId;             /* MyDatabaseId */
@@ -277,7 +277,7 @@ struct xl_xact_parsed_abort
    char twophase_gid[GIDSIZE];     /* only for 2PC */
 
    xlog_rec_ptr origin_lsn;
-   TimestampTz origin_timestamp;
+   timestamp_tz origin_timestamp;
 };
 
 char*xact_desc(char* buf, struct decoded_xlog_record* record);

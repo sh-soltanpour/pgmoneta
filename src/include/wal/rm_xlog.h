@@ -39,8 +39,6 @@
 #define POSTGRES_EPOCH_JDATE  2451545 /* == date2j(2000, 1, 1) */
 #define SECS_PER_DAY 86400
 
-typedef int64_t TimestampTz;
-
 /*
  * Information logged when we detect a change in one of the parameters
  * important for Hot Standby.
@@ -60,7 +58,7 @@ struct xl_parameter_change
 /* logs restore point */
 struct xl_restore_point
 {
-   TimestampTz rp_time;
+   timestamp_tz rp_time;
    char rp_name[MAXFNAMELEN];
 };
 
@@ -68,13 +66,13 @@ struct xl_restore_point
 struct xl_overwrite_contrecord
 {
    xlog_rec_ptr overwritten_lsn;
-   TimestampTz overwrite_time;
+   timestamp_tz overwrite_time;
 };
 
 /* End of recovery mark, when we don't do an END_OF_RECOVERY checkpoint */
 struct xl_end_of_recovery
 {
-   TimestampTz end_time;
+   timestamp_tz end_time;
    timeline_id ThisTimeLineID;    /* new TLI */
    timeline_id PrevTimeLineID;    /* previous TLI we forked off from */
 };
@@ -87,7 +85,7 @@ struct config_enum_entry
 };
 
 const char*
-timestamptz_to_str(TimestampTz dt);
+timestamptz_to_str(timestamp_tz dt);
 
 char*
 xlog_desc(char* buf, struct decoded_xlog_record* record);

@@ -31,7 +31,6 @@
 
 #include "wal_reader.h"
 #include "rm.h"
-#include "rm_xlog.h" //TODO: remove this and move timestamp somewhere else
 
 /* XLOG stuff */
 #define COMMIT_TS_ZEROPAGE    0x00
@@ -39,7 +38,7 @@
 
 struct xl_commit_ts_set
 {
-   TimestampTz timestamp;
+   timestamp_tz timestamp;
    rep_origin_id nodeid;
    transaction_id mainxid;
    /* subxact Xids follow */
