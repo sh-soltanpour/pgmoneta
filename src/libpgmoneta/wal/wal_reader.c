@@ -71,6 +71,14 @@ print_record(struct xlog_record* record)
 void
 parse_wal_segment_headers(char* path)
 {
+#define MALLOC(pointer, size) \
+        pointer = malloc(size); \
+        if (pointer == NULL) \
+        { \
+           pgmoneta_log_fatal("Error: Could not allocate memory for %s\n", #pointer); \
+           goto finish; \
+        }
+
    struct xlog_record* record = NULL;
    struct xlog_long_page_header_data* long_header = NULL;
    char* buffer = NULL;
@@ -83,7 +91,7 @@ parse_wal_segment_headers(char* path)
       pgmoneta_log_fatal("Error: Could not open file %s\n", path);
    }
 
-   long_header = malloc(SIZE_OF_XLOG_LONG_PHD);
+   MALLOC(long_header, SIZE_OF_XLOG_LONG_PHD);
    fread(long_header, SIZE_OF_XLOG_LONG_PHD, 1, file);
 
    uint32_t next_record = ftell(file);
@@ -91,12 +99,12 @@ parse_wal_segment_headers(char* path)
 
    while (true)
    {
-
+      // Check if next record is beyond the current page
       if (next_record >= (long_header->xlp_xlog_blcksz * (page_number + 1)))
       {
          page_number++;
          fseek(file, page_number * long_header->xlp_xlog_blcksz, SEEK_SET);
-         page_header = malloc(SIZE_OF_XLOG_SHORT_PHD);
+         MALLOC(page_header, SIZE_OF_XLOG_SHORT_PHD);
          fread(page_header, SIZE_OF_XLOG_SHORT_PHD, 1, file);
          next_record = MAXALIGN(ftell(file) + page_header->xlp_rem_len);
          free(page_header);
@@ -104,9 +112,11 @@ parse_wal_segment_headers(char* path)
       }
       fseek(file, next_record, SEEK_SET);
 
+      // Check if record crosses the page boundary
       if (ftell(file) + SIZE_OF_XLOG_RECORD > long_header->xlp_xlog_blcksz * (page_number + 1))
       {
-         char* temp_buffer = malloc(SIZE_OF_XLOG_RECORD);
+         char* temp_buffer = NULL;
+         MALLOC(temp_buffer, SIZE_OF_XLOG_RECORD)
          uint32_t end_of_page = (page_number + 1) * long_header->xlp_xlog_blcksz;
          size_t bytes_read = fread(temp_buffer, 1, end_of_page - ftell(file), file);
 
@@ -119,28 +129,21 @@ parse_wal_segment_headers(char* path)
       }
       else
       {
-         record = malloc(SIZE_OF_XLOG_RECORD);
+         MALLOC(record, SIZE_OF_XLOG_RECORD)
          fread(record, SIZE_OF_XLOG_RECORD, 1, file);
       }
 
       if (record->xl_tot_len == 0)
       {
-         free(record);
-         free(long_header);
-         fclose(file);
-         return;
+         goto finish;
       }
       uint32_t data_length = record->xl_tot_len - SIZE_OF_XLOG_RECORD;
       next_record = ftell(file) + MAXALIGN(record->xl_tot_len - SIZE_OF_XLOG_RECORD);
       uint32_t end_of_page = (page_number + 1) * long_header->xlp_xlog_blcksz;
 
-      buffer = malloc(data_length);
-      if (buffer == NULL)
-      {
-         pgmoneta_log_fatal("Error: Could not allocate memory for buffer\n");
-         break;
-      }
+      MALLOC(buffer, data_length)
 
+       // Read record data, possibly across page boundaries
       if (data_length + ftell(file) >= end_of_page)
       {
          size_t bytes_read = 0;
@@ -168,8 +171,7 @@ parse_wal_segment_headers(char* path)
 
       decoded = calloc(1, sizeof(struct decoded_xlog_record));
 
-      bool decode_success = decode_xlog_record(buffer, decoded, record, long_header->xlp_xlog_blcksz);
-      if (!decode_success)
+      if (!decode_xlog_record(buffer, decoded, record, long_header->xlp_xlog_blcksz))
       {
          pgmoneta_log_fatal("error in decoding\n");
          continue;
@@ -193,8 +195,13 @@ parse_wal_segment_headers(char* path)
       }
       free(decoded);
       free(record);
-
    }
+
+finish:
+   free(record);
+   free(long_header);
+   fclose(file);
+
 }
 
 void
