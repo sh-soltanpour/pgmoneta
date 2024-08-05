@@ -68,8 +68,21 @@ print_record(struct xlog_record* record)
    printf("xl_rmid: %u\n", record->xl_rmid);
 }
 
+bool
+is_bkp_image_compressed(struct server* server_info, uint8_t bimg_info)
+{
+   if (server_info->version >= 15)
+   {
+      return (bimg_info & (BKPIMAGE_COMPRESS_PGLZ | BKPIMAGE_COMPRESS_LZ4 | BKPIMAGE_COMPRESS_ZSTD)) != 0;
+   }
+   else
+   {
+      return ((bimg_info & BKPIMAGE_IS_COMPRESSED) != 0);
+   }
+}
+
 void
-parse_wal_segment_headers(char* path)
+parse_wal_segment_headers(char* path, struct server* server_info)
 {
 #define MALLOC(pointer, size) \
         pointer = malloc(size); \
@@ -84,6 +97,7 @@ parse_wal_segment_headers(char* path)
    char* buffer = NULL;
    struct decoded_xlog_record* decoded = NULL;
    struct xlog_page_header_data* page_header = NULL;
+   int count = 0;
 
    FILE* file = fopen(path, "rb");
    if (file == NULL)
@@ -143,7 +157,7 @@ parse_wal_segment_headers(char* path)
 
       MALLOC(buffer, data_length)
 
-       // Read record data, possibly across page boundaries
+      // Read record data, possibly across page boundaries
       if (data_length + ftell(file) >= end_of_page)
       {
          size_t bytes_read = 0;
@@ -171,14 +185,14 @@ parse_wal_segment_headers(char* path)
 
       decoded = calloc(1, sizeof(struct decoded_xlog_record));
 
-      if (!decode_xlog_record(buffer, decoded, record, long_header->xlp_xlog_blcksz))
+      if (!decode_xlog_record(buffer, decoded, record, long_header->xlp_xlog_blcksz, server_info))
       {
          pgmoneta_log_fatal("error in decoding\n");
          continue;
       }
       else
       {
-         display_decoded_record(decoded);
+         display_decoded_record(decoded, ++count, server_info);
       }
 
       free(buffer);
@@ -205,7 +219,7 @@ finish:
 }
 
 void
-display_decoded_record(struct decoded_xlog_record* record)
+display_decoded_record(struct decoded_xlog_record* record, int count, struct server* server_info)
 {
 
    uint32_t rec_len;
@@ -213,11 +227,12 @@ display_decoded_record(struct decoded_xlog_record* record)
 
    print_record(&record->header);
    get_record_length(record, &rec_len, &fpi_len);
+   printf("record: %d\n", count);
    printf("rec/tot_len: %u/%u\t", rec_len, record->header.xl_tot_len);
 
    char* buf = NULL;
    buf = RmgrTable[record->header.xl_rmid].rm_desc(buf, record);
-   buf = get_record_block_ref_info(buf, record, false, true, &fpi_len);
+   buf = get_record_block_ref_info(buf, record, false, true, &fpi_len, server_info);
    if (buf)
    {
       printf("%s\n", buf);
@@ -227,7 +242,7 @@ display_decoded_record(struct decoded_xlog_record* record)
 }
 
 bool
-decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlog_record* record, uint32_t block_size)
+decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlog_record* record, uint32_t block_size, struct server* server_info)
 {
 #define COPY_HEADER_FIELD(_dst, _size)          \
         do {                                        \
@@ -337,7 +352,7 @@ decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlo
 
             blk->apply_image = ((blk->bimg_info & BKPIMAGE_APPLY) != 0);
 
-            if (BKPIMAGE_COMPRESSED(blk->bimg_info))
+            if (is_bkp_image_compressed(server_info, blk->bimg_info))
             {
                if (blk->bimg_info & BKPIMAGE_HAS_HOLE)
                {
@@ -382,7 +397,7 @@ decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlo
             /*
              * Cross-check that bimg_len < BLCKSZ if it is compressed.
              */
-            if (BKPIMAGE_COMPRESSED(blk->bimg_info) &&
+            if (is_bkp_image_compressed(server_info, blk->bimg_info) &&
                 blk->bimg_len == block_size)
             {
                pgmoneta_log_fatal("BKPIMAGE_COMPRESSED set, but block image length %u at %X/%X");
@@ -394,7 +409,7 @@ decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlo
              * set nor COMPRESSED().
              */
             if (!(blk->bimg_info & BKPIMAGE_HAS_HOLE) &&
-                !BKPIMAGE_COMPRESSED(blk->bimg_info) &&
+                !is_bkp_image_compressed(server_info, blk->bimg_info) &&
                 blk->bimg_len != block_size)
             {
                pgmoneta_log_fatal(
@@ -535,8 +550,8 @@ get_record_length(struct decoded_xlog_record* record, uint32_t* rec_len, uint32_
 }
 
 char*
-get_record_block_ref_info(char* buf, struct decoded_xlog_record* record, bool pretty, bool detailed_format, uint32_t* fpi_len
-                          )
+get_record_block_ref_info(char* buf, struct decoded_xlog_record* record, bool pretty, bool detailed_format, uint32_t* fpi_len,
+                          struct server* server_info)
 {
    int block_id;
 
@@ -587,7 +602,7 @@ get_record_block_ref_info(char* buf, struct decoded_xlog_record* record, bool pr
                *fpi_len += record->blocks[block_id].bimg_len;
             }
 
-            if (BKPIMAGE_COMPRESSED(bimg_info))
+            if (is_bkp_image_compressed(server_info, bimg_info))
             {
                const char* method;
 

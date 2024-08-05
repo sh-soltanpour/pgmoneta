@@ -39,6 +39,7 @@ extern "C" {
 #include <stddef.h>
 #include "stdbool.h"
 #include "wal/transaction.h"
+#include "pgmoneta.h"
 
 #define MAXIMUM_ALIGNOF 8 // TODO: double check this value
 #define ALIGNOF_SHORT 2 // TODO: double check this value
@@ -228,23 +229,21 @@ struct rel_file_node
 #define BKPIMAGE_COMPRESS_LZ4   0x08
 #define BKPIMAGE_COMPRESS_ZSTD  0x10
 
-#define BKPIMAGE_COMPRESSED(info) \
-        ((info & BKPIMAGE_IS_COMPRESSED) != 0)
+void parse_wal_segment_headers(char* path, struct server* server_info);
 
-void parse_wal_segment_headers(char* path);
-
-bool decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlog_record* record, uint32_t block_size);
+bool decode_xlog_record(char* buffer, struct decoded_xlog_record* decoded, struct xlog_record* record, uint32_t block_size, struct server* server_info);
 
 void get_record_length(struct decoded_xlog_record* record, uint32_t* rec_len, uint32_t* fpi_len);
 
-void display_decoded_record(struct decoded_xlog_record* record);
+void display_decoded_record(struct decoded_xlog_record* record, int count, struct server* server_info);
 
-char* get_record_block_ref_info(char* buf, struct decoded_xlog_record* record, bool pretty, bool detailed_format, uint32_t* fpi_len);
+char* get_record_block_ref_info(char* buf, struct decoded_xlog_record* record, bool pretty, bool detailed_format, uint32_t* fpi_len, struct server* server_info);
 
 char* get_record_block_data(struct decoded_xlog_record* record, uint8_t block_id, size_t* len);
 
 bool get_record_block_tag_extended(struct decoded_xlog_record* pRecord, int id, struct rel_file_locator* pLocator, enum fork_number* pNumber,
                                    block_number* pInt, buffer* pVoid);
+bool is_bkp_image_compressed(struct server* server_info, uint8_t bimg_info);
 
 #define SIZE_OF_XLOG_LONG_PHD   MAXALIGN(sizeof(struct xlog_long_page_header_data))
 #define SIZE_OF_XLOG_SHORT_PHD   MAXALIGN(sizeof(struct xlog_page_header_data))
