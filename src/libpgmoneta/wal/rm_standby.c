@@ -34,7 +34,7 @@ standby_desc_running_xacts(char* buf, struct xl_running_xacts* xlrec)
 {
    int i;
 
-   buf = pgmoneta_format_and_append(buf, "nextXid %u latestCompletedXid %u oldestRunningXid %u",
+   buf = pgmoneta_format_and_append(buf, "next_xid %u latestCompletedXid %u oldestRunningXid %u",
                                     xlrec->nextXid,
                                     xlrec->latestCompletedXid,
                                     xlrec->oldestRunningXid);

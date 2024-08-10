@@ -59,7 +59,7 @@ struct xl_running_xacts
    int xcnt;             /* # of xact ids in xids[] */
    int subxcnt;          /* # of subxact ids in xids[] */
    bool subxid_overflow;      /* snapshot overflowed, subxids missing */
-   transaction_id nextXid;        /* xid from TransamVariables->nextXid */
+   transaction_id nextXid;        /* xid from TransamVariables->next_xid */
    transaction_id oldestRunningXid;   /* *not* oldestXmin */
    transaction_id latestCompletedXid;     /* so we can set xmax */
 

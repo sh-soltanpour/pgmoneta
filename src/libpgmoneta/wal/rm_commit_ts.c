@@ -46,7 +46,7 @@ commit_ts_desc(char* buf, struct decoded_xlog_record* record)
    {
       struct xl_commit_ts_truncate* trunc = (struct xl_commit_ts_truncate*) rec;
 
-      buf = pgmoneta_format_and_append(buf, "pageno %d, oldestXid %u",
+      buf = pgmoneta_format_and_append(buf, "pageno %d, oldest_xid %u",
                                        trunc->pageno, trunc->oldestXid);
    }
    return buf;

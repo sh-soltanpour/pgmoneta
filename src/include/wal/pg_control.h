@@ -42,22 +42,22 @@ struct check_point
 {
    xlog_rec_ptr redo;         /* next RecPtr available when we began to
                                * create check_point (i.e. REDO start point) */
-   timeline_id ThisTimeLineID;    /* current TLI */
-   timeline_id PrevTimeLineID;    /* previous TLI, if this record begins a new
-                                   * timeline (equals ThisTimeLineID otherwise) */
-   bool fullPageWrites;     /* current full_page_writes */
-   struct full_transaction_id nextXid;    /* next free transaction ID */
-   oid nextOid;            /* next free OID */
-   multi_xact_id nextMulti;      /* next free multi_xact_id */
-   multi_xact_offset nextMultiOffset;  /* next free MultiXact offset */
-   transaction_id oldestXid;  /* cluster-wide minimum datfrozenxid */
-   oid oldestXidDB;           /* database with minimum datfrozenxid */
-   multi_xact_id oldestMulti;    /* cluster-wide minimum datminmxid */
-   oid oldestMultiDB;         /* database with minimum datminmxid */
+   timeline_id this_timeline_id;    /* current TLI */
+   timeline_id prev_timeline_id;    /* previous TLI, if this record begins a new
+                                   * timeline (equals this_timeline_id otherwise) */
+   bool full_page_writes;     /* current full_page_writes */
+   struct full_transaction_id next_xid;    /* next free transaction ID */
+   oid next_oid;            /* next free OID */
+   multi_xact_id next_multi;      /* next free multi_xact_id */
+   multi_xact_offset next_multi_offset;  /* next free MultiXact offset */
+   transaction_id oldest_xid;  /* cluster-wide minimum datfrozenxid */
+   oid oldest_xid_db;           /* database with minimum datfrozenxid */
+   multi_xact_id oldest_multi;    /* cluster-wide minimum datminmxid */
+   oid oldest_multi_db;         /* database with minimum datminmxid */
    pg_time_t time;         /* time stamp of checkpoint */
-   transaction_id oldestCommitTsXid;   /* oldest Xid with valid commit
+   transaction_id oldest_commit_ts_xid;   /* oldest Xid with valid commit
                                         * timestamp */
-   transaction_id newestCommitTsXid;   /* newest Xid with valid commit
+   transaction_id newest_commit_ts_xid;   /* newest Xid with valid commit
                                         * timestamp */
 
    /*
@@ -66,7 +66,7 @@ struct check_point
     * online checkpoints and only when wal_level is replica. Otherwise it's
     * set to INVALID_TRANSACTION_ID.
     */
-   transaction_id oldestActiveXid;
+   transaction_id oldest_active_xid;
 };
 
 /* XLOG info values for XLOG rmgr */
