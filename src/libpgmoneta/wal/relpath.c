@@ -31,9 +31,9 @@
  *
  * Result is a palloc'd string.
  *
- * Note: ideally, backendId would be declared as type BackendId, but relpath.h
+ * Note: ideally, backendId would be declared as type backend_id, but relpath.h
  * would have to include a backend-only header to do that; doesn't seem worth
- * the trouble considering BackendId is just int anyway.
+ * the trouble considering backend_id is just int anyway.
  */
 
 #include "wal/relpath.h"

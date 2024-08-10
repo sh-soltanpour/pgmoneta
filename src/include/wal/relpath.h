@@ -31,7 +31,7 @@
 
 #include "wal/wal_reader.h"
 
-typedef int BackendId;        /* unique currently active backend identifier */
+typedef int backend_id;        /* unique currently active backend identifier */
 
 #define INVALID_BACKEND_ID      (-1)
 
