@@ -33,7 +33,7 @@
 
 typedef int BackendId;        /* unique currently active backend identifier */
 
-#define InvalidBackendId      (-1)
+#define INVALID_BACKEND_ID      (-1)
 
 #define DEFAULTTABLESPACE_OID 1663
 #define GLOBALTABLESPACE_OID 1664
@@ -48,7 +48,7 @@ typedef int BackendId;        /* unique currently active backend identifier */
 
 /* First argument is a rel_file_node */
 #define RELPATHPERM(rnode, forknum) \
-        RELPATHBACKEND(rnode, InvalidBackendId, forknum)
+        RELPATHBACKEND(rnode, INVALID_BACKEND_ID, forknum)
 
 char*
 get_relation_path(oid dbNode, oid spcNode, oid relNode, int backendId, enum fork_number forkNumber);

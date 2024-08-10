@@ -57,7 +57,7 @@ get_relation_path(oid dbNode, oid spcNode, oid relNode,
    {
       /* Shared system relations live in {datadir}/global */
       assert(dbNode == 0);
-      assert(backendId == InvalidBackendId);
+      assert(backendId == INVALID_BACKEND_ID);
       if (forkNumber != MAIN_FORKNUM)
       {
          path = pgmoneta_format_and_append(path, "global/%u_%s",
@@ -71,7 +71,7 @@ get_relation_path(oid dbNode, oid spcNode, oid relNode,
    else if (spcNode == DEFAULTTABLESPACE_OID)
    {
       /* The default tablespace is {datadir}/base */
-      if (backendId == InvalidBackendId)
+      if (backendId == INVALID_BACKEND_ID)
       {
          if (forkNumber != MAIN_FORKNUM)
          {
@@ -103,7 +103,7 @@ get_relation_path(oid dbNode, oid spcNode, oid relNode,
    else
    {
       /* All other tablespaces are accessed via symlinks */
-      if (backendId == InvalidBackendId)
+      if (backendId == INVALID_BACKEND_ID)
       {
          if (forkNumber != MAIN_FORKNUM)
          {
